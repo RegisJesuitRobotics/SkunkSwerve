@@ -5,10 +5,19 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.PathPlanner;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Constants.DriveTrainConstants;
+import frc.robot.commands.drive.FieldOrientatedDriveCommand;
+import frc.robot.commands.drive.FollowPathCommand;
+import frc.robot.commands.drive.SetModuleRotationCommand;
+import frc.robot.commands.util.InstantRunWhenDisabledCommand;
+import frc.robot.joysticks.ThrustMaster;
+import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 
@@ -22,10 +31,12 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
-    private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
+    private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
 
-    private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
+    private final ThrustMaster driverController = new ThrustMaster(0);
 
+    private final SendableChooser<Command> driveCommandChooser = new SendableChooser<>();
+    private final SendableChooser<Command> autoCommandChooser = new SendableChooser<>();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -33,6 +44,20 @@ public class RobotContainer {
     public RobotContainer() {
         // Configure the button bindings
         configureButtonBindings();
+
+        autoCommandChooser.setDefaultOption("Nothing", new InstantCommand());
+        autoCommandChooser
+                .addOption("No Rotation Auto",
+                        new FollowPathCommand(
+                                PathPlanner.loadPath("NoRotation", DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+                                        DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED),
+                                swerveDriveSubsystem));
+        autoCommandChooser
+                .addOption("Rotation Auto",
+                        new FollowPathCommand(
+                                PathPlanner.loadPath("WithRotation", DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+                                        DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED),
+                                swerveDriveSubsystem));
     }
 
 
@@ -43,9 +68,19 @@ public class RobotContainer {
      * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        // Add button to command mappings here.
-        // See
-        // https://docs.wpilib.org/en/stable/docs/software/commandbased/binding-commands-to-triggers.html
+        driveCommandChooser.setDefaultOption("Field Orientated",
+                new FieldOrientatedDriveCommand(driverController, swerveDriveSubsystem));
+        driveCommandChooser.addOption("Robot Orientated",
+                new FieldOrientatedDriveCommand(driverController, swerveDriveSubsystem));
+
+        Shuffleboard.getTab("DriveTrainRaw").add("Drive Style", driveCommandChooser);
+        Shuffleboard.getTab("DriveTrainRaw").add("Evaluate Drive Style", new InstantRunWhenDisabledCommand(
+                () -> swerveDriveSubsystem.setDefaultCommand(driveCommandChooser.getSelected())));
+        swerveDriveSubsystem.setDefaultCommand(driveCommandChooser.getSelected());
+
+        driverController.buttonOne.whenPressed(swerveDriveSubsystem::zeroGyro);
+        driverController.buttonTwo
+                .whenHeld(new SetModuleRotationCommand(new double[]{ 0.0, 0.0, 0.0, 0.0 }, swerveDriveSubsystem));
     }
 
 
@@ -55,7 +90,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // An ExampleCommand will run in autonomous
-        return autoCommand;
+        return null;
     }
 }
