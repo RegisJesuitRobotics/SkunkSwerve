@@ -88,7 +88,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private boolean moduleAtDesiredState(SwerveModule module, int index) {
         boolean atState = inTolerance(module.getDriveMotorVelocityMetersPerSecond(), states[index].speedMetersPerSecond,
                 VELOCITY_TOLERANCE_METERS_PER_SECOND);
-        atState &= inTolerance(module.getSteeringAngleDegrees(), states[index].angle.getDegrees(), ANGLE_TOLERANCE_RADIANS);
+        atState &= inTolerance(module.getSteeringAngleDegrees(), states[index].angle.getDegrees(),
+                ANGLE_TOLERANCE_RADIANS);
         return atState;
     }
 

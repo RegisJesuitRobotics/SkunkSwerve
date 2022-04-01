@@ -116,12 +116,15 @@ public class SwerveModule {
     }
 
     private void setAngleReference(double targetAngleDegrees) {
-        steeringMotor.set(TalonFXControlMode.Position, SwerveMathUtils.optimizeAngleSetpoint(
-                getSteeringAngleDegreesNoWrap(), targetAngleDegrees / steeringMotorConversionFactorPosition), DemandType.ArbitraryFeedForward, steeringArbFF);
+        steeringMotor.set(TalonFXControlMode.Position,
+                SwerveMathUtils.optimizeAngleSetpoint(getSteeringAngleDegreesNoWrap(),
+                        targetAngleDegrees / steeringMotorConversionFactorPosition),
+                DemandType.ArbitraryFeedForward, steeringArbFF);
     }
 
     private void setDriveReference(double targetVelocityMetersPerSecond) {
-        driveMotor.set(TalonFXControlMode.Velocity, targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity, DemandType.ArbitraryFeedForward, driveArbFF);
+        driveMotor.set(TalonFXControlMode.Velocity, targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity,
+                DemandType.ArbitraryFeedForward, driveArbFF);
     }
 
     public static class SwerveModuleConfiguration {
@@ -144,10 +147,11 @@ public class SwerveModule {
         // Native units to radians
         private final double steeringMotorConversionFactorPosition;
 
-        public SwerveModuleConfiguration(int driveMotorPort, int steeringMotorPort, int steeringEncoderPort, double driveGearRatio,
-                double steeringGearRatio, double driveCurrentLimit, double steeringCurrentLimit, boolean driveMotorInverted,
-                boolean steeringMotorInverted, double nominalVoltage, double offsetDegrees, boolean steeringEncoderInverted,
-                double wheelDiameterMeters, PIDFGains driveVelocityGains, PIDFGains steeringPositionGains) {
+        public SwerveModuleConfiguration(int driveMotorPort, int steeringMotorPort, int steeringEncoderPort,
+                double driveGearRatio, double steeringGearRatio, double driveCurrentLimit, double steeringCurrentLimit,
+                boolean driveMotorInverted, boolean steeringMotorInverted, double nominalVoltage, double offsetDegrees,
+                boolean steeringEncoderInverted, double wheelDiameterMeters, PIDFGains driveVelocityGains,
+                PIDFGains steeringPositionGains) {
             this.driveMotorPort = driveMotorPort;
             this.steeringMotorPort = steeringMotorPort;
             this.steeringEncoderPort = steeringEncoderPort;

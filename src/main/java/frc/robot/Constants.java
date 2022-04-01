@@ -39,21 +39,22 @@ public final class Constants {
         public static final PIDFGains DRIVE_VELOCITY_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0, 0.0);
         public static final PIDFGains STEER_POSITION_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0, 0.0);
 
-        public static final SwerveModuleConfiguration FRONT_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                1, 5, 9, DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT, false, false,
-                NOMINAL_VOLTAGE, 0.0, false, WHEEL_DIAMETER_METERS, DRIVE_VELOCITY_GAINS, STEER_POSITION_GAINS);
+        public static final SwerveModuleConfiguration FRONT_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(1,
+                5, 9, DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT, false,
+                false, NOMINAL_VOLTAGE, 0.0, false, WHEEL_DIAMETER_METERS, DRIVE_VELOCITY_GAINS, STEER_POSITION_GAINS);
 
         public static final SwerveModuleConfiguration FRONT_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                2, 6, 10, DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT, false, false,
-                NOMINAL_VOLTAGE, 0.0, false, WHEEL_DIAMETER_METERS, DRIVE_VELOCITY_GAINS, STEER_POSITION_GAINS);
+                2, 6, 10, DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT,
+                false, false, NOMINAL_VOLTAGE, 0.0, false, WHEEL_DIAMETER_METERS, DRIVE_VELOCITY_GAINS,
+                STEER_POSITION_GAINS);
 
-        public static final SwerveModuleConfiguration BACK_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                3, 7, 11, DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT, false, false,
-                NOMINAL_VOLTAGE, 0.0, false, WHEEL_DIAMETER_METERS, DRIVE_VELOCITY_GAINS, STEER_POSITION_GAINS);
+        public static final SwerveModuleConfiguration BACK_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(3,
+                7, 11, DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT, false,
+                false, NOMINAL_VOLTAGE, 0.0, false, WHEEL_DIAMETER_METERS, DRIVE_VELOCITY_GAINS, STEER_POSITION_GAINS);
 
-        public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                4, 8, 12, DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT, false, false,
-                NOMINAL_VOLTAGE, 0.0, false, WHEEL_DIAMETER_METERS, DRIVE_VELOCITY_GAINS, STEER_POSITION_GAINS);
+        public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(4,
+                8, 12, DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT, false,
+                false, NOMINAL_VOLTAGE, 0.0, false, WHEEL_DIAMETER_METERS, DRIVE_VELOCITY_GAINS, STEER_POSITION_GAINS);
 
         // Left right distance between center of wheels
         public static final double TRACKWIDTH_METERS = Units.inchesToMeters(30);
