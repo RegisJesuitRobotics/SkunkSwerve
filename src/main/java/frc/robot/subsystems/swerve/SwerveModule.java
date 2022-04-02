@@ -10,6 +10,7 @@ import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.utils.PIDFGains;
 import frc.robot.utils.SwerveMathUtils;
@@ -24,6 +25,8 @@ public class SwerveModule {
 
     private final double driveArbFF;
     private final double steeringArbFF;
+
+    private boolean optimizeState = true;
 
     public SwerveModule(SwerveModuleConfiguration config) {
         this.driveMotor = new TalonFX(config.driveMotorPort);
@@ -111,8 +114,16 @@ public class SwerveModule {
     }
 
     public void setState(SwerveModuleState state) {
+        if (optimizeState) {
+            state = SwerveModuleState.optimize(state, Rotation2d.fromDegrees(getSteeringAngleDegrees()));
+        }
+
         setDriveReference(state.speedMetersPerSecond);
         setAngleReference(state.angle.getDegrees());
+    }
+
+    public void setOptimizeState(boolean optimizeState) {
+        this.optimizeState = optimizeState;
     }
 
     private void setAngleReference(double targetAngleDegrees) {

@@ -32,11 +32,13 @@ public class FollowPathCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        timer.reset();
-        timer.start();
+        driveSubsystem.setOptimizeStates(true);
 
         driveSubsystem.resetOdometry(
                 new Pose2d(path.getInitialPose().getTranslation(), path.getInitialState().holonomicRotation));
+
+        timer.reset();
+        timer.start();
     }
 
     @Override

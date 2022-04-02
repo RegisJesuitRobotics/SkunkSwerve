@@ -36,7 +36,7 @@ public final class Constants {
 
         public static final double NOMINAL_VOLTAGE = 12.0;
 
-        public static final PIDFGains DRIVE_VELOCITY_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0, 0.0);
+        public static final PIDFGains DRIVE_VELOCITY_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0469, 0.0);
         public static final PIDFGains STEER_POSITION_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0, 0.0);
 
         public static final SwerveModuleConfiguration FRONT_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(1,

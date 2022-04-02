@@ -8,18 +8,23 @@ import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 
 public class RobotOrientatedDriveCommand extends CommandBase {
     private final ThrustMaster thrustMaster;
-    private final SwerveDriveSubsystem swerveDrive;
+    private final SwerveDriveSubsystem driveSubsystem;
 
-    public RobotOrientatedDriveCommand(ThrustMaster thrustMaster, SwerveDriveSubsystem swerveDrive) {
+    public RobotOrientatedDriveCommand(ThrustMaster thrustMaster, SwerveDriveSubsystem driveSubsystem) {
         this.thrustMaster = thrustMaster;
-        this.swerveDrive = swerveDrive;
+        this.driveSubsystem = driveSubsystem;
 
-        addRequirements(swerveDrive);
+        addRequirements(driveSubsystem);
+    }
+
+    @Override
+    public void initialize() {
+        driveSubsystem.setOptimizeStates(true);
     }
 
     @Override
     public void execute() {
-        swerveDrive.setChassisSpeeds(new ChassisSpeeds(
+        driveSubsystem.setChassisSpeeds(new ChassisSpeeds(
                 thrustMaster.stick.getXAxis() * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
                 thrustMaster.stick.getYAxis() * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
                 thrustMaster.stick.getZAxis() * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
@@ -27,7 +32,7 @@ public class RobotOrientatedDriveCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        swerveDrive.setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0));
+        driveSubsystem.setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0));
     }
 
     @Override

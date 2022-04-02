@@ -18,10 +18,7 @@ import static frc.robot.Constants.DriveTrainConstants.*;
 
 
 public class SwerveDriveSubsystem extends SubsystemBase {
-    private final SwerveModule frontLeft;
-    private final SwerveModule frontRight;
-    private final SwerveModule backLeft;
-    private final SwerveModule backRight;
+    private final SwerveModule[] modules = new SwerveModule[4];
 
     private final AHRS gyro = new AHRS();
 
@@ -30,10 +27,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private SwerveModuleState[] states = new SwerveModuleState[4];
 
     public SwerveDriveSubsystem() {
-        this.frontLeft = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION);
-        this.frontRight = new SwerveModule(FRONT_RIGHT_MODULE_CONFIGURATION);
-        this.backLeft = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION);
-        this.backRight = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION);
+        modules[0] = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION);
+        modules[1] = new SwerveModule(FRONT_RIGHT_MODULE_CONFIGURATION);
+        modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION);
+        modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION);
+
+        setOptimizeStates(true);
+        stopMovement();
     }
 
     public void zeroGyro() {
@@ -43,7 +43,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public Rotation2d getGyroRotation() {
         // We prefer to use this as it hypothetically has zero drift
         if (gyro.isMagnetometerCalibrated()) {
-            return Rotation2d.fromDegrees(gyro.getFusedHeading());
+            // TODO: should this be negative
+            return Rotation2d.fromDegrees(-gyro.getFusedHeading());
         }
 
         return Rotation2d.fromDegrees(-gyro.getYaw());
@@ -64,31 +65,39 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     /**
      * @param states ordered front left, front right, back left, back right
      */
-    public void setRawStates(SwerveModuleState[] states) {
-        if (states.length != 4) {
-            throw new IllegalArgumentException("You must provide all 4 states");
+    public void setRawStates(SwerveModuleState... states) {
+        if (states.length != modules.length) {
+            throw new IllegalArgumentException("You must provide states for all modules");
         }
         this.states = states;
     }
 
+    public void setOptimizeStates(boolean optimizeStates) {
+        for (SwerveModule module : modules) {
+            module.setOptimizeState(optimizeStates);
+        }
+    }
+
     public void stopMovement() {
-        for (SwerveModuleState state : states) {
-            state.speedMetersPerSecond = 0.0;
+        for (int i = 0; i < states.length; i++) {
+            states[i] = new SwerveModuleState(0.0, Rotation2d.fromDegrees(modules[i].getSteeringAngleDegrees()));
         }
     }
 
     public boolean atDesiredStates() {
-        boolean atStates = moduleAtDesiredState(frontLeft, 0);
-        atStates &= moduleAtDesiredState(backLeft, 2);
-        atStates &= moduleAtDesiredState(frontRight, 1);
-        atStates &= moduleAtDesiredState(backRight, 3);
+        boolean atStates = true;
+        for (int i = 0; i < modules.length; i++) {
+            atStates &= moduleAtDesiredState(i);
+        }
         return atStates;
     }
 
-    private boolean moduleAtDesiredState(SwerveModule module, int index) {
-        boolean atState = inTolerance(module.getDriveMotorVelocityMetersPerSecond(), states[index].speedMetersPerSecond,
+    private boolean moduleAtDesiredState(int index) {
+        SwerveModule module = modules[index];
+        SwerveModuleState desiredState = states[index];
+        boolean atState = inTolerance(module.getDriveMotorVelocityMetersPerSecond(), desiredState.speedMetersPerSecond,
                 VELOCITY_TOLERANCE_METERS_PER_SECOND);
-        atState &= inTolerance(module.getSteeringAngleDegrees(), states[index].angle.getDegrees(),
+        atState &= inTolerance(module.getSteeringAngleDegrees(), desiredState.angle.getDegrees(),
                 ANGLE_TOLERANCE_RADIANS);
         return atState;
     }
@@ -100,11 +109,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
-
-        frontLeft.setState(states[0]);
-        frontRight.setState(states[1]);
-        backLeft.setState(states[2]);
-        backRight.setState(states[3]);
+        for (int i = 0; i < modules.length; i++) {
+            modules[i].setState(states[i]);
+        }
 
         odometry.update(getGyroRotation(), states);
     }
