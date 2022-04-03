@@ -19,7 +19,7 @@ public class RobotOrientatedDriveCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        driveSubsystem.setOptimizeStates(true);
+
     }
 
     @Override

@@ -32,7 +32,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION);
         modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION);
 
-        setOptimizeStates(true);
         stopMovement();
     }
 
@@ -70,12 +69,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             throw new IllegalArgumentException("You must provide states for all modules");
         }
         this.states = states;
-    }
-
-    public void setOptimizeStates(boolean optimizeStates) {
-        for (SwerveModule module : modules) {
-            module.setOptimizeState(optimizeStates);
-        }
     }
 
     public void stopMovement() {

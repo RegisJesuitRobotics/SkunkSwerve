@@ -24,7 +24,7 @@ public class SetModuleRotationCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        driveSubsystem.setOptimizeStates(false);
+
     }
 
     @Override

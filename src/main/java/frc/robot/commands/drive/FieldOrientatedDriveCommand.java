@@ -19,7 +19,7 @@ public class FieldOrientatedDriveCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        driveSubsystem.setOptimizeStates(true);
+
     }
 
     @Override

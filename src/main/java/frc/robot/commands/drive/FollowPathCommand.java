@@ -32,8 +32,6 @@ public class FollowPathCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        driveSubsystem.setOptimizeStates(true);
-
         driveSubsystem.resetOdometry(
                 new Pose2d(path.getInitialPose().getTranslation(), path.getInitialState().holonomicRotation));
 

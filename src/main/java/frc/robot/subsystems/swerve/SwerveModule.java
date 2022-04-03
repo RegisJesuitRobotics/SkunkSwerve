@@ -26,8 +26,6 @@ public class SwerveModule {
     private final double driveArbFF;
     private final double steeringArbFF;
 
-    private boolean optimizeState = true;
-
     public SwerveModule(SwerveModuleConfiguration config) {
         this.driveMotor = new TalonFX(config.driveMotorPort);
         configDriveMotor(config);
@@ -114,16 +112,10 @@ public class SwerveModule {
     }
 
     public void setState(SwerveModuleState state) {
-        if (optimizeState) {
-            state = SwerveModuleState.optimize(state, Rotation2d.fromDegrees(getSteeringAngleDegrees()));
-        }
+        state = SwerveModuleState.optimize(state, Rotation2d.fromDegrees(getSteeringAngleDegrees()));
 
         setDriveReference(state.speedMetersPerSecond);
         setAngleReference(state.angle.getDegrees());
-    }
-
-    public void setOptimizeState(boolean optimizeState) {
-        this.optimizeState = optimizeState;
     }
 
     private void setAngleReference(double targetAngleDegrees) {
