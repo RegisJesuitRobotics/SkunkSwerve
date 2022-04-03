@@ -103,16 +103,20 @@ public class SwerveModule {
     /**
      * @return the rotation of the wheel [-180, 180)
      */
-    public double getSteeringAngleDegrees() {
-        return Math.IEEEremainder(getSteeringAngleDegreesNoWrap(), 360);
+    private Rotation2d getSteeringAngle() {
+        return Rotation2d.fromDegrees(Math.IEEEremainder(getSteeringAngleDegreesNoWrap(), 360));
     }
 
-    public double getDriveMotorVelocityMetersPerSecond() {
+    private double getDriveMotorVelocityMetersPerSecond() {
         return driveMotor.getSelectedSensorVelocity() * driveMotorConversionFactorVelocity;
     }
 
-    public void setState(SwerveModuleState state) {
-        state = SwerveModuleState.optimize(state, Rotation2d.fromDegrees(getSteeringAngleDegrees()));
+    public SwerveModuleState getActualState() {
+        return new SwerveModuleState(getDriveMotorVelocityMetersPerSecond(), getSteeringAngle());
+    }
+
+    public void setDesiredState(SwerveModuleState state) {
+        state = SwerveModuleState.optimize(state, getSteeringAngle());
 
         setDriveReference(state.speedMetersPerSecond);
         setAngleReference(state.angle.getDegrees());

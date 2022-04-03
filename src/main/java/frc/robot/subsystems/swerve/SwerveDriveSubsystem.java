@@ -73,7 +73,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public void stopMovement() {
         for (int i = 0; i < states.length; i++) {
-            states[i] = new SwerveModuleState(0.0, Rotation2d.fromDegrees(modules[i].getSteeringAngleDegrees()));
+            states[i] = new SwerveModuleState(0.0, modules[i].getActualState().angle);
         }
     }
 
@@ -88,9 +88,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private boolean moduleAtDesiredState(int index) {
         SwerveModule module = modules[index];
         SwerveModuleState desiredState = states[index];
-        boolean atState = inTolerance(module.getDriveMotorVelocityMetersPerSecond(), desiredState.speedMetersPerSecond,
+        SwerveModuleState actualState = module.getActualState();
+        boolean atState = inTolerance(actualState.speedMetersPerSecond, desiredState.speedMetersPerSecond,
                 VELOCITY_TOLERANCE_METERS_PER_SECOND);
-        atState &= inTolerance(module.getSteeringAngleDegrees(), desiredState.angle.getDegrees(),
+        atState &= inTolerance(actualState.angle.getDegrees(), desiredState.angle.getDegrees(),
                 ANGLE_TOLERANCE_RADIANS);
         return atState;
     }
@@ -102,11 +103,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+
+        SwerveModuleState[] actualStates = new SwerveModuleState[modules.length];
         for (int i = 0; i < modules.length; i++) {
-            modules[i].setState(states[i]);
+            SwerveModule module = modules[i];
+
+            module.setDesiredState(states[i]);
+            actualStates[i] = module.getActualState();
         }
 
-        odometry.update(getGyroRotation(), states);
+        odometry.update(getGyroRotation(), actualStates);
     }
-
 }
