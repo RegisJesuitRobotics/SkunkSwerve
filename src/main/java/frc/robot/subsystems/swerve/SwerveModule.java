@@ -12,10 +12,12 @@ import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.robot.utils.PIDFGains;
 import frc.robot.utils.SwerveMathUtils;
 
-public class SwerveModule {
+public class SwerveModule implements Sendable {
     private final TalonFX driveMotor;
     private final TalonFX steeringMotor;
     private final CANCoder absoluteSteeringEncoder;
@@ -25,6 +27,8 @@ public class SwerveModule {
 
     private final double driveArbFF;
     private final double steeringArbFF;
+
+    private SwerveModuleState desiredState;
 
     public SwerveModule(SwerveModuleConfiguration config) {
         this.driveMotor = new TalonFX(config.driveMotorPort);
@@ -117,6 +121,7 @@ public class SwerveModule {
 
     public void setDesiredState(SwerveModuleState state) {
         state = SwerveModuleState.optimize(state, getSteeringAngle());
+        desiredState = state;
 
         setDriveReference(state.speedMetersPerSecond);
         setAngleReference(state.angle.getDegrees());
@@ -132,6 +137,15 @@ public class SwerveModule {
     private void setDriveReference(double targetVelocityMetersPerSecond) {
         driveMotor.set(TalonFXControlMode.Velocity, targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity,
                 DemandType.ArbitraryFeedForward, driveArbFF);
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleProperty("Absolute Angle", absoluteSteeringEncoder::getAbsolutePosition, null);
+        builder.addDoubleProperty("Read Angle", () -> getSteeringAngle().getDegrees(), null);
+        builder.addDoubleProperty("Drive Velocity", this::getDriveMotorVelocityMetersPerSecond, null);
+        builder.addDoubleProperty("Desired Drive Velocity", () -> desiredState.speedMetersPerSecond, null);
+        builder.addDoubleProperty("Desired Angle", () -> desiredState.angle.getDegrees(), null);
     }
 
     public static class SwerveModuleConfiguration {

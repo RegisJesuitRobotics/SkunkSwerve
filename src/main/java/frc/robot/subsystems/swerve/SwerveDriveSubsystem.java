@@ -12,8 +12,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import static frc.robot.Constants.DriveTrainConstants.*;
 
 
@@ -24,13 +25,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation());
 
-    private SwerveModuleState[] states = new SwerveModuleState[4];
+    private SwerveModuleState[] desiredStates = new SwerveModuleState[4];
 
     public SwerveDriveSubsystem() {
         modules[0] = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION);
         modules[1] = new SwerveModule(FRONT_RIGHT_MODULE_CONFIGURATION);
         modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION);
         modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION);
+
+        ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
+
+        driveTab.add("Front Left", modules[0]);
+        driveTab.add("Front Right", modules[1]);
+        driveTab.add("Back Left", modules[2]);
+        driveTab.add("Back Right", modules[3]);
 
         stopMovement();
     }
@@ -58,7 +66,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
-        states = KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+        desiredStates = KINEMATICS.toSwerveModuleStates(chassisSpeeds);
     }
 
     /**
@@ -68,12 +76,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         if (states.length != modules.length) {
             throw new IllegalArgumentException("You must provide states for all modules");
         }
-        this.states = states;
+
+        this.desiredStates = states;
     }
 
     public void stopMovement() {
-        for (int i = 0; i < states.length; i++) {
-            states[i] = new SwerveModuleState(0.0, modules[i].getActualState().angle);
+        for (int i = 0; i < desiredStates.length; i++) {
+            desiredStates[i] = new SwerveModuleState(0.0, modules[i].getActualState().angle);
         }
     }
 
@@ -87,8 +96,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     private boolean moduleAtDesiredState(int index) {
         SwerveModule module = modules[index];
-        SwerveModuleState desiredState = states[index];
+        SwerveModuleState desiredState = desiredStates[index];
         SwerveModuleState actualState = module.getActualState();
+
         boolean atState = inTolerance(actualState.speedMetersPerSecond, desiredState.speedMetersPerSecond,
                 VELOCITY_TOLERANCE_METERS_PER_SECOND);
         atState &= inTolerance(actualState.angle.getDegrees(), desiredState.angle.getDegrees(),
@@ -102,13 +112,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
 
         SwerveModuleState[] actualStates = new SwerveModuleState[modules.length];
         for (int i = 0; i < modules.length; i++) {
             SwerveModule module = modules[i];
 
-            module.setDesiredState(states[i]);
+            module.setDesiredState(desiredStates[i]);
             actualStates[i] = module.getActualState();
         }
 
