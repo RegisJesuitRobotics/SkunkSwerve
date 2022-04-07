@@ -35,10 +35,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
 
-        driveTab.add("Front Left", modules[0]);
-        driveTab.add("Front Right", modules[1]);
-        driveTab.add("Back Left", modules[2]);
-        driveTab.add("Back Right", modules[3]);
+        driveTab.add("Front Left", modules[0]).withSize(2, 3);
+        driveTab.add("Front Right", modules[1]).withSize(2, 3);
+        driveTab.add("Back Left", modules[2]).withSize(2, 3);
+        driveTab.add("Back Right", modules[3]).withSize(2, 3);
 
         stopMovement();
     }

@@ -9,6 +9,10 @@ public class SetModuleRotationCommand extends CommandBase {
     private final SwerveModuleState[] desiredStates = new SwerveModuleState[4];
     private final SwerveDriveSubsystem driveSubsystem;
 
+    public SetModuleRotationCommand(double allRotationDegrees, SwerveDriveSubsystem driveSubsystem) {
+        this(new double[]{allRotationDegrees, allRotationDegrees, allRotationDegrees, allRotationDegrees}, driveSubsystem);
+    }
+
     public SetModuleRotationCommand(double[] rotationDegrees, SwerveDriveSubsystem driveSubsystem) {
         if (rotationDegrees.length != 4) {
             throw new IllegalArgumentException("You must have 4 rotation degrees");

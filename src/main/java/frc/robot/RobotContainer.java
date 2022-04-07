@@ -5,15 +5,14 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.PathPlanner;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.commands.drive.FieldOrientatedDriveCommand;
 import frc.robot.commands.drive.FollowPathCommand;
+import frc.robot.commands.drive.RobotOrientatedDriveCommand;
 import frc.robot.commands.drive.SetModuleRotationCommand;
 import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.joysticks.ThrustMaster;
@@ -30,10 +29,10 @@ import edu.wpi.first.wpilibj2.command.Command;
  * commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-    // The robot's subsystems and commands are defined here...
-    private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
+    private final SwerveDriveSubsystem driveSubsystem = new SwerveDriveSubsystem();
 
     private final ThrustMaster driverController = new ThrustMaster(0);
+//    private final PlaystationController driverController = new PlaystationController(0);
 
     private final SendableChooser<Command> driveCommandChooser = new SendableChooser<>();
     private final SendableChooser<Command> autoCommandChooser = new SendableChooser<>();
@@ -42,22 +41,17 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        // Configure the button bindings
         configureButtonBindings();
+        configureAutos();
+    }
 
+    private void configureAutos() {
         autoCommandChooser.setDefaultOption("Nothing", new InstantCommand());
-        autoCommandChooser
-                .addOption("No Rotation Auto",
-                        new FollowPathCommand(
-                                PathPlanner.loadPath("NoRotation", DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-                                        DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED),
-                                swerveDriveSubsystem));
-        autoCommandChooser
-                .addOption("Rotation Auto",
-                        new FollowPathCommand(
-                                PathPlanner.loadPath("WithRotation", DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-                                        DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED),
-                                swerveDriveSubsystem));
+        autoCommandChooser.addOption("UpDownWithRotation", new FollowPathCommand("WithRotation", driveSubsystem));
+        autoCommandChooser.addOption("UpDownNoRotation", new FollowPathCommand("NoRotation", driveSubsystem));
+        autoCommandChooser.addOption("StraightWithRotation", new FollowPathCommand("StraightWithRotation", driveSubsystem));
+        autoCommandChooser.addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", driveSubsystem));
+        autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", driveSubsystem));
     }
 
 
@@ -69,18 +63,26 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         driveCommandChooser.setDefaultOption("Field Orientated",
-                new FieldOrientatedDriveCommand(driverController, swerveDriveSubsystem));
+                new FieldOrientatedDriveCommand(driverController.stick::getXAxis, driverController.stick::getYAxis,
+                        driverController.stick::getZAxis, driveSubsystem));
         driveCommandChooser.addOption("Robot Orientated",
-                new FieldOrientatedDriveCommand(driverController, swerveDriveSubsystem));
+                new RobotOrientatedDriveCommand(driverController.stick::getXAxis, driverController.stick::getYAxis,
+                        driverController.stick::getZAxis, driveSubsystem));
+//        driveCommandChooser.setDefaultOption("Field Orientated",
+//                new FieldOrientatedDriveCommand(driverController.leftThumb::getXAxis, driverController.leftThumb::getYAxis,
+//                        driverController.rightThumb::getYAxis, swerveDriveSubsystem));
+//        driveCommandChooser.addOption("Robot Orientated",
+//                new RobotOrientatedDriveCommand(driverController.leftThumb::getXAxis, driverController.leftThumb::getYAxis,
+//                        driverController.rightThumb::getXAxis, swerveDriveSubsystem));
 
         Shuffleboard.getTab("DriveTrainRaw").add("Drive Style", driveCommandChooser);
         Shuffleboard.getTab("DriveTrainRaw").add("Evaluate Drive Style", new InstantRunWhenDisabledCommand(
-                () -> swerveDriveSubsystem.setDefaultCommand(driveCommandChooser.getSelected())));
-        swerveDriveSubsystem.setDefaultCommand(driveCommandChooser.getSelected());
+                () -> driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected())));
+        driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected());
 
-        driverController.buttonOne.whenPressed(swerveDriveSubsystem::zeroGyro);
+        driverController.buttonOne.whenPressed(driveSubsystem::zeroGyro);
         driverController.buttonTwo
-                .whenHeld(new SetModuleRotationCommand(new double[]{ 0.0, 0.0, 0.0, 0.0 }, swerveDriveSubsystem));
+                .whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
     }
 
 

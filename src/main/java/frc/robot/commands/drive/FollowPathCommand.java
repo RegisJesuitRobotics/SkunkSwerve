@@ -1,5 +1,6 @@
 package frc.robot.commands.drive;
 
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -22,6 +23,10 @@ public class FollowPathCommand extends CommandBase {
                     DriveTrainConstants.PATH_ANGULAR_VELOCITY_P, 0.0, 0.0, DriveTrainConstants.ANGULAR_CONSTRAINTS));
 
     private final Timer timer = new Timer();
+
+    public FollowPathCommand(String pathName, SwerveDriveSubsystem driveSubsystem) {
+        this(PathPlanner.loadPath(pathName, DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND, DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED), driveSubsystem);
+    }
 
     public FollowPathCommand(PathPlannerTrajectory path, SwerveDriveSubsystem driveSubsystem) {
         this.path = path;
