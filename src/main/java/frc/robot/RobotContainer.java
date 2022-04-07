@@ -49,7 +49,8 @@ public class RobotContainer {
         autoCommandChooser.setDefaultOption("Nothing", new InstantCommand());
         autoCommandChooser.addOption("UpDownWithRotation", new FollowPathCommand("WithRotation", driveSubsystem));
         autoCommandChooser.addOption("UpDownNoRotation", new FollowPathCommand("NoRotation", driveSubsystem));
-        autoCommandChooser.addOption("StraightWithRotation", new FollowPathCommand("StraightWithRotation", driveSubsystem));
+        autoCommandChooser.addOption("StraightWithRotation",
+                new FollowPathCommand("StraightWithRotation", driveSubsystem));
         autoCommandChooser.addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", driveSubsystem));
         autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", driveSubsystem));
     }
@@ -81,8 +82,7 @@ public class RobotContainer {
         driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected());
 
         driverController.buttonOne.whenPressed(driveSubsystem::zeroGyro);
-        driverController.buttonTwo
-                .whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
+        driverController.buttonTwo.whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
     }
 
 

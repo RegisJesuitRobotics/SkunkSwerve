@@ -10,7 +10,8 @@ public class SetModuleRotationCommand extends CommandBase {
     private final SwerveDriveSubsystem driveSubsystem;
 
     public SetModuleRotationCommand(double allRotationDegrees, SwerveDriveSubsystem driveSubsystem) {
-        this(new double[]{allRotationDegrees, allRotationDegrees, allRotationDegrees, allRotationDegrees}, driveSubsystem);
+        this(new double[]{ allRotationDegrees, allRotationDegrees, allRotationDegrees, allRotationDegrees },
+                driveSubsystem);
     }
 
     public SetModuleRotationCommand(double[] rotationDegrees, SwerveDriveSubsystem driveSubsystem) {

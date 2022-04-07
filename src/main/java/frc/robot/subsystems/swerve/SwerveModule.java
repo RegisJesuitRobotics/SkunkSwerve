@@ -40,11 +40,13 @@ public class SwerveModule implements Sendable {
         this.absoluteSteeringEncoder = new CANCoder(config.steeringEncoderPort);
         configSteeringEncoder(config);
 
-        this.driveMotorConversionFactorVelocity = config.driveMotorConversionFactorVelocity;
-        this.steeringMotorConversionFactorPosition = config.steeringMotorConversionFactorPosition;
+        this.driveMotorConversionFactorVelocity = (config.sharedSwerveModuleConfiguration.wheelDiameterMeters * Math.PI
+                * 10) / (config.sharedSwerveModuleConfiguration.driveGearRatio * 2048);
+        this.steeringMotorConversionFactorPosition = (360)
+                / (config.sharedSwerveModuleConfiguration.steerGearRatio * 2048);
 
-        this.driveArbFF = config.driveVelocityGains.arbFF;
-        this.steeringArbFF = config.steeringPositionGains.arbFF;
+        this.driveArbFF = config.sharedSwerveModuleConfiguration.driveVelocityGains.arbFF;
+        this.steeringArbFF = config.sharedSwerveModuleConfiguration.steerPositionGains.arbFF;
 
         resetSteeringToAbsolute();
     }
@@ -53,11 +55,11 @@ public class SwerveModule implements Sendable {
         TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
 
         // Current limit
-        motorConfiguration.supplyCurrLimit.currentLimit = config.driveCurrentLimit;
+        motorConfiguration.supplyCurrLimit.currentLimit = config.sharedSwerveModuleConfiguration.driveCurrentLimit;
         motorConfiguration.supplyCurrLimit.enable = true;
         // Voltage compensation
-        motorConfiguration.voltageCompSaturation = config.nominalVoltage;
-        config.driveVelocityGains.setSlot(motorConfiguration.slot0);
+        motorConfiguration.voltageCompSaturation = config.sharedSwerveModuleConfiguration.nominalVoltage;
+        config.sharedSwerveModuleConfiguration.driveVelocityGains.setSlot(motorConfiguration.slot0);
 
         driveMotor.configAllSettings(motorConfiguration);
         driveMotor.setInverted(
@@ -70,11 +72,11 @@ public class SwerveModule implements Sendable {
         TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
 
         // Current limit
-        motorConfiguration.supplyCurrLimit.currentLimit = config.steeringCurrentLimit;
+        motorConfiguration.supplyCurrLimit.currentLimit = config.sharedSwerveModuleConfiguration.steerCurrentLimit;
         motorConfiguration.supplyCurrLimit.enable = true;
         // Voltage compensation
-        motorConfiguration.voltageCompSaturation = config.nominalVoltage;
-        config.steeringPositionGains.setSlot(motorConfiguration.slot0);
+        motorConfiguration.voltageCompSaturation = config.sharedSwerveModuleConfiguration.nominalVoltage;
+        config.sharedSwerveModuleConfiguration.steerPositionGains.setSlot(motorConfiguration.slot0);
 
         steeringMotor.configAllSettings(motorConfiguration);
         steeringMotor.setInverted(
@@ -149,47 +151,53 @@ public class SwerveModule implements Sendable {
     }
 
     public static class SwerveModuleConfiguration {
-        private final int driveMotorPort;
-        private final int steeringMotorPort;
-        private final int steeringEncoderPort;
-        private final double driveCurrentLimit;
-        private final double steeringCurrentLimit;
-        private final boolean driveMotorInverted;
-        private final boolean steeringMotorInverted;
-        private final double nominalVoltage;
-        private final double offsetDegrees;
-        private final boolean steeringEncoderInverted;
-        private final PIDFGains driveVelocityGains;
-        private final PIDFGains steeringPositionGains;
-
-        // Native units per 100ms to m/s
-        private final double driveMotorConversionFactorVelocity;
-
-        // Native units to radians
-        private final double steeringMotorConversionFactorPosition;
+        public final int driveMotorPort;
+        public final int steeringMotorPort;
+        public final int steeringEncoderPort;
+        public final boolean driveMotorInverted;
+        public final boolean steeringMotorInverted;
+        public final double offsetDegrees;
+        public final boolean steeringEncoderInverted;
+        public final SharedSwerveModuleConfiguration sharedSwerveModuleConfiguration;
 
         public SwerveModuleConfiguration(int driveMotorPort, int steeringMotorPort, int steeringEncoderPort,
-                double driveGearRatio, double steeringGearRatio, double driveCurrentLimit, double steeringCurrentLimit,
-                boolean driveMotorInverted, boolean steeringMotorInverted, double nominalVoltage, double offsetDegrees,
-                boolean steeringEncoderInverted, double wheelDiameterMeters, PIDFGains driveVelocityGains,
-                PIDFGains steeringPositionGains) {
+                boolean driveMotorInverted, boolean steeringMotorInverted, double offsetDegrees,
+                boolean steeringEncoderInverted, SharedSwerveModuleConfiguration sharedSwerveModuleConfiguration) {
             this.driveMotorPort = driveMotorPort;
             this.steeringMotorPort = steeringMotorPort;
             this.steeringEncoderPort = steeringEncoderPort;
-            this.driveCurrentLimit = driveCurrentLimit;
-            this.steeringCurrentLimit = steeringCurrentLimit;
             this.driveMotorInverted = driveMotorInverted;
             this.steeringMotorInverted = steeringMotorInverted;
-            this.nominalVoltage = nominalVoltage;
             this.offsetDegrees = offsetDegrees;
             this.steeringEncoderInverted = steeringEncoderInverted;
-            this.driveVelocityGains = driveVelocityGains;
-            this.steeringPositionGains = steeringPositionGains;
+            this.sharedSwerveModuleConfiguration = sharedSwerveModuleConfiguration;
+        }
 
-            this.driveMotorConversionFactorVelocity = (Math.PI * wheelDiameterMeters * 10) / (driveGearRatio * 2048.0);
+        /**
+         * This is all the options that are not module specific
+         */
+        public static class SharedSwerveModuleConfiguration {
+            public final double driveGearRatio;
+            public final double steerGearRatio;
+            public final double driveCurrentLimit;
+            public final double steerCurrentLimit;
+            public final double nominalVoltage;
+            public final double wheelDiameterMeters;
+            public final PIDFGains driveVelocityGains;
+            public final PIDFGains steerPositionGains;
 
-            // One full rotation is 360 degrees
-            this.steeringMotorConversionFactorPosition = (360) / (steeringGearRatio * 2048.0);
+            public SharedSwerveModuleConfiguration(double driveGearRatio, double steerGearRatio,
+                    double driveCurrentLimit, double steerCurrentLimit, double nominalVoltage,
+                    double wheelDiameterMeters, PIDFGains driveVelocityGains, PIDFGains steerPositionGains) {
+                this.driveGearRatio = driveGearRatio;
+                this.steerGearRatio = steerGearRatio;
+                this.driveCurrentLimit = driveCurrentLimit;
+                this.steerCurrentLimit = steerCurrentLimit;
+                this.nominalVoltage = nominalVoltage;
+                this.wheelDiameterMeters = wheelDiameterMeters;
+                this.driveVelocityGains = driveVelocityGains;
+                this.steerPositionGains = steerPositionGains;
+            }
         }
     }
 }

@@ -25,7 +25,8 @@ public class FollowPathCommand extends CommandBase {
     private final Timer timer = new Timer();
 
     public FollowPathCommand(String pathName, SwerveDriveSubsystem driveSubsystem) {
-        this(PathPlanner.loadPath(pathName, DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND, DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED), driveSubsystem);
+        this(PathPlanner.loadPath(pathName, DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+                DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED), driveSubsystem);
     }
 
     public FollowPathCommand(PathPlannerTrajectory path, SwerveDriveSubsystem driveSubsystem) {

@@ -101,8 +101,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         boolean atState = inTolerance(actualState.speedMetersPerSecond, desiredState.speedMetersPerSecond,
                 VELOCITY_TOLERANCE_METERS_PER_SECOND);
-        atState &= inTolerance(actualState.angle.getDegrees(), desiredState.angle.getDegrees(),
-                ANGLE_TOLERANCE_RADIANS);
+        atState &= inTolerance(actualState.angle.getDegrees(), desiredState.angle.getDegrees(), ANGLE_TOLERANCE_DEGREES);
         return atState;
     }
 
