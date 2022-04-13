@@ -37,10 +37,11 @@ public final class Constants {
 
         public static final double NOMINAL_VOLTAGE = 12.0;
 
-        // We have to divide by 12 because Sys-id outputs into volts, and we just want
-        // [-1 - 1]
-        public static final PIDFGains DRIVE_VELOCITY_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0 / 12, 0.0 / 12);
-        public static final PIDFGains STEER_POSITION_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0 / 12, 0.0 / 12);
+        // For talons PIDF full output is 1023 so PIDF are all in those units except
+        // arbFF.
+        // arbFF are [-1 - 1]
+        public static final PIDFGains DRIVE_VELOCITY_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0, 0.0 / 12);
+        public static final PIDFGains STEER_POSITION_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0, 0.0 / 12);
 
         private static final SharedSwerveModuleConfiguration SHARED_SWERVE_MODULE_CONFIGURATION = new SharedSwerveModuleConfiguration(
                 DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT,
@@ -59,10 +60,10 @@ public final class Constants {
                 8, 12, false, false, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION);
 
         // Left right distance between center of wheels
-        public static final double TRACKWIDTH_METERS = Units.inchesToMeters(30);
+        public static final double TRACKWIDTH_METERS = Units.inchesToMeters(24.78);
 
         // Front back distance between center of wheels
-        public static final double WHEELBASE_METERS = Units.inchesToMeters(30);
+        public static final double WHEELBASE_METERS = Units.inchesToMeters(24.78);
 
         public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
                 new Translation2d(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0),

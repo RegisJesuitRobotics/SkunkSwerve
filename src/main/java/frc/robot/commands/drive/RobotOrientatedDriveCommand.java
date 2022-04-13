@@ -4,6 +4,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
+import frc.robot.utils.SwerveMathUtils;
 
 import java.util.function.DoubleSupplier;
 
@@ -25,9 +26,11 @@ public class RobotOrientatedDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
+        double[] normalized = SwerveMathUtils.applyCircleDeadZone(xAxisSupplier.getAsDouble(),
+                yAxisSupplier.getAsDouble(), 1.0);
         driveSubsystem.setChassisSpeeds(new ChassisSpeeds(
-                xAxisSupplier.getAsDouble() * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
-                yAxisSupplier.getAsDouble() * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
+                normalized[0] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
+                normalized[1] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
                 rotationSupplier.getAsDouble() * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
     }
 

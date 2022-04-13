@@ -12,18 +12,27 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.utils.datalog.LazyDoubleLogEntry;
+
 import static frc.robot.Constants.DriveTrainConstants.*;
 
 
 public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveModule[] modules = new SwerveModule[4];
-
     private final AHRS gyro = new AHRS();
-
     private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation());
+
+    private final DataLog logger = DataLogManager.getLog();
+    private final DoubleLogEntry gyroEntry = new LazyDoubleLogEntry(logger, "/drive/gyroDegrees");
+    private final DoubleLogEntry odometryXEntry = new LazyDoubleLogEntry(logger, "/drive/estimatedX");
+    private final DoubleLogEntry odometryYEntry = new LazyDoubleLogEntry(logger, "/drive/estimatedY");
+    private final DoubleLogEntry odometryHeadingEntry = new LazyDoubleLogEntry(logger, "/drive/estimatedHeading");
 
     private SwerveModuleState[] desiredStates = new SwerveModuleState[4];
 
@@ -123,5 +132,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         }
 
         odometry.update(getGyroRotation(), actualStates);
+
+        logValues();
+    }
+
+    private void logValues() {
+        gyroEntry.append(getGyroRotation().getDegrees());
+
+        Pose2d estimatedPose = getPose();
+        odometryXEntry.append(estimatedPose.getX());
+        odometryYEntry.append(estimatedPose.getY());
+        odometryHeadingEntry.append(estimatedPose.getRotation().getDegrees());
+
+        for (SwerveModule module : modules) {
+            module.logValues();
+        }
     }
 }
