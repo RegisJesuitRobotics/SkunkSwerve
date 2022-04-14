@@ -32,7 +32,7 @@ public class FieldOrientatedDriveCommand extends CommandBase {
                 normalized[0] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
                 normalized[1] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
                 rotationSupplier.getAsDouble() * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                driveSubsystem.getGyroRotation()));
+                driveSubsystem.getPose().getRotation()));
     }
 
     @Override

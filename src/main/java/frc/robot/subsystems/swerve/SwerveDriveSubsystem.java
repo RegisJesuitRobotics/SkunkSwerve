@@ -56,10 +56,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         gyro.zeroYaw();
     }
 
+    /**
+     * @return the value from the gyro. This does not get reset when resetOdometry
+     *         is called
+     */
     public Rotation2d getGyroRotation() {
         // We prefer to use this as it hypothetically has zero drift
         if (gyro.isMagnetometerCalibrated()) {
-            // TODO: should this be negative
+            // TODO: should this be negative?
             return Rotation2d.fromDegrees(-gyro.getFusedHeading());
         }
 
