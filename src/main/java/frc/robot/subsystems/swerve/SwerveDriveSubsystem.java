@@ -14,11 +14,11 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.datalog.LazyDoubleLogEntry;
 
 import static frc.robot.Constants.DriveTrainConstants.*;
 
@@ -29,10 +29,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation());
 
     private final DataLog logger = DataLogManager.getLog();
-    private final DoubleLogEntry gyroEntry = new LazyDoubleLogEntry(logger, "/drive/gyroDegrees");
-    private final DoubleLogEntry odometryXEntry = new LazyDoubleLogEntry(logger, "/drive/estimatedX");
-    private final DoubleLogEntry odometryYEntry = new LazyDoubleLogEntry(logger, "/drive/estimatedY");
-    private final DoubleLogEntry odometryHeadingEntry = new LazyDoubleLogEntry(logger, "/drive/estimatedHeading");
+    private final DoubleLogEntry gyroEntry = new DoubleLogEntry(logger, "/drive/gyroDegrees");
+    private final DoubleLogEntry odometryXEntry = new DoubleLogEntry(logger, "/drive/estimatedX");
+    private final DoubleLogEntry odometryYEntry = new DoubleLogEntry(logger, "/drive/estimatedY");
+    private final DoubleLogEntry odometryHeadingEntry = new DoubleLogEntry(logger, "/drive/estimatedHeading");
+    private final StringLogEntry driveEventLogger = new StringLogEntry(logger, "/drive/events");
 
     private SwerveModuleState[] desiredStates = new SwerveModuleState[4];
 
@@ -41,6 +42,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         modules[1] = new SwerveModule(FRONT_RIGHT_MODULE_CONFIGURATION);
         modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION);
         modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION);
+        driveEventLogger.append("Swerve modules initialized");
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
 
@@ -54,6 +56,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public void zeroGyro() {
         gyro.zeroYaw();
+        driveEventLogger.append("Gyro reset");
     }
 
     /**
@@ -72,31 +75,34 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose2d) {
         odometry.resetPosition(pose2d, getGyroRotation());
+
+        driveEventLogger.append("Odometry reset");
     }
 
     public Pose2d getPose() {
         return odometry.getPoseMeters();
     }
 
-    public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
-        desiredStates = KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+    public void setChassisSpeeds(ChassisSpeeds chassisSpeeds, boolean openLoop) {
+        setRawStates(openLoop, KINEMATICS.toSwerveModuleStates(chassisSpeeds));
     }
 
     /**
      * @param states ordered front left, front right, back left, back right
      */
-    public void setRawStates(SwerveModuleState... states) {
+    public void setRawStates(boolean openLoop, SwerveModuleState... states) {
         if (states.length != modules.length) {
             throw new IllegalArgumentException("You must provide states for all modules");
         }
 
         this.desiredStates = states;
+        for (int i = 0; i < modules.length; i++) {
+            modules[i].setDesiredState(desiredStates[i], openLoop);
+        }
     }
 
     public void stopMovement() {
-        for (int i = 0; i < desiredStates.length; i++) {
-            desiredStates[i] = new SwerveModuleState(0.0, modules[i].getActualState().angle);
-        }
+        setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0), true);
     }
 
     public boolean atDesiredStates() {
@@ -129,10 +135,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         SwerveModuleState[] actualStates = new SwerveModuleState[modules.length];
         for (int i = 0; i < modules.length; i++) {
-            SwerveModule module = modules[i];
-
-            module.setDesiredState(desiredStates[i]);
-            actualStates[i] = module.getActualState();
+            actualStates[i] = modules[i].getActualState();
         }
 
         odometry.update(getGyroRotation(), actualStates);

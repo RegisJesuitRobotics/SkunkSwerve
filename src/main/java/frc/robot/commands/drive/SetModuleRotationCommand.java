@@ -34,7 +34,7 @@ public class SetModuleRotationCommand extends CommandBase {
 
     @Override
     public void execute() {
-        driveSubsystem.setRawStates(desiredStates);
+        driveSubsystem.setRawStates(false, desiredStates);
     }
 
     @Override

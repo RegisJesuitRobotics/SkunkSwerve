@@ -44,12 +44,12 @@ public class AlwaysFacingDriveCommand extends CommandBase {
         double[] normalized = SwerveMathUtils.applyCircleDeadZone(xAxisSupplier.getAsDouble(),
                 yAxisSupplier.getAsDouble(), DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND);
         driveSubsystem.setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(normalized[0], normalized[1],
-                thetaVelocity, robotPose.getRotation()));
+                thetaVelocity, robotPose.getRotation()), true);
     }
 
     @Override
     public void end(boolean interrupted) {
-        super.end(interrupted);
+        driveSubsystem.stopMovement();
     }
 
     @Override

@@ -1,21 +1,23 @@
 package frc.robot.subsystems.swerve;
 
+import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.*;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
-import frc.robot.utils.PIDFGains;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.utils.PIDFFFGains;
+import frc.robot.utils.PIDGains;
 import frc.robot.utils.SwerveMathUtils;
-import frc.robot.utils.datalog.LazyDoubleLogEntry;
-
-import static frc.robot.utils.CTREUtils.checkCTREError;
 
 public class SwerveModule implements Sendable {
     private static int instances = 0;
@@ -26,6 +28,7 @@ public class SwerveModule implements Sendable {
     private final DoubleLogEntry actualHeadingEntry;
     private final DoubleLogEntry driveMotorAmpsEntry;
     private final DoubleLogEntry steerMotorAmpsEntry;
+    private final StringLogEntry moduleEventEntry;
 
     private final TalonFX driveMotor;
     private final TalonFX steeringMotor;
@@ -34,8 +37,9 @@ public class SwerveModule implements Sendable {
     private final double driveMotorConversionFactorVelocity;
     private final double steeringMotorConversionFactorPosition;
 
-    private final double driveArbFF;
-    private final double steeringArbFF;
+    private final SimpleMotorFeedforward driveMotorFF;
+
+    private final double openLoopMaxSpeed;
 
     private SwerveModuleState desiredState;
 
@@ -44,12 +48,13 @@ public class SwerveModule implements Sendable {
 
         DataLog logger = DataLogManager.getLog();
         String tableName = "/drive/modules/" + instances + "/";
-        desiredVelocityEntry = new LazyDoubleLogEntry(logger, tableName + "desiredVelocity");
-        desiredHeadingEntry = new LazyDoubleLogEntry(logger, tableName + "desiredHeading");
-        actualVelocityEntry = new LazyDoubleLogEntry(logger, tableName + "actualVelocity");
-        actualHeadingEntry = new LazyDoubleLogEntry(logger, tableName + "actualHeading");
-        driveMotorAmpsEntry = new LazyDoubleLogEntry(logger, tableName + "driveMotorAmps");
-        steerMotorAmpsEntry = new LazyDoubleLogEntry(logger, tableName + "steerMotorAmps");
+        desiredVelocityEntry = new DoubleLogEntry(logger, tableName + "desiredVelocity");
+        desiredHeadingEntry = new DoubleLogEntry(logger, tableName + "desiredHeading");
+        actualVelocityEntry = new DoubleLogEntry(logger, tableName + "actualVelocity");
+        actualHeadingEntry = new DoubleLogEntry(logger, tableName + "actualHeading");
+        driveMotorAmpsEntry = new DoubleLogEntry(logger, tableName + "driveMotorAmps");
+        steerMotorAmpsEntry = new DoubleLogEntry(logger, tableName + "steerMotorAmps");
+        moduleEventEntry = new StringLogEntry(logger, tableName + "events");
 
         this.driveMotor = new TalonFX(config.driveMotorPort);
         configDriveMotor(config);
@@ -64,12 +69,10 @@ public class SwerveModule implements Sendable {
                 / (config.sharedConfiguration.driveGearRatio * 2048);
         this.steeringMotorConversionFactorPosition = (360) / (config.sharedConfiguration.steerGearRatio * 2048);
 
-        this.driveArbFF = config.sharedConfiguration.driveVelocityGains.arbFF;
-        this.steeringArbFF = config.sharedConfiguration.steerPositionGains.arbFF;
+        this.driveMotorFF = config.sharedConfiguration.driveVelocityGains.feedforward;
+        this.openLoopMaxSpeed = config.sharedConfiguration.openLoopMaxSpeed;
 
         resetSteeringToAbsolute();
-
-        DataLogManager.log("Initialized module " + instances);
     }
 
     public void configDriveMotor(SwerveModuleConfiguration config) {
@@ -91,6 +94,8 @@ public class SwerveModule implements Sendable {
         driveMotor.setNeutralMode(NeutralMode.Brake);
         checkCTREError(driveMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 250),
                 "Could not config drive status frame");
+
+        moduleEventEntry.append("Drive motor initialized");
     }
 
     public void configSteeringMotor(SwerveModuleConfiguration config) {
@@ -115,6 +120,8 @@ public class SwerveModule implements Sendable {
         // not send as often to save CAN bandwidth
         checkCTREError(steeringMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 250),
                 "Could not config steer status frame");
+
+        moduleEventEntry.append("Steer motor initialized");
     }
 
     public void configSteeringEncoder(SwerveModuleConfiguration config) {
@@ -132,11 +139,27 @@ public class SwerveModule implements Sendable {
         checkCTREError(absoluteSteeringEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100),
                 "Could not set steer encoder status frame");
         absoluteSteeringEncoder.setPositionToAbsolute();
+
+        moduleEventEntry.append("Steer encoder initialized");
+    }
+
+    private void checkCTREError(ErrorCode errorCode, String message) {
+        if (errorCode != ErrorCode.OK) {
+            String fullMessage = String.format("%s: %s", message, errorCode.toString());
+
+            moduleEventEntry.append(fullMessage);
+            DriverStation.reportError(fullMessage, false);
+        }
     }
 
     public void resetSteeringToAbsolute() {
-        steeringMotor.setSelectedSensorPosition(
-                absoluteSteeringEncoder.getAbsolutePosition() / steeringMotorConversionFactorPosition);
+        double absolutePosition = absoluteSteeringEncoder.getAbsolutePosition();
+
+        checkCTREError(
+                steeringMotor.setSelectedSensorPosition(absolutePosition / steeringMotorConversionFactorPosition),
+                "Could not reset encoder to absolute");
+
+        moduleEventEntry.append("Reset steer motor encoder to absolute position: " + absolutePosition);
     }
 
     private double getSteeringAngleDegreesNoWrap() {
@@ -162,11 +185,11 @@ public class SwerveModule implements Sendable {
         return new SwerveModuleState(getDriveMotorVelocityMetersPerSecond(), getSteeringAngle());
     }
 
-    public void setDesiredState(SwerveModuleState state) {
+    public void setDesiredState(SwerveModuleState state, boolean openLoop) {
         state = SwerveModuleState.optimize(state, getSteeringAngle());
         desiredState = state;
 
-        setDriveReference(state.speedMetersPerSecond);
+        setDriveReference(state.speedMetersPerSecond, openLoop);
         setAngleReference(state.angle.getDegrees());
     }
 
@@ -179,16 +202,20 @@ public class SwerveModule implements Sendable {
 
     private void setAngleReference(double targetAngleDegrees) {
         desiredHeadingEntry.append(targetAngleDegrees);
-        steeringMotor.set(TalonFXControlMode.Position,
-                SwerveMathUtils.optimizeAngleSetpoint(getSteeringAngleDegreesNoWrap(),
-                        targetAngleDegrees / steeringMotorConversionFactorPosition),
-                DemandType.ArbitraryFeedForward, steeringArbFF);
+        steeringMotor.set(TalonFXControlMode.Position, SwerveMathUtils.optimizeAngleSetpoint(
+                getSteeringAngleDegreesNoWrap(), targetAngleDegrees / steeringMotorConversionFactorPosition));
     }
 
-    private void setDriveReference(double targetVelocityMetersPerSecond) {
+    private void setDriveReference(double targetVelocityMetersPerSecond, boolean openLoop) {
         desiredVelocityEntry.append(targetVelocityMetersPerSecond);
-        driveMotor.set(TalonFXControlMode.Velocity, targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity,
-                DemandType.ArbitraryFeedForward, driveArbFF);
+
+        if (openLoop) {
+            driveMotor.set(TalonFXControlMode.PercentOutput, targetVelocityMetersPerSecond / openLoopMaxSpeed);
+        } else {
+            driveMotor.set(TalonFXControlMode.Velocity,
+                    targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity, DemandType.ArbitraryFeedForward,
+                    driveMotorFF.calculate(targetVelocityMetersPerSecond));
+        }
     }
 
     @Override
@@ -233,18 +260,21 @@ public class SwerveModule implements Sendable {
             public final double steerCurrentLimit;
             public final double nominalVoltage;
             public final double wheelDiameterMeters;
-            public final PIDFGains driveVelocityGains;
-            public final PIDFGains steerPositionGains;
+            public final double openLoopMaxSpeed;
+            public final PIDFFFGains driveVelocityGains;
+            public final PIDGains steerPositionGains;
 
             public SharedSwerveModuleConfiguration(double driveGearRatio, double steerGearRatio,
                     double driveCurrentLimit, double steerCurrentLimit, double nominalVoltage,
-                    double wheelDiameterMeters, PIDFGains driveVelocityGains, PIDFGains steerPositionGains) {
+                    double wheelDiameterMeters, double openLoopMaxSpeed, PIDFFFGains driveVelocityGains,
+                    PIDGains steerPositionGains) {
                 this.driveGearRatio = driveGearRatio;
                 this.steerGearRatio = steerGearRatio;
                 this.driveCurrentLimit = driveCurrentLimit;
                 this.steerCurrentLimit = steerCurrentLimit;
                 this.nominalVoltage = nominalVoltage;
                 this.wheelDiameterMeters = wheelDiameterMeters;
+                this.openLoopMaxSpeed = openLoopMaxSpeed;
                 this.driveVelocityGains = driveVelocityGains;
                 this.steerPositionGains = steerPositionGains;
             }

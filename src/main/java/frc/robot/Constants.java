@@ -11,18 +11,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.swerve.SwerveModule.SwerveModuleConfiguration;
 import frc.robot.subsystems.swerve.SwerveModule.SwerveModuleConfiguration.SharedSwerveModuleConfiguration;
-import frc.robot.utils.PIDFGains;
+import frc.robot.utils.PIDFFFGains;
+import frc.robot.utils.PIDGains;
 
-/**
- * The Constants class provides a convenient place for teams to hold robot-wide
- * numerical or boolean constants. This class should not be used for any other
- * purpose. All constants should be declared globally (i.e. public static). Do
- * not put anything functional in this class.
- *
- * <p>
- * It is advised to statically import this class (or one of its inner classes)
- * wherever the constants are needed, to reduce verbosity.
- */
 public final class Constants {
     private Constants() {}
 
@@ -37,27 +28,11 @@ public final class Constants {
 
         public static final double NOMINAL_VOLTAGE = 12.0;
 
-        // For talons PIDF full output is 1023 so PIDF are all in those units except
-        // arbFF.
-        // arbFF are [-1 - 1]
-        public static final PIDFGains DRIVE_VELOCITY_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0, 0.0 / 12);
-        public static final PIDFGains STEER_POSITION_GAINS = new PIDFGains(0.0, 0.0, 0.0, 0.0, 0.0 / 12);
+        // For talons PID full output is 1023 except for all FFF gains
+        public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(0.0, 0.0, 0.0, 0.0 / 12, 0.0 / 12,
+                0.0 / 12);
+        public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
 
-        private static final SharedSwerveModuleConfiguration SHARED_SWERVE_MODULE_CONFIGURATION = new SharedSwerveModuleConfiguration(
-                DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT,
-                NOMINAL_VOLTAGE, WHEEL_DIAMETER_METERS, DRIVE_VELOCITY_GAINS, STEER_POSITION_GAINS);
-
-        public static final SwerveModuleConfiguration FRONT_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(1,
-                5, 9, false, false, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION);
-
-        public static final SwerveModuleConfiguration FRONT_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                2, 6, 10, false, false, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION);
-
-        public static final SwerveModuleConfiguration BACK_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(3,
-                7, 11, false, false, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION);
-
-        public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(4,
-                8, 12, false, false, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION);
 
         // Left right distance between center of wheels
         public static final double TRACKWIDTH_METERS = Units.inchesToMeters(24.78);
@@ -91,5 +66,21 @@ public final class Constants {
         public static final double ANGLE_TOLERANCE_DEGREES = 0.5;
         public static final double VELOCITY_TOLERANCE_METERS_PER_SECOND = 0.05;
 
+        private static final SharedSwerveModuleConfiguration SHARED_SWERVE_MODULE_CONFIGURATION = new SharedSwerveModuleConfiguration(
+                DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT,
+                NOMINAL_VOLTAGE, WHEEL_DIAMETER_METERS, MAX_VELOCITY_METERS_PER_SECOND, DRIVE_VELOCITY_GAINS,
+                STEER_POSITION_GAINS);
+
+        public static final SwerveModuleConfiguration FRONT_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(1,
+                5, 9, true, true, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION);
+
+        public static final SwerveModuleConfiguration FRONT_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
+                2, 6, 10, true, true, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION);
+
+        public static final SwerveModuleConfiguration BACK_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(3,
+                7, 11, true, true, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION);
+
+        public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(4,
+                8, 12, true, true, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION);
     }
 }

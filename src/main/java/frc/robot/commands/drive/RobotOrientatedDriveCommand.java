@@ -31,12 +31,13 @@ public class RobotOrientatedDriveCommand extends CommandBase {
         driveSubsystem.setChassisSpeeds(new ChassisSpeeds(
                 normalized[0] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
                 normalized[1] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
-                rotationSupplier.getAsDouble() * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
+                rotationSupplier.getAsDouble() * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND),
+                true);
     }
 
     @Override
     public void end(boolean interrupted) {
-        driveSubsystem.setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0));
+        driveSubsystem.stopMovement();
     }
 
     @Override

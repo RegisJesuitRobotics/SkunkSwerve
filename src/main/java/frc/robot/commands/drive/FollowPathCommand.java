@@ -52,7 +52,7 @@ public class FollowPathCommand extends CommandBase {
         ChassisSpeeds chassisSpeeds = driveController.calculate(driveSubsystem.getPose(), desiredState,
                 desiredState.holonomicRotation);
 
-        driveSubsystem.setChassisSpeeds(chassisSpeeds);
+        driveSubsystem.setChassisSpeeds(chassisSpeeds, false);
     }
 
     @Override
