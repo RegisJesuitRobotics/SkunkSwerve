@@ -91,6 +91,7 @@ public class RobotContainer {
                         () -> driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected())
                 )
         );
+
         driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected());
 
         driverController.buttonOne.whenPressed(driveSubsystem::zeroGyro);
