@@ -19,14 +19,21 @@ public class FollowPathCommand extends CommandBase {
 
     private final HolonomicDriveController driveController = new HolonomicDriveController(
             new PIDController(DriveTrainConstants.PATH_POSITIONAL_VELOCITY_P, 0.0, 0.0),
-            new PIDController(DriveTrainConstants.PATH_POSITIONAL_VELOCITY_P, 0.0, 0.0), new ProfiledPIDController(
-                    DriveTrainConstants.PATH_ANGULAR_VELOCITY_P, 0.0, 0.0, DriveTrainConstants.ANGULAR_CONSTRAINTS));
+            new PIDController(DriveTrainConstants.PATH_POSITIONAL_VELOCITY_P, 0.0, 0.0),
+            new ProfiledPIDController(
+                    DriveTrainConstants.PATH_ANGULAR_VELOCITY_P, 0.0, 0.0, DriveTrainConstants.ANGULAR_CONSTRAINTS
+            )
+    );
 
     private final Timer timer = new Timer();
 
     public FollowPathCommand(String pathName, SwerveDriveSubsystem driveSubsystem) {
-        this(PathPlanner.loadPath(pathName, DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-                DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED), driveSubsystem);
+        this(
+                PathPlanner.loadPath(
+                        pathName, DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+                        DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
+                ), driveSubsystem
+        );
     }
 
     public FollowPathCommand(PathPlannerTrajectory path, SwerveDriveSubsystem driveSubsystem) {
@@ -39,7 +46,8 @@ public class FollowPathCommand extends CommandBase {
     @Override
     public void initialize() {
         driveSubsystem.resetOdometry(
-                new Pose2d(path.getInitialPose().getTranslation(), path.getInitialState().holonomicRotation));
+                new Pose2d(path.getInitialPose().getTranslation(), path.getInitialState().holonomicRotation)
+        );
 
         timer.reset();
         timer.start();
@@ -49,8 +57,8 @@ public class FollowPathCommand extends CommandBase {
     public void execute() {
         double currentTime = timer.get();
         PathPlannerState desiredState = (PathPlannerState) path.sample(currentTime);
-        ChassisSpeeds chassisSpeeds = driveController.calculate(driveSubsystem.getPose(), desiredState,
-                desiredState.holonomicRotation);
+        ChassisSpeeds chassisSpeeds = driveController
+                .calculate(driveSubsystem.getPose(), desiredState, desiredState.holonomicRotation);
 
         driveSubsystem.setChassisSpeeds(chassisSpeeds, false);
     }

@@ -87,13 +87,18 @@ public class SwerveModule implements Sendable {
 
         checkCTREError(driveMotor.configAllSettings(motorConfiguration), "Could not config drive motor");
         driveMotor.setInverted(
-                config.driveMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise);
-        checkCTREError(driveMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor),
-                "Could not config drive motor sensor");
+                config.driveMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise
+        );
+        checkCTREError(
+                driveMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor),
+                "Could not config drive motor sensor"
+        );
         driveMotor.setSensorPhase(true);
         driveMotor.setNeutralMode(NeutralMode.Brake);
-        checkCTREError(driveMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 250),
-                "Could not config drive status frame");
+        checkCTREError(
+                driveMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 250),
+                "Could not config drive status frame"
+        );
 
         moduleEventEntry.append("Drive motor initialized");
     }
@@ -110,16 +115,21 @@ public class SwerveModule implements Sendable {
 
         checkCTREError(steeringMotor.configAllSettings(motorConfiguration), "Could not configure steer motor");
         steeringMotor.setInverted(
-                config.steeringMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise);
-        checkCTREError(steeringMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor),
-                "Could not config steer motor sensor");
+                config.steeringMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise
+        );
+        checkCTREError(
+                steeringMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor),
+                "Could not config steer motor sensor"
+        );
         steeringMotor.setSensorPhase(true);
         steeringMotor.setNeutralMode(NeutralMode.Brake);
 
         // We don't really need the information on this status frame, so we can make it
         // not send as often to save CAN bandwidth
-        checkCTREError(steeringMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 250),
-                "Could not config steer status frame");
+        checkCTREError(
+                steeringMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 250),
+                "Could not config steer status frame"
+        );
 
         moduleEventEntry.append("Steer motor initialized");
     }
@@ -132,12 +142,15 @@ public class SwerveModule implements Sendable {
         encoderConfiguration.sensorDirection = config.steeringEncoderInverted;
         encoderConfiguration.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
 
-        checkCTREError(absoluteSteeringEncoder.configAllSettings(encoderConfiguration),
-                "Could not configure steer encoder");
+        checkCTREError(
+                absoluteSteeringEncoder.configAllSettings(encoderConfiguration), "Could not configure steer encoder"
+        );
         // Because we are only reading this at the beginning we do not have to update it
         // often
-        checkCTREError(absoluteSteeringEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100),
-                "Could not set steer encoder status frame");
+        checkCTREError(
+                absoluteSteeringEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100),
+                "Could not set steer encoder status frame"
+        );
         absoluteSteeringEncoder.setPositionToAbsolute();
 
         moduleEventEntry.append("Steer encoder initialized");
@@ -157,7 +170,8 @@ public class SwerveModule implements Sendable {
 
         checkCTREError(
                 steeringMotor.setSelectedSensorPosition(absolutePosition / steeringMotorConversionFactorPosition),
-                "Could not reset encoder to absolute");
+                "Could not reset encoder to absolute"
+        );
 
         moduleEventEntry.append("Reset steer motor encoder to absolute position: " + absolutePosition);
     }
@@ -202,8 +216,12 @@ public class SwerveModule implements Sendable {
 
     private void setAngleReference(double targetAngleDegrees) {
         desiredHeadingEntry.append(targetAngleDegrees);
-        steeringMotor.set(TalonFXControlMode.Position, SwerveMathUtils.optimizeAngleSetpoint(
-                getSteeringAngleDegreesNoWrap(), targetAngleDegrees / steeringMotorConversionFactorPosition));
+        steeringMotor.set(
+                TalonFXControlMode.Position,
+                SwerveMathUtils.optimizeAngleSetpoint(
+                        getSteeringAngleDegreesNoWrap(), targetAngleDegrees / steeringMotorConversionFactorPosition
+                )
+        );
     }
 
     private void setDriveReference(double targetVelocityMetersPerSecond, boolean openLoop) {
@@ -212,9 +230,10 @@ public class SwerveModule implements Sendable {
         if (openLoop) {
             driveMotor.set(TalonFXControlMode.PercentOutput, targetVelocityMetersPerSecond / openLoopMaxSpeed);
         } else {
-            driveMotor.set(TalonFXControlMode.Velocity,
-                    targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity, DemandType.ArbitraryFeedForward,
-                    driveMotorFF.calculate(targetVelocityMetersPerSecond));
+            driveMotor.set(
+                    TalonFXControlMode.Velocity, targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity,
+                    DemandType.ArbitraryFeedForward, driveMotorFF.calculate(targetVelocityMetersPerSecond)
+            );
         }
     }
 
@@ -237,9 +256,11 @@ public class SwerveModule implements Sendable {
         public final boolean steeringEncoderInverted;
         public final SharedSwerveModuleConfiguration sharedConfiguration;
 
-        public SwerveModuleConfiguration(int driveMotorPort, int steeringMotorPort, int steeringEncoderPort,
-                boolean driveMotorInverted, boolean steeringMotorInverted, double offsetDegrees,
-                boolean steeringEncoderInverted, SharedSwerveModuleConfiguration sharedConfiguration) {
+        public SwerveModuleConfiguration(
+                int driveMotorPort, int steeringMotorPort, int steeringEncoderPort, boolean driveMotorInverted,
+                boolean steeringMotorInverted, double offsetDegrees, boolean steeringEncoderInverted,
+                SharedSwerveModuleConfiguration sharedConfiguration
+        ) {
             this.driveMotorPort = driveMotorPort;
             this.steeringMotorPort = steeringMotorPort;
             this.steeringEncoderPort = steeringEncoderPort;
@@ -264,10 +285,11 @@ public class SwerveModule implements Sendable {
             public final PIDFFFGains driveVelocityGains;
             public final PIDGains steerPositionGains;
 
-            public SharedSwerveModuleConfiguration(double driveGearRatio, double steerGearRatio,
-                    double driveCurrentLimit, double steerCurrentLimit, double nominalVoltage,
-                    double wheelDiameterMeters, double openLoopMaxSpeed, PIDFFFGains driveVelocityGains,
-                    PIDGains steerPositionGains) {
+            public SharedSwerveModuleConfiguration(
+                    double driveGearRatio, double steerGearRatio, double driveCurrentLimit, double steerCurrentLimit,
+                    double nominalVoltage, double wheelDiameterMeters, double openLoopMaxSpeed,
+                    PIDFFFGains driveVelocityGains, PIDGains steerPositionGains
+            ) {
                 this.driveGearRatio = driveGearRatio;
                 this.steerGearRatio = steerGearRatio;
                 this.driveCurrentLimit = driveCurrentLimit;

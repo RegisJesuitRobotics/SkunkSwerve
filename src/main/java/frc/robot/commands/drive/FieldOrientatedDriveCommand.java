@@ -14,8 +14,10 @@ public class FieldOrientatedDriveCommand extends CommandBase {
     private final DoubleSupplier rotationSupplier;
     private final SwerveDriveSubsystem driveSubsystem;
 
-    public FieldOrientatedDriveCommand(DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier,
-            DoubleSupplier rotationSupplier, SwerveDriveSubsystem driveSubsystem) {
+    public FieldOrientatedDriveCommand(
+            DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier, DoubleSupplier rotationSupplier,
+            SwerveDriveSubsystem driveSubsystem
+    ) {
         this.xAxisSupplier = xAxisSupplier;
         this.yAxisSupplier = yAxisSupplier;
         this.rotationSupplier = rotationSupplier;
@@ -26,13 +28,17 @@ public class FieldOrientatedDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        double[] normalized = SwerveMathUtils.applyCircleDeadZone(xAxisSupplier.getAsDouble(),
-                yAxisSupplier.getAsDouble(), 1.0);
-        driveSubsystem.setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
-                normalized[0] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
-                normalized[1] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
-                rotationSupplier.getAsDouble() * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                driveSubsystem.getPose().getRotation()), true);
+        double[] normalized = SwerveMathUtils
+                .applyCircleDeadZone(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble(), 1.0);
+        driveSubsystem.setChassisSpeeds(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        normalized[0] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
+                        normalized[1] * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND,
+                        rotationSupplier.getAsDouble()
+                                * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                        driveSubsystem.getPose().getRotation()
+                ), true
+        );
     }
 
     @Override

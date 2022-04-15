@@ -49,8 +49,8 @@ public class RobotContainer {
         autoCommandChooser.setDefaultOption("Nothing", new InstantCommand());
         autoCommandChooser.addOption("UpDownWithRotation", new FollowPathCommand("WithRotation", driveSubsystem));
         autoCommandChooser.addOption("UpDownNoRotation", new FollowPathCommand("NoRotation", driveSubsystem));
-        autoCommandChooser.addOption("StraightWithRotation",
-                new FollowPathCommand("StraightWithRotation", driveSubsystem));
+        autoCommandChooser
+                .addOption("StraightWithRotation", new FollowPathCommand("StraightWithRotation", driveSubsystem));
         autoCommandChooser.addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", driveSubsystem));
         autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", driveSubsystem));
     }
@@ -63,12 +63,20 @@ public class RobotContainer {
      * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        driveCommandChooser.setDefaultOption("Field Orientated",
-                new FieldOrientatedDriveCommand(driverController.stick::getXAxis, driverController.stick::getYAxis,
-                        driverController.stick::getZAxis, driveSubsystem));
-        driveCommandChooser.addOption("Robot Orientated",
-                new RobotOrientatedDriveCommand(driverController.stick::getXAxis, driverController.stick::getYAxis,
-                        driverController.stick::getZAxis, driveSubsystem));
+        driveCommandChooser.setDefaultOption(
+                "Field Orientated",
+                new FieldOrientatedDriveCommand(
+                        driverController.stick::getXAxis, driverController.stick::getYAxis,
+                        driverController.stick::getZAxis, driveSubsystem
+                )
+        );
+        driveCommandChooser.addOption(
+                "Robot Orientated",
+                new RobotOrientatedDriveCommand(
+                        driverController.stick::getXAxis, driverController.stick::getYAxis,
+                        driverController.stick::getZAxis, driveSubsystem
+                )
+        );
 //        driveCommandChooser.setDefaultOption("Field Orientated",
 //                new FieldOrientatedDriveCommand(driverController.leftThumb::getXAxis, driverController.leftThumb::getYAxis,
 //                        driverController.rightThumb::getYAxis, swerveDriveSubsystem));
@@ -77,8 +85,12 @@ public class RobotContainer {
 //                        driverController.rightThumb::getXAxis, swerveDriveSubsystem));
 
         Shuffleboard.getTab("DriveTrainRaw").add("Drive Style", driveCommandChooser);
-        Shuffleboard.getTab("DriveTrainRaw").add("Evaluate Drive Style", new InstantRunWhenDisabledCommand(
-                () -> driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected())));
+        Shuffleboard.getTab("DriveTrainRaw").add(
+                "Evaluate Drive Style",
+                new InstantRunWhenDisabledCommand(
+                        () -> driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected())
+                )
+        );
         driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected());
 
         driverController.buttonOne.whenPressed(driveSubsystem::zeroGyro);

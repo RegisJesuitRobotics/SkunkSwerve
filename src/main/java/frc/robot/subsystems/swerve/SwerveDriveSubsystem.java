@@ -118,10 +118,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         SwerveModuleState desiredState = desiredStates[index];
         SwerveModuleState actualState = module.getActualState();
 
-        boolean atState = inTolerance(actualState.speedMetersPerSecond, desiredState.speedMetersPerSecond,
-                VELOCITY_TOLERANCE_METERS_PER_SECOND);
-        atState &= inTolerance(actualState.angle.getDegrees(), desiredState.angle.getDegrees(),
-                ANGLE_TOLERANCE_DEGREES);
+        boolean atState = inTolerance(
+                actualState.speedMetersPerSecond, desiredState.speedMetersPerSecond,
+                VELOCITY_TOLERANCE_METERS_PER_SECOND
+        );
+        atState &= inTolerance(
+                actualState.angle.getDegrees(), desiredState.angle.getDegrees(), ANGLE_TOLERANCE_DEGREES
+        );
         return atState;
     }
 

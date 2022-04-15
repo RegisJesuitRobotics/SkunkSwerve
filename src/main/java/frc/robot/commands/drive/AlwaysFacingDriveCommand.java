@@ -20,10 +20,13 @@ public class AlwaysFacingDriveCommand extends CommandBase {
     private final SwerveDriveSubsystem driveSubsystem;
 
     private final ProfiledPIDController rotationController = new ProfiledPIDController(
-            DriveTrainConstants.PATH_ANGULAR_VELOCITY_P, 0.0, 0.0, DriveTrainConstants.ANGULAR_CONSTRAINTS);
+            DriveTrainConstants.PATH_ANGULAR_VELOCITY_P, 0.0, 0.0, DriveTrainConstants.ANGULAR_CONSTRAINTS
+    );
 
-    public AlwaysFacingDriveCommand(Translation2d point, DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier,
-            SwerveDriveSubsystem driveSubsystem) {
+    public AlwaysFacingDriveCommand(
+            Translation2d point, DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier,
+            SwerveDriveSubsystem driveSubsystem
+    ) {
         this.point = point;
         this.xAxisSupplier = xAxisSupplier;
         this.yAxisSupplier = yAxisSupplier;
@@ -38,13 +41,18 @@ public class AlwaysFacingDriveCommand extends CommandBase {
         Translation2d subtracted = robotPose.getTranslation().minus(point);
         Rotation2d desiredHeading = new Rotation2d(subtracted.getX(), subtracted.getY());
 
-        double thetaVelocity = rotationController.calculate(robotPose.getRotation().getRadians(),
-                desiredHeading.getRadians());
+        double thetaVelocity = rotationController
+                .calculate(robotPose.getRotation().getRadians(), desiredHeading.getRadians());
 
-        double[] normalized = SwerveMathUtils.applyCircleDeadZone(xAxisSupplier.getAsDouble(),
-                yAxisSupplier.getAsDouble(), DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND);
-        driveSubsystem.setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(normalized[0], normalized[1],
-                thetaVelocity, robotPose.getRotation()), true);
+        double[] normalized = SwerveMathUtils.applyCircleDeadZone(
+                xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble(),
+                DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND
+        );
+        driveSubsystem.setChassisSpeeds(
+                ChassisSpeeds
+                        .fromFieldRelativeSpeeds(normalized[0], normalized[1], thetaVelocity, robotPose.getRotation()),
+                true
+        );
     }
 
     @Override
