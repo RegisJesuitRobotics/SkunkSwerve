@@ -1,6 +1,5 @@
 package frc.robot.joysticks;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -11,6 +10,8 @@ public abstract class RaiderJoystick extends Joystick {
     }
 
     public static class Trigger extends edu.wpi.first.wpilibj2.command.button.Button {
+        public static final double DEAD_ZONE = 0.05;
+
         private final int axisPort;
         private final GenericHID parent;
 
@@ -31,12 +32,12 @@ public abstract class RaiderJoystick extends Joystick {
          * @return Between 0-1
          */
         public double getAxis() {
-            return parent.getRawAxis(axisPort);
+            return deadZone(parent.getRawAxis(axisPort), DEAD_ZONE);
         }
     }
 
     public static class ThumbStick extends JoystickButton {
-        public static final double thumbStickDeadZone = 0.1;
+        public static final double DEAD_ZONE = 0.05;
         private final int xAxisPort;
         private final int yAxisPort;
 
@@ -50,11 +51,11 @@ public abstract class RaiderJoystick extends Joystick {
         }
 
         public double getXAxis() {
-            return MathUtil.applyDeadband(parent.getRawAxis(xAxisPort), thumbStickDeadZone);
+            return deadZone(parent.getRawAxis(xAxisPort), DEAD_ZONE);
         }
 
         public double getYAxis() {
-            return -MathUtil.applyDeadband(parent.getRawAxis(yAxisPort), thumbStickDeadZone);
+            return -deadZone(parent.getRawAxis(yAxisPort), DEAD_ZONE);
         }
     }
 
@@ -100,5 +101,12 @@ public abstract class RaiderJoystick extends Joystick {
                 return parent.angle() == direction.angle;
             }
         }
+    }
+
+    public static double deadZone(double value, double deadZone) {
+        if (Math.abs(deadZone) < value) {
+            return 0.0;
+        }
+        return value;
     }
 }

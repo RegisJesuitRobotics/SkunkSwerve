@@ -27,6 +27,8 @@ public class ThrustMaster extends RaiderJoystick {
     public final ThreeAxisStick stick = new ThreeAxisStick(this, 0, 1, 2);
 
     public static class ThreeAxisStick {
+        public static final double DEAD_ZONE = 0.05;
+
         private final int xAxisPort;
         private final int yAxisPort;
         private final int zAxisPort;
@@ -41,15 +43,15 @@ public class ThrustMaster extends RaiderJoystick {
         }
 
         public double getXAxis() {
-            return parent.getRawAxis(xAxisPort);
+            return deadZone(parent.getRawAxis(xAxisPort), DEAD_ZONE);
         }
 
         public double getYAxis() {
-            return parent.getRawAxis(yAxisPort);
+            return deadZone(parent.getRawAxis(yAxisPort), DEAD_ZONE);
         }
 
         public double getZAxis() {
-            return parent.getRawAxis(zAxisPort);
+            return deadZone(parent.getRawAxis(zAxisPort), DEAD_ZONE);
         }
     }
 
