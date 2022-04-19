@@ -36,6 +36,7 @@ public class SwerveModule implements Sendable {
 
     private final double driveMotorConversionFactorVelocity;
     private final double steeringMotorConversionFactorPosition;
+    private final double nominalVoltage;
 
     private final SimpleMotorFeedforward driveMotorFF;
 
@@ -68,6 +69,8 @@ public class SwerveModule implements Sendable {
         this.driveMotorConversionFactorVelocity = (config.sharedConfiguration.wheelDiameterMeters * Math.PI * 10)
                 / (config.sharedConfiguration.driveGearRatio * 2048);
         this.steeringMotorConversionFactorPosition = (360) / (config.sharedConfiguration.steerGearRatio * 2048);
+
+        this.nominalVoltage = config.sharedConfiguration.nominalVoltage;
 
         this.driveMotorFF = config.sharedConfiguration.driveVelocityGains.feedforward;
         this.openLoopMaxSpeed = config.sharedConfiguration.openLoopMaxSpeed;
@@ -230,9 +233,11 @@ public class SwerveModule implements Sendable {
         if (openLoop) {
             driveMotor.set(TalonFXControlMode.PercentOutput, targetVelocityMetersPerSecond / openLoopMaxSpeed);
         } else {
+            // Divide by 12 because we have to convert from volts to
             driveMotor.set(
                     TalonFXControlMode.Velocity, targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity,
-                    DemandType.ArbitraryFeedForward, driveMotorFF.calculate(targetVelocityMetersPerSecond)
+                    DemandType.ArbitraryFeedForward,
+                    driveMotorFF.calculate(targetVelocityMetersPerSecond) / nominalVoltage
             );
         }
     }

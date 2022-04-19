@@ -29,9 +29,7 @@ public final class Constants {
         public static final double NOMINAL_VOLTAGE = 12.0;
 
         // For talons PID full output is 1023 except for all FFF gains
-        public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(
-                0.0, 0.0, 0.0, 0.0 / 12, 0.0 / 12, 0.0 / 12
-        );
+        public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
 
 

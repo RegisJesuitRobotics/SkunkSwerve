@@ -3,6 +3,11 @@ package frc.robot.utils;
 public class SwerveMathUtils {
     private SwerveMathUtils() {}
 
+    /**
+     * @param currentAngle        what the talon currently reads
+     * @param targetAngleSetpoint the desired angle [-180, 180)
+     * @return the target angle in talon's scope
+     */
     public static double optimizeAngleSetpoint(double currentAngle, double targetAngleSetpoint) {
         targetAngleSetpoint = Math.IEEEremainder(targetAngleSetpoint, 360);
 
@@ -23,7 +28,8 @@ public class SwerveMathUtils {
      * Some controllers are not circular, so they can return something like (1, 1)
      * which has a magnitude of over 1 which could result in requesting too much
      * from the system. This makes sure that nothing goes over the maxMagnitude.
-     * Simple example: https://www.desmos.com/calculator/gohl0rmvez
+     * Simple example:
+     * <a href="https://www.desmos.com/calculator/gohl0rmvez">Desmos</a>
      *
      * @param xValue       the x value
      * @param yValue       the y value
