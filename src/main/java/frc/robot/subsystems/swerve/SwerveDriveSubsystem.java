@@ -18,6 +18,7 @@ import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.DriveTrainConstants.*;
@@ -37,6 +38,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final DoubleLogEntry odometryHeadingEntry = new DoubleLogEntry(logger, "/drive/estimatedHeading");
     private final StringLogEntry driveEventLogger = new StringLogEntry(logger, "/drive/events");
 
+    private final Field2d field2d = new Field2d();
+
     private SwerveModuleState[] desiredStates = new SwerveModuleState[4];
     private boolean openLoop = true;
 
@@ -49,6 +52,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
 
+        driveTab.add("Field", field2d);
         driveTab.add("Front Left", modules[0]).withSize(2, 3);
         driveTab.add("Front Right", modules[1]).withSize(2, 3);
         driveTab.add("Back Left", modules[2]).withSize(2, 3);
@@ -203,6 +207,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         odometryXEntry.append(estimatedPose.getX());
         odometryYEntry.append(estimatedPose.getY());
         odometryHeadingEntry.append(estimatedPose.getRotation().getDegrees());
+
+        field2d.setRobotPose(estimatedPose);
 
         for (SwerveModule module : modules) {
             module.logValues();
