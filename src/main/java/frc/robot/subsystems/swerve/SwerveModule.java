@@ -26,6 +26,7 @@ public class SwerveModule implements Sendable {
     private final DoubleLogEntry desiredHeadingEntry;
     private final DoubleLogEntry actualVelocityEntry;
     private final DoubleLogEntry actualHeadingEntry;
+    private final DoubleLogEntry absoluteHeadingEntry;
     private final DoubleLogEntry driveMotorAmpsEntry;
     private final DoubleLogEntry steerMotorAmpsEntry;
     private final StringLogEntry moduleEventEntry;
@@ -47,22 +48,27 @@ public class SwerveModule implements Sendable {
     public SwerveModule(SwerveModuleConfiguration config) {
         ++instances;
 
+        // Initialize all logging entries
         DataLog logger = DataLogManager.getLog();
         String tableName = "/drive/modules/" + instances + "/";
         desiredVelocityEntry = new DoubleLogEntry(logger, tableName + "desiredVelocity");
         desiredHeadingEntry = new DoubleLogEntry(logger, tableName + "desiredHeading");
         actualVelocityEntry = new DoubleLogEntry(logger, tableName + "actualVelocity");
         actualHeadingEntry = new DoubleLogEntry(logger, tableName + "actualHeading");
+        absoluteHeadingEntry = new DoubleLogEntry(logger, tableName + "absoluteHeading");
         driveMotorAmpsEntry = new DoubleLogEntry(logger, tableName + "driveMotorAmps");
         steerMotorAmpsEntry = new DoubleLogEntry(logger, tableName + "steerMotorAmps");
         moduleEventEntry = new StringLogEntry(logger, tableName + "events");
 
+        // Drive motor
         this.driveMotor = new TalonFX(config.driveMotorPort);
         configDriveMotor(config);
 
+        // Steer encoder
         this.absoluteSteeringEncoder = new CANCoder(config.steeringEncoderPort);
         configSteeringEncoder(config);
 
+        // Steer motor
         this.steeringMotor = new TalonFX(config.steeringMotorPort);
         configSteeringMotor(config);
 
@@ -78,7 +84,7 @@ public class SwerveModule implements Sendable {
         resetSteeringToAbsolute();
     }
 
-    public void configDriveMotor(SwerveModuleConfiguration config) {
+    private void configDriveMotor(SwerveModuleConfiguration config) {
         TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
 
         // Current limit
@@ -92,11 +98,13 @@ public class SwerveModule implements Sendable {
         driveMotor.setInverted(
                 config.driveMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise
         );
+
         checkCTREError(
                 driveMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor),
                 "Could not config drive motor sensor"
         );
         driveMotor.setSensorPhase(true);
+
         driveMotor.setNeutralMode(NeutralMode.Brake);
         checkCTREError(
                 driveMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 250),
@@ -106,7 +114,9 @@ public class SwerveModule implements Sendable {
         moduleEventEntry.append("Drive motor initialized");
     }
 
-    public void configSteeringMotor(SwerveModuleConfiguration config) {
+    private void configSteeringMotor(SwerveModuleConfiguration config) {
+        steeringMotor.configFactoryDefault();
+
         TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
 
         // Current limit
@@ -120,11 +130,15 @@ public class SwerveModule implements Sendable {
         steeringMotor.setInverted(
                 config.steeringMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise
         );
+
         checkCTREError(
                 steeringMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor),
                 "Could not config steer motor sensor"
         );
+        // Because + on motor is clockwise, and we want + on encoder to be
+        // counter-clockwise we have to set the sensor phase
         steeringMotor.setSensorPhase(true);
+
         steeringMotor.setNeutralMode(NeutralMode.Brake);
 
         // We don't really need the information on this status frame, so we can make it
@@ -137,7 +151,7 @@ public class SwerveModule implements Sendable {
         moduleEventEntry.append("Steer motor initialized");
     }
 
-    public void configSteeringEncoder(SwerveModuleConfiguration config) {
+    private void configSteeringEncoder(SwerveModuleConfiguration config) {
         CANCoderConfiguration encoderConfiguration = new CANCoderConfiguration();
 
         encoderConfiguration.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
@@ -168,8 +182,12 @@ public class SwerveModule implements Sendable {
         }
     }
 
+    /**
+     * Resets the integrated encoder on the steering motor to the absolute position
+     * of the CANCoder
+     */
     public void resetSteeringToAbsolute() {
-        double absolutePosition = absoluteSteeringEncoder.getAbsolutePosition();
+        double absolutePosition = getAbsoluteDegrees();
 
         checkCTREError(
                 steeringMotor.setSelectedSensorPosition(absolutePosition / steeringMotorConversionFactorPosition),
@@ -179,42 +197,45 @@ public class SwerveModule implements Sendable {
         moduleEventEntry.append("Reset steer motor encoder to absolute position: " + absolutePosition);
     }
 
-    private double getSteeringAngleDegreesNoWrap() {
-        return steeringMotor.getSelectedSensorPosition() * steeringMotorConversionFactorPosition;
+    private double getAbsoluteDegrees() {
+        return absoluteSteeringEncoder.getAbsolutePosition();
     }
 
-    private double getSteeringAngleDegrees() {
-        return Math.IEEEremainder(getSteeringAngleDegreesNoWrap(), 360);
+    private double getSteeringAngleDegreesNoWrap() {
+        return steeringMotor.getSelectedSensorPosition() * steeringMotorConversionFactorPosition;
     }
 
     /**
      * @return the rotation of the wheel [-180, 180)
      */
     private Rotation2d getSteeringAngle() {
-        return Rotation2d.fromDegrees(getSteeringAngleDegrees());
+        return Rotation2d.fromDegrees(Math.IEEEremainder(getSteeringAngleDegreesNoWrap(), 360));
     }
 
     private double getDriveMotorVelocityMetersPerSecond() {
         return driveMotor.getSelectedSensorVelocity() * driveMotorConversionFactorVelocity;
     }
 
+    /**
+     * @return the current state of the modules as reported from the encoders
+     */
     public SwerveModuleState getActualState() {
         return new SwerveModuleState(getDriveMotorVelocityMetersPerSecond(), getSteeringAngle());
     }
 
+    /**
+     * Set the desired state for this swerve module
+     *
+     * @param state    the desired state
+     * @param openLoop if velocity control should be feed forward only. False if to
+     *                 use PIDF for velocity control.
+     */
     public void setDesiredState(SwerveModuleState state, boolean openLoop) {
         state = SwerveModuleState.optimize(state, getSteeringAngle());
         desiredState = state;
 
         setDriveReference(state.speedMetersPerSecond, openLoop);
         setAngleReference(state.angle.getDegrees());
-    }
-
-    public void logValues() {
-        actualHeadingEntry.append(getSteeringAngleDegrees());
-        actualVelocityEntry.append(getDriveMotorVelocityMetersPerSecond());
-        driveMotorAmpsEntry.append(driveMotor.getSupplyCurrent());
-        steerMotorAmpsEntry.append(steeringMotor.getSupplyCurrent());
     }
 
     private void setAngleReference(double targetAngleDegrees) {
@@ -233,13 +254,24 @@ public class SwerveModule implements Sendable {
         if (openLoop) {
             driveMotor.set(TalonFXControlMode.PercentOutput, targetVelocityMetersPerSecond / openLoopMaxSpeed);
         } else {
-            // Divide by 12 because we have to convert from volts to
+            // Divide by 12 because we have to convert from volts to [-1, 1]
             driveMotor.set(
                     TalonFXControlMode.Velocity, targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity,
                     DemandType.ArbitraryFeedForward,
                     driveMotorFF.calculate(targetVelocityMetersPerSecond) / nominalVoltage
             );
         }
+    }
+
+    /**
+     * Log all telemetry values. Should be called (only) in subsystem periodic
+     */
+    public void logValues() {
+        actualHeadingEntry.append(getSteeringAngle().getDegrees());
+        actualVelocityEntry.append(getDriveMotorVelocityMetersPerSecond());
+        absoluteHeadingEntry.append(getAbsoluteDegrees());
+        driveMotorAmpsEntry.append(driveMotor.getSupplyCurrent());
+        steerMotorAmpsEntry.append(steeringMotor.getSupplyCurrent());
     }
 
     @Override

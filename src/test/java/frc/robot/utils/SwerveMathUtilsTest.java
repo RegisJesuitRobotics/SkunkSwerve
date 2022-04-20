@@ -94,4 +94,25 @@ class SwerveMathUtilsTest {
     void optimizeAngleSetpoint_NegativeOver_Positive_NoWrap() {
         assertEquals(-719, SwerveMathUtils.optimizeAngleSetpoint(-720, 1));
     }
+
+    @Test
+    void applyCircleDeadZone_InsideCircle_NoChange() {
+        assertArrayEquals(new double[]{ 0.5, 0.5 }, SwerveMathUtils.applyCircleDeadZone(0.5, 0.5, 1.0));
+    }
+
+    @Test
+    void applyCircleDeadZone_InsideCircle_NonOneMax_NoChange() {
+        assertArrayEquals(new double[]{ 1.0, 1.5 }, SwerveMathUtils.applyCircleDeadZone(1.0, 1.5, 10.0));
+    }
+
+    @Test
+    void applyCircleDeadZone_OutsideCircle_Normalized() {
+        // sqrt(2) / 2
+        assertArrayEquals(new double[]{ 0.707, 0.707 }, SwerveMathUtils.applyCircleDeadZone(1.0, 1.0, 1.0), 0.001);
+    }
+
+    @Test
+    void applyCircleDeadZone_OutsideCircle_Negative_Normalized() {
+        assertArrayEquals(new double[]{ -0.707, 0.707 }, SwerveMathUtils.applyCircleDeadZone(-1.0, 1.0, 1.0), 0.001);
+    }
 }

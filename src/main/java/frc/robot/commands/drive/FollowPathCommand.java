@@ -27,6 +27,12 @@ public class FollowPathCommand extends CommandBase {
 
     private final Timer timer = new Timer();
 
+    /**
+     * A follow path command made with the path name
+     *
+     * @param pathName       the name of the path in path planner
+     * @param driveSubsystem the swerve drive subsystem
+     */
     public FollowPathCommand(String pathName, SwerveDriveSubsystem driveSubsystem) {
         this(
                 PathPlanner.loadPath(
@@ -36,6 +42,12 @@ public class FollowPathCommand extends CommandBase {
         );
     }
 
+    /**
+     * A follow path command made with the trajectory
+     *
+     * @param path           the trajectory
+     * @param driveSubsystem the swerve drive subsystem
+     */
     public FollowPathCommand(PathPlannerTrajectory path, SwerveDriveSubsystem driveSubsystem) {
         this.path = path;
         this.driveSubsystem = driveSubsystem;

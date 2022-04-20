@@ -5,6 +5,13 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 public abstract class RaiderJoystick extends Joystick {
+
+    /**
+     * Construct an instance of a joystick.
+     *
+     * @param port The port index on the Driver Station that the joystick is plugged
+     *             into.
+     */
     public RaiderJoystick(int port) {
         super(port);
     }

@@ -23,6 +23,12 @@ public class AlwaysFacingDriveCommand extends CommandBase {
             DriveTrainConstants.PATH_ANGULAR_VELOCITY_P, 0.0, 0.0, DriveTrainConstants.ANGULAR_CONSTRAINTS
     );
 
+    /**
+     * @param point          the point to always be facing
+     * @param xAxisSupplier  the x-axis supplier for driving
+     * @param yAxisSupplier  the y-axis supplier for driving
+     * @param driveSubsystem the swerve drive subsystem
+     */
     public AlwaysFacingDriveCommand(
             Translation2d point, DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier,
             SwerveDriveSubsystem driveSubsystem
@@ -62,6 +68,6 @@ public class AlwaysFacingDriveCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return super.isFinished();
+        return false;
     }
 }

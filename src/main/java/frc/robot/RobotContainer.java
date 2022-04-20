@@ -94,7 +94,7 @@ public class RobotContainer {
 
         driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected());
 
-        driverController.buttonOne.whenPressed(driveSubsystem::zeroGyro);
+        driverController.buttonOne.whenPressed(driveSubsystem::zeroHeading);
         driverController.buttonTwo.whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
     }
 

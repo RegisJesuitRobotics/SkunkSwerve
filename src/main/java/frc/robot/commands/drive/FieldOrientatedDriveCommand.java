@@ -14,6 +14,12 @@ public class FieldOrientatedDriveCommand extends CommandBase {
     private final DoubleSupplier rotationSupplier;
     private final SwerveDriveSubsystem driveSubsystem;
 
+    /**
+     * @param xAxisSupplier    supplier for x-axis translation. should be [-1, 1]
+     * @param yAxisSupplier    supplier for y-axis translation. should be [-1, 1]
+     * @param rotationSupplier supplier for rotation. should be [-1, 1]
+     * @param driveSubsystem   the drive subsystem.
+     */
     public FieldOrientatedDriveCommand(
             DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier, DoubleSupplier rotationSupplier,
             SwerveDriveSubsystem driveSubsystem

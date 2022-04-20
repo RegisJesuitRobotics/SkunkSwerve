@@ -55,6 +55,12 @@ public class ThrustMaster extends RaiderJoystick {
         }
     }
 
+    /**
+     * Construct an instance of a joystick.
+     *
+     * @param port The port index on the Driver Station that the joystick is plugged
+     *             into.
+     */
     public ThrustMaster(int port) {
         super(port);
     }

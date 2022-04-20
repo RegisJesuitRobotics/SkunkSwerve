@@ -5,8 +5,12 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.swerve.SwerveModule.SwerveModuleConfiguration;
@@ -66,6 +70,11 @@ public final class Constants {
 
         public static final double ANGLE_TOLERANCE_DEGREES = 0.5;
         public static final double VELOCITY_TOLERANCE_METERS_PER_SECOND = 0.05;
+
+        // For pose estimation. Increase to trust model LESS
+        public static final Vector<N3> STATE_STD_DEVS = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
+        public static final Vector<N1> LOCAL_MEASUREMENT_STD_DEVS = VecBuilder.fill(Units.degreesToRadians(0.01));
+        public static final Vector<N3> VISION_STD_DEVS = VecBuilder.fill(0.01, 0.01, Units.degreesToRadians(0.01));
 
         private static final SharedSwerveModuleConfiguration SHARED_SWERVE_MODULE_CONFIGURATION = new SharedSwerveModuleConfiguration(
                 DRIVE_GEAR_REDUCTION, STEERING_GEAR_REDUCTION, DRIVE_CURRENT_LIMIT, STEER_CURRENT_LIMIT,

@@ -14,6 +14,12 @@ public class RobotOrientatedDriveCommand extends CommandBase {
     private final DoubleSupplier rotationSupplier;
     private final SwerveDriveSubsystem driveSubsystem;
 
+    /**
+     * @param xAxisSupplier    the x translation supplier. Should be [-1, 1]
+     * @param yAxisSupplier    the y translation supplier. Should be [-1, 1]
+     * @param rotationSupplier the rotation supplier. Should be [-1, 1]
+     * @param driveSubsystem   the swerve drive subsystem
+     */
     public RobotOrientatedDriveCommand(
             DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier, DoubleSupplier rotationSupplier,
             SwerveDriveSubsystem driveSubsystem

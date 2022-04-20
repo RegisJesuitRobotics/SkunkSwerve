@@ -6,11 +6,11 @@
 package frc.robot.subsystems.swerve;
 
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
@@ -26,7 +26,9 @@ import static frc.robot.Constants.DriveTrainConstants.*;
 public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveModule[] modules = new SwerveModule[4];
     private final AHRS gyro = new AHRS();
-    private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation());
+    private final SwerveDrivePoseEstimator odometry = new SwerveDrivePoseEstimator(
+            getGyroRotation(), new Pose2d(), KINEMATICS, STATE_STD_DEVS, LOCAL_MEASUREMENT_STD_DEVS, VISION_STD_DEVS
+    );
 
     private final DataLog logger = DataLogManager.getLog();
     private final DoubleLogEntry gyroEntry = new DoubleLogEntry(logger, "/drive/gyroDegrees");
@@ -36,6 +38,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final StringLogEntry driveEventLogger = new StringLogEntry(logger, "/drive/events");
 
     private SwerveModuleState[] desiredStates = new SwerveModuleState[4];
+    private boolean openLoop = true;
 
     public SwerveDriveSubsystem() {
         modules[0] = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION);
@@ -54,41 +57,79 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         stopMovement();
     }
 
-    public void zeroGyro() {
-        gyro.zeroYaw();
-        driveEventLogger.append("Gyro reset");
-    }
-
     /**
      * @return the value from the gyro. This does not get reset when resetOdometry
-     *         is called
+     *         is called. Use <code>getPose().getRotation2d()</code> to get the
+     *         field centric value. Counterclockwise is positive (unit circle like).
      */
-    public Rotation2d getGyroRotation() {
+    private Rotation2d getGyroRotation() {
         // We prefer to use this as it hypothetically has zero drift
         if (gyro.isMagnetometerCalibrated()) {
-            // TODO: should this be negative?
-            return Rotation2d.fromDegrees(-gyro.getFusedHeading());
+            return Rotation2d.fromDegrees(gyro.getFusedHeading());
         }
-
         return Rotation2d.fromDegrees(-gyro.getYaw());
     }
 
+    /**
+     * Sets the odometry perceived location to zero
+     */
+    public void zeroHeading() {
+        setHeading(Rotation2d.fromDegrees(0.0));
+    }
+
+    /**
+     * Set the odometry perceived location to the provided heading
+     *
+     * @param newHeading the provided heading
+     */
+    public void setHeading(Rotation2d newHeading) {
+        Pose2d currentPose = getPose();
+
+        Pose2d newPose = new Pose2d(currentPose.getTranslation(), newHeading);
+
+        resetOdometry(newPose);
+    }
+
+    /**
+     * Set the current perceived location of the robot to the provided pose
+     *
+     * @param pose2d the provided pose
+     */
     public void resetOdometry(Pose2d pose2d) {
         odometry.resetPosition(pose2d, getGyroRotation());
 
         driveEventLogger.append("Odometry reset");
     }
 
+    /**
+     * @return the estimated position of the robot
+     */
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+        return odometry.getEstimatedPosition();
     }
 
+    /**
+     * Set the desired speed of the robot. Chassis speeds are always robot centric
+     * but can be created from field centric values through
+     * <code>ChassisSpeeds.fromFieldRelativeSpeeds</code>
+     *
+     * @param chassisSpeeds the desired chassis speeds
+     * @param openLoop      if true then velocity will be handled exclusivity with
+     *                      feedforward (for teleop mostly). If false a PIDF will be
+     *                      used (for auto)
+     */
     public void setChassisSpeeds(ChassisSpeeds chassisSpeeds, boolean openLoop) {
         setRawStates(openLoop, KINEMATICS.toSwerveModuleStates(chassisSpeeds));
     }
 
     /**
-     * @param states ordered front left, front right, back left, back right
+     * Sets the desired swerve drive states for the modules
+     *
+     * @param openLoop if true then velocity will be handled exclusivity with
+     *                 feedforward (for teleop mostly). If false a PIDF will be used
+     *                 (for auto)
+     * @param states   the desired states... Ordered front left, front right, back
+     *                 left, back right
      */
     public void setRawStates(boolean openLoop, SwerveModuleState... states) {
         if (states.length != modules.length) {
@@ -96,15 +137,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         }
 
         this.desiredStates = states;
-        for (int i = 0; i < modules.length; i++) {
-            modules[i].setDesiredState(desiredStates[i], openLoop);
-        }
+        this.openLoop = openLoop;
     }
 
+    /**
+     * Sets the chassis speeds to 0 across x, y, and rotation
+     */
     public void stopMovement() {
         setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0), true);
     }
 
+    /**
+     * @return true if all modules are at the set desired states within the
+     *         threshold in <code>Constants.java</code>
+     */
     public boolean atDesiredStates() {
         boolean atStates = true;
         for (int i = 0; i < modules.length; i++) {
@@ -135,6 +181,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
+
+        for (int i = 0; i < modules.length; i++) {
+            modules[i].setDesiredState(desiredStates[i], openLoop);
+        }
 
         SwerveModuleState[] actualStates = new SwerveModuleState[modules.length];
         for (int i = 0; i < modules.length; i++) {
