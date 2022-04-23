@@ -27,7 +27,7 @@ public final class Constants {
 
         public static final double STEERING_GEAR_REDUCTION = 3.0;
 
-        public static final double DRIVE_CURRENT_LIMIT = 40.0;
+        public static final double DRIVE_CURRENT_LIMIT = 80.0;
         public static final double STEER_CURRENT_LIMIT = 20.0;
 
         public static final double NOMINAL_VOLTAGE = 12.0;

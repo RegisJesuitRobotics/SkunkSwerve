@@ -5,15 +5,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.commands.drive.FieldOrientatedDriveCommand;
-import frc.robot.commands.drive.FollowPathCommand;
-import frc.robot.commands.drive.RobotOrientatedDriveCommand;
-import frc.robot.commands.drive.SetModuleRotationCommand;
+import frc.robot.commands.drive.*;
 import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.joysticks.ThrustMaster;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
@@ -32,14 +27,10 @@ public class RobotContainer {
     private final SwerveDriveSubsystem driveSubsystem = new SwerveDriveSubsystem();
 
     private final ThrustMaster driverController = new ThrustMaster(0);
-//    private final PlaystationController driverController = new PlaystationController(0);
 
     private final SendableChooser<Command> driveCommandChooser = new SendableChooser<>();
     private final SendableChooser<Command> autoCommandChooser = new SendableChooser<>();
 
-    /**
-     * The container for the robot. Contains subsystems, OI devices, and commands.
-     */
     public RobotContainer() {
         configureButtonBindings();
         configureAutos();
@@ -55,13 +46,6 @@ public class RobotContainer {
         autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", driveSubsystem));
     }
 
-
-    /**
-     * Use this method to define your button->command mappings. Buttons can be
-     * created by instantiating a {@link GenericHID} or one of its subclasses
-     * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then
-     * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-     */
     private void configureButtonBindings() {
         driveCommandChooser.setDefaultOption(
                 "Field Orientated",
@@ -77,12 +61,6 @@ public class RobotContainer {
                         driverController.stick::getZAxis, driveSubsystem
                 )
         );
-//        driveCommandChooser.setDefaultOption("Field Orientated",
-//                new FieldOrientatedDriveCommand(driverController.leftThumb::getXAxis, driverController.leftThumb::getYAxis,
-//                        driverController.rightThumb::getYAxis, swerveDriveSubsystem));
-//        driveCommandChooser.addOption("Robot Orientated",
-//                new RobotOrientatedDriveCommand(driverController.leftThumb::getXAxis, driverController.leftThumb::getYAxis,
-//                        driverController.rightThumb::getXAxis, swerveDriveSubsystem));
 
         Shuffleboard.getTab("DriveTrainRaw").add("Drive Style", driveCommandChooser);
         Shuffleboard.getTab("DriveTrainRaw").add(
@@ -96,14 +74,9 @@ public class RobotContainer {
 
         driverController.buttonOne.whenPressed(driveSubsystem::zeroHeading);
         driverController.buttonTwo.whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
+        driverController.buttonThree.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
     }
 
-
-    /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
-     */
     public Command getAutonomousCommand() {
         return autoCommandChooser.getSelected();
     }

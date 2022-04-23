@@ -145,10 +145,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     /**
-     * Sets the chassis speeds to 0 across x, y, and rotation
+     * Sets each module velocity to zero and desired angle to what it currently is
      */
     public void stopMovement() {
-        setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0), true);
+        openLoop = true;
+        for (int i = 0; i < modules.length; i++) {
+            SwerveModule module = modules[i];
+            // Copy the current angle so everything stops moving
+            desiredStates[i] = new SwerveModuleState(0.0, module.getActualState().angle);
+        }
     }
 
     /**

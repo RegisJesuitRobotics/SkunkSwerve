@@ -4,11 +4,11 @@ public class SwerveMathUtils {
     private SwerveMathUtils() {}
 
     /**
-     * @param currentAngle        what the talon currently reads
+     * @param currentAngle        what the controller currently reads
      * @param targetAngleSetpoint the desired angle [-180, 180)
-     * @return the target angle in talon's scope
+     * @return the target angle in controller's scope
      */
-    public static double optimizeAngleSetpoint(double currentAngle, double targetAngleSetpoint) {
+    public static double calculateContinuousInputSetpoint(double currentAngle, double targetAngleSetpoint) {
         targetAngleSetpoint = Math.IEEEremainder(targetAngleSetpoint, 360);
 
         double remainder = currentAngle % 360;
@@ -39,8 +39,8 @@ public class SwerveMathUtils {
     public static double[] applyCircleDeadZone(double xValue, double yValue, double maxMagnitude) {
         double magnitude = Math.hypot(xValue, yValue);
         if (magnitude > maxMagnitude) {
-            return new double[]{ xValue / magnitude * maxMagnitude, yValue / magnitude * maxMagnitude };
+            return new double[] { xValue / magnitude * maxMagnitude, yValue / magnitude * maxMagnitude };
         }
-        return new double[]{ xValue, yValue };
+        return new double[] { xValue, yValue };
     }
 }
