@@ -5,6 +5,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -62,19 +63,30 @@ public class RobotContainer {
                 )
         );
 
-        Shuffleboard.getTab("DriveTrainRaw").add("Drive Style", driveCommandChooser);
-        Shuffleboard.getTab("DriveTrainRaw").add(
-                "Evaluate Drive Style",
-                new InstantRunWhenDisabledCommand(
-                        () -> driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected())
-                )
-        );
+        Shuffleboard.getTab("DriveTrainRaw").add("Drive Style", driveCommandChooser)
+                .withWidget(BuiltInWidgets.kCommand);
+        Shuffleboard.getTab("DriveTrainRaw")
+                .add("Evaluate Drive Style", new InstantRunWhenDisabledCommand(this::evaluateDriveStyle));
 
-        driveSubsystem.setDefaultCommand(driveCommandChooser.getSelected());
+        evaluateDriveStyle();
 
         driverController.buttonOne.whenPressed(driveSubsystem::zeroHeading);
         driverController.buttonTwo.whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
         driverController.buttonThree.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
+    }
+
+    private void evaluateDriveStyle() {
+        Command newCommand = driveCommandChooser.getSelected();
+        Command oldCommand = driveSubsystem.getDefaultCommand();
+
+        if (newCommand.equals(oldCommand)) {
+            return;
+        }
+
+        driveSubsystem.setDefaultCommand(newCommand);
+        if (oldCommand != null) {
+            oldCommand.cancel();
+        }
     }
 
     public Command getAutonomousCommand() {

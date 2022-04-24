@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.utils.SwerveUtils;
 
 import static frc.robot.Constants.DriveTrainConstants.*;
 
@@ -119,15 +120,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      *
      * @param chassisSpeeds the desired chassis speeds
      * @param openLoop      if true then velocity will be handled exclusivity with
-     *                      feedforward (for teleop mostly). If false a PIDF will be
-     *                      used (for auto)
+     *                      feedforward (mostly used for teleop). If false a PIDF
+     *                      will be used (mostly used for auto)
      */
     public void setChassisSpeeds(ChassisSpeeds chassisSpeeds, boolean openLoop) {
         setRawStates(openLoop, KINEMATICS.toSwerveModuleStates(chassisSpeeds));
     }
 
     /**
-     * Sets the desired swerve drive states for the modules
+     * Sets the desired swerve drive states for the modules. This method also takes
+     * a copy of the states, so they will not be changed
      *
      * @param openLoop if true then velocity will be handled exclusivity with
      *                 feedforward (for teleop mostly). If false a PIDF will be used
@@ -140,8 +142,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             throw new IllegalArgumentException("You must provide states for all modules");
         }
 
-        this.desiredStates = states;
         this.openLoop = openLoop;
+
+        // Deep copy of states array
+        desiredStates = new SwerveModuleState[states.length];
+        for (int i = 0; i < states.length; i++) {
+            desiredStates[i] = SwerveUtils.copySwerveState(states[i]);
+        }
     }
 
     /**

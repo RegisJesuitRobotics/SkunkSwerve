@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utils.PIDFFFGains;
 import frc.robot.utils.PIDGains;
-import frc.robot.utils.SwerveMathUtils;
+import frc.robot.utils.SwerveUtils;
 
 public class SwerveModule implements Sendable {
     private static final int CAN_TIMEOUT_MS = 30;
@@ -39,6 +39,7 @@ public class SwerveModule implements Sendable {
     private final double driveMotorConversionFactorVelocity;
     private final double steeringMotorConversionFactorPosition;
     private final double nominalVoltage;
+    private final double steeringEncoderOffset;
 
     private final SimpleMotorFeedforward driveMotorFF;
 
@@ -78,6 +79,7 @@ public class SwerveModule implements Sendable {
         this.steeringMotorConversionFactorPosition = (360) / (config.sharedConfiguration.steerGearRatio * 2048);
 
         this.nominalVoltage = config.sharedConfiguration.nominalVoltage;
+        this.steeringEncoderOffset = config.offsetDegrees;
 
         this.driveMotorFF = config.sharedConfiguration.driveVelocityGains.feedforward;
         this.openLoopMaxSpeed = config.sharedConfiguration.openLoopMaxSpeed;
@@ -163,9 +165,7 @@ public class SwerveModule implements Sendable {
         CANCoderConfiguration encoderConfiguration = new CANCoderConfiguration();
 
         encoderConfiguration.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
-        encoderConfiguration.magnetOffsetDegrees = config.offsetDegrees;
         encoderConfiguration.sensorDirection = config.steeringEncoderInverted;
-        encoderConfiguration.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
 
         checkCTREError(
                 absoluteSteeringEncoder.configAllSettings(encoderConfiguration, CAN_TIMEOUT_MS),
@@ -177,7 +177,6 @@ public class SwerveModule implements Sendable {
                 absoluteSteeringEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100, CAN_TIMEOUT_MS),
                 "Could not set steer encoder status frame"
         );
-
 
         moduleEventEntry.append("Steer encoder initialized");
     }
@@ -196,7 +195,7 @@ public class SwerveModule implements Sendable {
      * of the CANCoder
      */
     public void resetSteeringToAbsolute() {
-        setSteerMotorEncoderPosition(absoluteSteeringEncoder.getAbsolutePosition());
+        setSteerMotorEncoderPosition(getAbsoluteDegrees());
     }
 
     private void setSteerMotorEncoderPosition(double newPositionDegrees) {
@@ -210,7 +209,7 @@ public class SwerveModule implements Sendable {
     }
 
     private double getAbsoluteDegrees() {
-        return absoluteSteeringEncoder.getAbsolutePosition();
+        return absoluteSteeringEncoder.getAbsolutePosition() + steeringEncoderOffset;
     }
 
     private double getSteeringAngleDegreesNoWrap() {
@@ -254,7 +253,7 @@ public class SwerveModule implements Sendable {
         desiredHeadingEntry.append(targetAngleDegrees);
         steeringMotor.set(
                 TalonFXControlMode.Position,
-                SwerveMathUtils.calculateContinuousInputSetpoint(getSteeringAngleDegreesNoWrap(), targetAngleDegrees)
+                SwerveUtils.calculateContinuousInputSetpoint(getSteeringAngleDegreesNoWrap(), targetAngleDegrees)
                         / steeringMotorConversionFactorPosition
         );
     }
@@ -287,7 +286,7 @@ public class SwerveModule implements Sendable {
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.addDoubleProperty("Absolute Angle", absoluteSteeringEncoder::getAbsolutePosition, null);
+        builder.addDoubleProperty("Absolute Angle", this::getAbsoluteDegrees, null);
         builder.addDoubleProperty("Read Angle", () -> getSteeringAngle().getDegrees(), null);
         builder.addDoubleProperty("Drive Velocity", this::getDriveMotorVelocityMetersPerSecond, null);
         builder.addDoubleProperty("Desired Drive Velocity", () -> desiredState.speedMetersPerSecond, null);

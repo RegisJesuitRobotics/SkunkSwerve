@@ -1,7 +1,9 @@
 package frc.robot.utils;
 
-public class SwerveMathUtils {
-    private SwerveMathUtils() {}
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+
+public class SwerveUtils {
+    private SwerveUtils() {}
 
     /**
      * @param currentAngle        what the controller currently reads
@@ -42,5 +44,13 @@ public class SwerveMathUtils {
             return new double[] { xValue / magnitude * maxMagnitude, yValue / magnitude * maxMagnitude };
         }
         return new double[] { xValue, yValue };
+    }
+
+    /**
+     * @param swerveModuleState the state to copy
+     * @return the copied state
+     */
+    public static SwerveModuleState copySwerveState(SwerveModuleState swerveModuleState) {
+        return new SwerveModuleState(swerveModuleState.speedMetersPerSecond, swerveModuleState.angle);
     }
 }
