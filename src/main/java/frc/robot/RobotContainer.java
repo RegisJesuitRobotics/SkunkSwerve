@@ -5,8 +5,8 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.drive.*;
@@ -63,10 +63,10 @@ public class RobotContainer {
                 )
         );
 
-        Shuffleboard.getTab("DriveTrainRaw").add("Drive Style", driveCommandChooser)
-                .withWidget(BuiltInWidgets.kCommand);
-        Shuffleboard.getTab("DriveTrainRaw")
-                .add("Evaluate Drive Style", new InstantRunWhenDisabledCommand(this::evaluateDriveStyle));
+        ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
+        driveTab.add("Drive Style", driveCommandChooser);
+        driveTab.add("Evaluate Drive Style", new InstantRunWhenDisabledCommand(this::evaluateDriveStyle));
+        driveTab.add("Reset to Absolute", new InstantRunWhenDisabledCommand(driveSubsystem::setAllModulesToAbsolute));
 
         evaluateDriveStyle();
 

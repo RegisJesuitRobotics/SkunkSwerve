@@ -190,6 +190,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return atState;
     }
 
+    public void setAllModulesToAbsolute() {
+        for (SwerveModule module : modules) {
+            module.resetSteeringToAbsolute();
+        }
+    }
+
     private static boolean inTolerance(double val, double target, double tolerance) {
         return Math.abs(target - val) <= tolerance;
     }
