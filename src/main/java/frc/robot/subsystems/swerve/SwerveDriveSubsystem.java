@@ -20,11 +20,15 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.utils.SwerveUtils;
 
 import static frc.robot.Constants.DriveTrainConstants.*;
 
 
+/**
+ * The subsystem containing all the swerve modules
+ */
 public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveModule[] modules = new SwerveModule[4];
     private final AHRS gyro = new AHRS();
@@ -58,6 +62,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         driveTab.add("Front Right", modules[1]).withSize(2, 3);
         driveTab.add("Back Left", modules[2]).withSize(2, 3);
         driveTab.add("Back Right", modules[3]).withSize(2, 3);
+
+        driveTab.add("Reset to Absolute", new InstantRunWhenDisabledCommand(this::setAllModulesToAbsolute));
+        driveTab.addBoolean("All have been set to absolute", this::allModulesAtAbsolute);
 
         stopMovement();
     }
@@ -194,6 +201,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         for (SwerveModule module : modules) {
             module.resetSteeringToAbsolute();
         }
+    }
+
+    private boolean allModulesAtAbsolute() {
+        boolean allSet = true;
+        for (SwerveModule module : modules) {
+            allSet &= module.isSetToAbsolute();
+        }
+        return allSet;
     }
 
     private static boolean inTolerance(double val, double target, double tolerance) {

@@ -66,7 +66,6 @@ public class RobotContainer {
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
         driveTab.add("Drive Style", driveCommandChooser);
         driveTab.add("Evaluate Drive Style", new InstantRunWhenDisabledCommand(this::evaluateDriveStyle));
-        driveTab.add("Reset to Absolute", new InstantRunWhenDisabledCommand(driveSubsystem::setAllModulesToAbsolute));
 
         evaluateDriveStyle();
 
@@ -79,12 +78,15 @@ public class RobotContainer {
         Command newCommand = driveCommandChooser.getSelected();
         Command oldCommand = driveSubsystem.getDefaultCommand();
 
-        if (newCommand.equals(oldCommand)) {
+        // Check if they are the same
+        // we use the == operator instead of Command#equals() because we want to know if
+        // it is the exact same object in memory
+        if (newCommand == oldCommand) {
             return;
         }
-
         driveSubsystem.setDefaultCommand(newCommand);
         if (oldCommand != null) {
+            // We have to cancel the command so the new default one will run
             oldCommand.cancel();
         }
     }

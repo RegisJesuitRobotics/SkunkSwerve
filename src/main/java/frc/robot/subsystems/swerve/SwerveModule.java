@@ -217,6 +217,10 @@ public class SwerveModule implements Sendable {
         moduleEventEntry.append("Reset steer motor encoder to position: " + absolutePosition);
     }
 
+    public boolean isSetToAbsolute() {
+        return setToAbsolute;
+    }
+
     private double getAbsoluteDegrees() {
         return absoluteSteeringEncoder.getAbsolutePosition() + steeringEncoderOffset;
     }
