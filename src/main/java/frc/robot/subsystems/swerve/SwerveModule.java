@@ -205,6 +205,7 @@ public class SwerveModule implements Sendable {
         if (gettingPositionError != ErrorCode.OK) {
             setToAbsolute = false;
             checkCTREError(gettingPositionError, "Could not get absolute position from encoder");
+            return;
         }
 
         ErrorCode settingPositionError = steeringMotor
@@ -212,8 +213,10 @@ public class SwerveModule implements Sendable {
         if (settingPositionError != ErrorCode.OK) {
             setToAbsolute = false;
             checkCTREError(settingPositionError, "Could not set steer motor encoder to absolute position");
+            return;
         }
 
+        setToAbsolute = true;
         moduleEventEntry.append("Reset steer motor encoder to position: " + absolutePosition);
     }
 
