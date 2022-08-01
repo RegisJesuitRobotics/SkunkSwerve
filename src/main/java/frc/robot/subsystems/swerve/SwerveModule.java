@@ -24,6 +24,7 @@ public class SwerveModule implements Sendable {
     private static final int CAN_TIMEOUT_MS = 30;
     private static int instances = 0;
 
+    private final int instanceId;
     private final DoubleLogEntry desiredVelocityEntry;
     private final BooleanLogEntry openLoopEntry;
     private final DoubleLogEntry desiredHeadingEntry;
@@ -51,11 +52,11 @@ public class SwerveModule implements Sendable {
     private boolean setToAbsolute = false;
 
     public SwerveModule(SwerveModuleConfiguration config) {
-        ++instances;
+        instanceId = ++instances;
 
         // Initialize all logging entries
         DataLog logger = DataLogManager.getLog();
-        String tableName = "/drive/modules/" + instances + "/";
+        String tableName = "/drive/modules/" + instanceId + "/";
         desiredVelocityEntry = new DoubleLogEntry(logger, tableName + "desiredVelocity");
         openLoopEntry = new BooleanLogEntry(logger, tableName + "openLoop");
         desiredHeadingEntry = new DoubleLogEntry(logger, tableName + "desiredHeading");
@@ -195,6 +196,16 @@ public class SwerveModule implements Sendable {
         }
     }
 
+    private void checkForSteeringMotorReset() {
+        // Steering motor lost power
+        if (steeringMotor.hasResetOccurred()) {
+            moduleEventEntry.append("Steering motor reset occurred");
+            DriverStation.reportError("Steering motor reset occurred on module " + instanceId, false);
+            setToAbsolute = false;
+            resetSteeringToAbsolute();
+        }
+    }
+
     /**
      * Resets the integrated encoder on the steering motor to the absolute position
      * of the CANCoder
@@ -258,6 +269,8 @@ public class SwerveModule implements Sendable {
      *                 use PIDF for velocity control.
      */
     public void setDesiredState(SwerveModuleState state, boolean openLoop) {
+        checkForSteeringMotorReset();
+
         state = SwerveModuleState.optimize(state, getSteeringAngle());
         desiredState = state;
 

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.utils.CommandSchedulerLogger;
 import frc.robot.utils.MiscRobotLogger;
 
 
@@ -34,6 +35,8 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         DataLogManager.start();
         DriverStation.startDataLog(DataLogManager.getLog());
+
+        new CommandSchedulerLogger(CommandScheduler.getInstance());
 
         robotContainer = new RobotContainer();
     }

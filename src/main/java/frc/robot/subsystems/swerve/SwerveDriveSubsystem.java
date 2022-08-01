@@ -25,7 +25,6 @@ import frc.robot.utils.SwerveUtils;
 
 import static frc.robot.Constants.DriveTrainConstants.*;
 
-
 /**
  * The subsystem containing all the swerve modules
  */

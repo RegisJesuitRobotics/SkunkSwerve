@@ -25,7 +25,7 @@ public final class Constants {
         public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(4.0);
         public static final double DRIVE_GEAR_REDUCTION = 6.0;
 
-        public static final double STEERING_GEAR_REDUCTION = 3.0;
+        public static final double STEERING_GEAR_REDUCTION = 150.0 / 7.0;
 
         public static final double DRIVE_CURRENT_LIMIT = 80.0;
         public static final double STEER_CURRENT_LIMIT = 20.0;
@@ -35,7 +35,6 @@ public final class Constants {
         // For talons PID full output is 1023 except for all FFF gains
         public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
-
 
         // Left right distance between center of wheels
         public static final double TRACKWIDTH_METERS = Units.inchesToMeters(24.78);
