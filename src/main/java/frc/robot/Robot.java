@@ -36,7 +36,7 @@ public class Robot extends TimedRobot {
         DataLogManager.start();
         DriverStation.startDataLog(DataLogManager.getLog());
 
-        new CommandSchedulerLogger(CommandScheduler.getInstance());
+        CommandSchedulerLogger.getInstance().start();
 
         robotContainer = new RobotContainer();
     }
