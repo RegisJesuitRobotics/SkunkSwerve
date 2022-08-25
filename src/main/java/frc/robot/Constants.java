@@ -23,7 +23,7 @@ public final class Constants {
 
     public static class DriveTrainConstants {
         public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(4.0);
-        public static final double DRIVE_GEAR_REDUCTION = 6.0;
+        public static final double DRIVE_GEAR_REDUCTION = (50.0 / 14) * (17.0 / 27) * (45.0 / 15);
 
         public static final double STEERING_GEAR_REDUCTION = 150.0 / 7.0;
 
@@ -37,10 +37,10 @@ public final class Constants {
         public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
 
         // Left right distance between center of wheels
-        public static final double TRACKWIDTH_METERS = Units.inchesToMeters(24.78);
+        public static final double TRACKWIDTH_METERS = Units.inchesToMeters(24.75);
 
         // Front back distance between center of wheels
-        public static final double WHEELBASE_METERS = Units.inchesToMeters(24.78);
+        public static final double WHEELBASE_METERS = Units.inchesToMeters(24.75);
 
         public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
                 new Translation2d(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0),
@@ -50,8 +50,8 @@ public final class Constants {
         );
 
         public static final double MOTOR_FREE_SPEED_RPM = 6380.0;
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = (MOTOR_FREE_SPEED_RPM * DRIVE_GEAR_REDUCTION
-                * WHEEL_DIAMETER_METERS * Math.PI) / (60.0);
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = (MOTOR_FREE_SPEED_RPM * WHEEL_DIAMETER_METERS
+                * Math.PI) / (60.0 * DRIVE_GEAR_REDUCTION);
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = (MAX_VELOCITY_METERS_PER_SECOND)
                 / (Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0));
 

@@ -1,4 +1,4 @@
-package frc.robot.utils;
+package frc.robot.utils.logging;
 
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.RobotController;
 
 public class MiscRobotLogger {
     private static final String tableName = "/robot/";
-    private static final DoubleLogEntry voltageEntryEntry = new DoubleLogEntry(
+    private static final DoubleLogEntry voltageEntry = new DoubleLogEntry(
             DataLogManager.getLog(), tableName + "voltage"
     );
     private static final DoubleLogEntry canUtilizationEntry = new DoubleLogEntry(
@@ -19,7 +19,7 @@ public class MiscRobotLogger {
     );
 
     public static void logValues() {
-        voltageEntryEntry.append(RobotController.getBatteryVoltage());
+        voltageEntry.append(RobotController.getBatteryVoltage());
         canUtilizationEntry.append(RobotController.getCANStatus().percentBusUtilization);
         isBrownedOutEntry.append(RobotController.isBrownedOut());
     }
