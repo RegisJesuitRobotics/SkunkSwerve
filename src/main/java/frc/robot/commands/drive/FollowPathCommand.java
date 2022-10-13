@@ -16,6 +16,7 @@ import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 public class FollowPathCommand extends CommandBase {
     private final SwerveDriveSubsystem driveSubsystem;
     private final PathPlannerTrajectory path;
+    private final boolean shouldResetOdometry;
 
     private final HolonomicDriveController driveController = new HolonomicDriveController(
             new PIDController(DriveTrainConstants.PATH_POSITIONAL_VELOCITY_P, 0.0, 0.0),
@@ -30,26 +31,33 @@ public class FollowPathCommand extends CommandBase {
     /**
      * A follow path command made with the path name
      *
-     * @param pathName       the name of the path in path planner
-     * @param driveSubsystem the swerve drive subsystem
+     * @param pathName            the name of the path in path planner
+     * @param shouldResetOdometry if odometry should be reset to the position at the
+     *                            beginning of the path
+     * @param driveSubsystem      the swerve drive subsystem
      */
-    public FollowPathCommand(String pathName, SwerveDriveSubsystem driveSubsystem) {
+    public FollowPathCommand(String pathName, boolean shouldResetOdometry, SwerveDriveSubsystem driveSubsystem) {
         this(
                 PathPlanner.loadPath(
                         pathName, DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
                         DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
-                ), driveSubsystem
+                ), shouldResetOdometry, driveSubsystem
         );
     }
 
     /**
      * A follow path command made with the trajectory
      *
-     * @param path           the trajectory
-     * @param driveSubsystem the swerve drive subsystem
+     * @param path                the trajectory
+     * @param shouldResetOdometry if odometry should be reset to the position at the
+     *                            beginning of the path
+     * @param driveSubsystem      the swerve drive subsystem
      */
-    public FollowPathCommand(PathPlannerTrajectory path, SwerveDriveSubsystem driveSubsystem) {
+    public FollowPathCommand(
+            PathPlannerTrajectory path, boolean shouldResetOdometry, SwerveDriveSubsystem driveSubsystem
+    ) {
         this.path = path;
+        this.shouldResetOdometry = shouldResetOdometry;
         this.driveSubsystem = driveSubsystem;
 
         addRequirements(driveSubsystem);
@@ -57,9 +65,11 @@ public class FollowPathCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        driveSubsystem.resetOdometry(
-                new Pose2d(path.getInitialPose().getTranslation(), path.getInitialState().holonomicRotation)
-        );
+        if (shouldResetOdometry) {
+            driveSubsystem.resetOdometry(
+                    new Pose2d(path.getInitialPose().getTranslation(), path.getInitialState().holonomicRotation)
+            );
+        }
 
         timer.reset();
         timer.start();

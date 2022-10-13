@@ -56,15 +56,16 @@ public final class Constants {
                 / (Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0));
 
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = MAX_VELOCITY_METERS_PER_SECOND;
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 
-        public static final double MAX_TELEOP_VELOCITY_METERS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND * 0.75;
+        public static final double MAX_TELEOP_VELOCITY_METERS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND * 0.9;
         public static final double MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
-                * 0.75;
+                * 0.9;
 
         public static final double PATH_POSITIONAL_VELOCITY_P = 1.0;
         public static final double PATH_ANGULAR_VELOCITY_P = 1.0;
         public static final Constraints ANGULAR_CONSTRAINTS = new Constraints(
-                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED
         );
 
         public static final double ANGLE_TOLERANCE_DEGREES = 0.5;
@@ -96,5 +97,9 @@ public final class Constants {
         public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
                 4, 8, 12, true, true, 0.0, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
+    }
+
+    public static class MiscConstants {
+        public static final int[] usedControllerPorts = { 0, 1 };
     }
 }

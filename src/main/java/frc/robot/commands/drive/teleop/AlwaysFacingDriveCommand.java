@@ -1,23 +1,18 @@
-package frc.robot.commands.drive;
+package frc.robot.commands.drive.teleop;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.SwerveUtils;
 
 import java.util.function.DoubleSupplier;
 
-public class AlwaysFacingDriveCommand extends CommandBase {
+public class AlwaysFacingDriveCommand extends SwerveDriveCommand {
     private final Translation2d point;
-    private final DoubleSupplier xAxisSupplier;
-    private final DoubleSupplier yAxisSupplier;
-
-    private final SwerveDriveSubsystem driveSubsystem;
 
     private final ProfiledPIDController rotationController = new ProfiledPIDController(
             DriveTrainConstants.PATH_ANGULAR_VELOCITY_P, 0.0, 0.0, DriveTrainConstants.ANGULAR_CONSTRAINTS
@@ -33,12 +28,8 @@ public class AlwaysFacingDriveCommand extends CommandBase {
             Translation2d point, DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier,
             SwerveDriveSubsystem driveSubsystem
     ) {
+        super(xAxisSupplier, yAxisSupplier, () -> 0, driveSubsystem);
         this.point = point;
-        this.xAxisSupplier = xAxisSupplier;
-        this.yAxisSupplier = yAxisSupplier;
-        this.driveSubsystem = driveSubsystem;
-
-        addRequirements(driveSubsystem);
     }
 
     @Override
@@ -55,9 +46,9 @@ public class AlwaysFacingDriveCommand extends CommandBase {
                 DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND
         );
         driveSubsystem.setChassisSpeeds(
-                ChassisSpeeds
-                        .fromFieldRelativeSpeeds(normalized[0], normalized[1], thetaVelocity, robotPose.getRotation()),
-                true
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        scaleXY(normalized[0]), scaleXY(normalized[1]), thetaVelocity, robotPose.getRotation()
+                ), true
         );
     }
 

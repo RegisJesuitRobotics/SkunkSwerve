@@ -43,15 +43,15 @@ public class ThrustMaster extends RaiderJoystick {
         }
 
         public double getXAxis() {
-            return deadZone(parent.getRawAxis(xAxisPort), DEAD_ZONE);
+            return parent.getRawAxis(xAxisPort);
         }
 
         public double getYAxis() {
-            return deadZone(parent.getRawAxis(yAxisPort), DEAD_ZONE);
+            return parent.getRawAxis(yAxisPort);
         }
 
         public double getZAxis() {
-            return deadZone(parent.getRawAxis(zAxisPort), DEAD_ZONE);
+            return parent.getRawAxis(zAxisPort);
         }
     }
 

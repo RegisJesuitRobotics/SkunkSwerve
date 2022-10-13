@@ -166,3 +166,6 @@ bin/
 /.idea/
 .sdkmanrc
 sysid_data*.json
+*.wpilog
+simgui-ds.json
+simgui.json

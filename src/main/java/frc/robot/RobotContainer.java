@@ -5,15 +5,22 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.EntryListenerFlags;
+import edu.wpi.first.networktables.EntryNotification;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.drive.*;
-import frc.robot.commands.util.InstantRunWhenDisabledCommand;
+import frc.robot.commands.drive.teleop.FieldOrientatedDriveCommand;
+import frc.robot.commands.drive.teleop.RobotOrientatedDriveCommand;
+import frc.robot.commands.util.NameableInstantRunWhenDisabledCommand;
 import frc.robot.joysticks.ThrustMaster;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.utils.Alert;
+import frc.robot.utils.Alert.AlertType;
 
 
 
@@ -31,6 +38,7 @@ public class RobotContainer {
 
     private final SendableChooser<Command> driveCommandChooser = new SendableChooser<>();
     private final SendableChooser<Command> autoCommandChooser = new SendableChooser<>();
+    private final Alert noAutoSelectedAlert = new Alert("No Auto Routine Selected", AlertType.WARNING);
 
     public RobotContainer() {
         configureButtonBindings();
@@ -39,12 +47,22 @@ public class RobotContainer {
 
     private void configureAutos() {
         autoCommandChooser.setDefaultOption("Nothing", new InstantCommand());
-        autoCommandChooser.addOption("UpDownWithRotation", new FollowPathCommand("WithRotation", driveSubsystem));
-        autoCommandChooser.addOption("UpDownNoRotation", new FollowPathCommand("NoRotation", driveSubsystem));
+        autoCommandChooser.addOption("UpDownWithRotation", new FollowPathCommand("WithRotation", true, driveSubsystem));
+        autoCommandChooser.addOption("UpDownNoRotation", new FollowPathCommand("NoRotation", true, driveSubsystem));
         autoCommandChooser
-                .addOption("StraightWithRotation", new FollowPathCommand("StraightWithRotation", driveSubsystem));
-        autoCommandChooser.addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", driveSubsystem));
-        autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", driveSubsystem));
+                .addOption("StraightWithRotation", new FollowPathCommand("StraightWithRotation", true, driveSubsystem));
+        autoCommandChooser
+                .addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", true, driveSubsystem));
+        autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", true, driveSubsystem));
+
+        NetworkTableInstance.getDefault().getTable("Shuffleboard").getSubTable("DriveTrainRaw")
+                .getSubTable("Auto Chooser").getEntry("selected").addListener(
+                        (EntryNotification notification) -> noAutoSelectedAlert
+                                .set(notification.value.getString().equals("Nothing")),
+                        EntryListenerFlags.kImmediate | EntryListenerFlags.kLocal | EntryListenerFlags.kUpdate
+                                | EntryListenerFlags.kNew
+                );
+        Shuffleboard.getTab("DriveTrainRaw").add("Auto Chooser", autoCommandChooser);
     }
 
     private void configureButtonBindings() {
@@ -65,7 +83,9 @@ public class RobotContainer {
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
         driveTab.add("Drive Style", driveCommandChooser);
-        driveTab.add("Evaluate Drive Style", new InstantRunWhenDisabledCommand(this::evaluateDriveStyle));
+        driveTab.add(
+                "Evaluate Drive Style", new NameableInstantRunWhenDisabledCommand("Evaluate", this::evaluateDriveStyle)
+        );
 
         evaluateDriveStyle();
 

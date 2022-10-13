@@ -44,7 +44,7 @@ public abstract class RaiderJoystick extends Joystick {
     }
 
     public static class ThumbStick extends JoystickButton {
-        public static final double DEAD_ZONE = 0.05;
+        public static final double DEAD_ZONE = 0.02;
         private final int xAxisPort;
         private final int yAxisPort;
 
@@ -58,11 +58,11 @@ public abstract class RaiderJoystick extends Joystick {
         }
 
         public double getXAxis() {
-            return deadZone(parent.getRawAxis(xAxisPort), DEAD_ZONE);
+            return parent.getRawAxis(xAxisPort);
         }
 
         public double getYAxis() {
-            return -deadZone(parent.getRawAxis(yAxisPort), DEAD_ZONE);
+            return -parent.getRawAxis(yAxisPort);
         }
     }
 

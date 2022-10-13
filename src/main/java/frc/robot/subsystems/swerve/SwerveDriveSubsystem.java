@@ -20,7 +20,9 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.util.InstantRunWhenDisabledCommand;
+import frc.robot.commands.util.NameableInstantRunWhenDisabledCommand;
+import frc.robot.utils.Alert;
+import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.SwerveUtils;
 
 import static frc.robot.Constants.DriveTrainConstants.*;
@@ -30,11 +32,16 @@ import static frc.robot.Constants.DriveTrainConstants.*;
  */
 public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveModule[] modules = new SwerveModule[4];
+
     private final AHRS gyro = new AHRS();
     private final SwerveDrivePoseEstimator odometry = new SwerveDrivePoseEstimator(
             getGyroRotation(), new Pose2d(), KINEMATICS, STATE_STD_DEVS, LOCAL_MEASUREMENT_STD_DEVS, VISION_STD_DEVS
     );
 
+    private final Alert navXNotConnectedFaultAlert = new Alert(
+            "navX is not connected. Field-centric drive and odometry will be negatively effected!", AlertType.ERROR
+    );
+    private final Alert navXCalibratingAlert = new Alert("navX is calibrating. Keep the robot still!", AlertType.INFO);
     private final DataLog logger = DataLogManager.getLog();
     private final DoubleLogEntry gyroEntry = new DoubleLogEntry(logger, "/drive/gyroDegrees");
     private final DoubleLogEntry odometryXEntry = new DoubleLogEntry(logger, "/drive/estimatedX");
@@ -57,12 +64,19 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
 
         driveTab.add("Field", field2d);
-        driveTab.add("Front Left", modules[0]).withSize(2, 3);
-        driveTab.add("Front Right", modules[1]).withSize(2, 3);
-        driveTab.add("Back Left", modules[2]).withSize(2, 3);
-        driveTab.add("Back Right", modules[3]).withSize(2, 3);
+        driveTab.add("Front Left (0)", modules[0]).withSize(2, 3);
+        driveTab.add("Front Right (1)", modules[1]).withSize(2, 3);
+        driveTab.add("Back Left (2)", modules[2]).withSize(2, 3);
+        driveTab.add("Back Right (3)", modules[3]).withSize(2, 3);
 
-        driveTab.add("Reset to Absolute", new InstantRunWhenDisabledCommand(this::setAllModulesToAbsolute));
+        driveTab.add("Kill Front Left (0)", modules[0].getToggleDeadModeCommand());
+        driveTab.add("Kill Front Right (1)", modules[1].getToggleDeadModeCommand());
+        driveTab.add("Kill Back Left (2)", modules[2].getToggleDeadModeCommand());
+        driveTab.add("Kill Back Right (3)", modules[3].getToggleDeadModeCommand());
+
+        driveTab.add(
+                "Reset to Absolute", new NameableInstantRunWhenDisabledCommand("Reset", this::setAllModulesToAbsolute)
+        );
         driveTab.addBoolean("All have been set to absolute", this::allModulesAtAbsolute);
 
         stopMovement();
@@ -245,5 +259,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         for (SwerveModule module : modules) {
             module.logValues();
         }
+
+        navXNotConnectedFaultAlert.set(!gyro.isConnected());
+        navXCalibratingAlert.set(gyro.isCalibrating());
     }
 }
