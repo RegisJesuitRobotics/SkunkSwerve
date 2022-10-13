@@ -84,20 +84,20 @@ public class SwerveModule implements Sendable {
         setToAbsoluteEntry = new BooleanLogEntry(logger, tableName + "setToAbsolute");
         moduleEventEntry = new StringLogEntry(logger, tableName + "events");
 
-        String alertBeginning = "Module " + instanceId + ":";
+        String alertBeginning = "Module " + instanceId + ": ";
         notSetToAbsoluteAlert = new Alert(
-                alertBeginning + " Steering is not reset to absolute position", AlertType.ERROR
+                alertBeginning + "Steering is not reset to absolute position", AlertType.ERROR
         );
         steeringEncoderFaultAlert = new Alert(
-                alertBeginning + " Steering encoder had a fault initializing (see logs)", AlertType.ERROR
+                alertBeginning + "Steering encoder had a fault initializing (see logs)", AlertType.ERROR
         );
         steeringMotorFaultAlert = new Alert(
-                alertBeginning + " Steering motor had a fault initializing (see logs)", AlertType.ERROR
+                alertBeginning + "Steering motor had a fault initializing (see logs)", AlertType.ERROR
         );
         driveMotorFaultAlert = new Alert(
-                alertBeginning + " Drive motor had a fault initializing (see logs)", AlertType.ERROR
+                alertBeginning + "Drive motor had a fault initializing (see logs)", AlertType.ERROR
         );
-        inDeadModeAlert = new Alert(alertBeginning + " In dead mode", AlertType.WARNING);
+        inDeadModeAlert = new Alert(alertBeginning + "In dead mode", AlertType.WARNING);
 
         // Drive motor
         this.driveMotor = new TalonFX(config.driveMotorPort);
@@ -235,12 +235,28 @@ public class SwerveModule implements Sendable {
         moduleEventEntry.append("Steer encoder initialized" + (faultInitializing ? " with faults" : ""));
     }
 
+    /**
+     * Reports error to event log and driver station. Prepends module details to DS
+     * report.
+     *
+     * @param message The message to report
+     */
+    private void reportError(String message) {
+        moduleEventEntry.append(message);
+        DriverStation.reportError(String.format("Module %d: %s", instanceId, message), false);
+    }
+
+    /**
+     *
+     * @param errorCode the error code passed by CTRE
+     * @param message   the message explaining the error
+     * @return true of there was an error, false if there wasn't
+     */
     private boolean checkCTREError(ErrorCode errorCode, String message) {
         if (errorCode != ErrorCode.OK) {
-            String fullMessage = String.format("Module %d: %s: %s", instanceId, message, errorCode.toString());
+            String fullMessage = String.format("%s: %s", message, errorCode.toString());
 
-            moduleEventEntry.append(fullMessage);
-            DriverStation.reportError(fullMessage, false);
+            reportError(fullMessage);
             return true;
         }
         return false;
@@ -249,8 +265,7 @@ public class SwerveModule implements Sendable {
     private void checkForSteeringMotorReset() {
         // Steering motor lost power
         if (steeringMotor.hasResetOccurred()) {
-            moduleEventEntry.append("Steering motor reset occurred");
-            DriverStation.reportError("Steering motor reset occurred on module " + instanceId, false);
+            reportError("Steering motor reset occurred");
             setToAbsolute = false;
             resetSteeringToAbsolute();
         }
@@ -258,7 +273,7 @@ public class SwerveModule implements Sendable {
 
     /**
      * Resets the integrated encoder on the steering motor to the absolute position
-     * of the CANCoder
+     * of the CANCoder. Trys only once, and if it fails, it will not try again until
      */
     public void resetSteeringToAbsolute() {
         resetSteeringToAbsolute(0.0);
@@ -268,7 +283,7 @@ public class SwerveModule implements Sendable {
      * Resets the integrated encoder on the steering motor to the absolute position
      * of the CANCoder
      *
-     * @param timeout The timeout in seconds to wait
+     * @param timeout The timeout in seconds to wait.
      */
     public void resetSteeringToAbsolute(double timeout) {
         double startTime = Timer.getFPGATimestamp();
@@ -285,7 +300,7 @@ public class SwerveModule implements Sendable {
                 gotAbsolutePosition = true;
                 break;
             }
-        } while (Timer.getFPGATimestamp() - startTime < timeout);
+        } while (timeout != 0.0 || Timer.getFPGATimestamp() - startTime < timeout);
 
         if (gotAbsolutePosition) {
             ErrorCode settingPositionError = steeringMotor.setSelectedSensorPosition(
@@ -297,8 +312,7 @@ public class SwerveModule implements Sendable {
                 moduleEventEntry.append("Reset steer motor encoder to position: " + absolutePosition);
             }
         } else {
-            moduleEventEntry.append("CANCoder timed out when trying to get absolute position");
-            DriverStation.reportError("CANCoder timed out when trying to get absolute position", false);
+            reportError("CANCoder timed out while trying to get absolute position");
         }
         notSetToAbsoluteAlert.set(!setToAbsolute);
     }
