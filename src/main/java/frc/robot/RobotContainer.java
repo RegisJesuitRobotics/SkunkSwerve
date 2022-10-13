@@ -5,22 +5,17 @@
 
 package frc.robot;
 
-import edu.wpi.first.networktables.EntryListenerFlags;
-import edu.wpi.first.networktables.EntryNotification;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.drive.*;
 import frc.robot.commands.drive.teleop.FieldOrientatedDriveCommand;
 import frc.robot.commands.drive.teleop.RobotOrientatedDriveCommand;
-import frc.robot.commands.util.NameableInstantRunWhenDisabledCommand;
 import frc.robot.joysticks.ThrustMaster;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
+import frc.robot.utils.ListenableSendableChooser;
 
 
 
@@ -36,8 +31,8 @@ public class RobotContainer {
 
     private final ThrustMaster driverController = new ThrustMaster(0);
 
-    private final SendableChooser<Command> driveCommandChooser = new SendableChooser<>();
-    private final SendableChooser<Command> autoCommandChooser = new SendableChooser<>();
+    private final ListenableSendableChooser<Command> driveCommandChooser = new ListenableSendableChooser<>();
+    private final ListenableSendableChooser<Command> autoCommandChooser = new ListenableSendableChooser<>();
     private final Alert noAutoSelectedAlert = new Alert("No Auto Routine Selected", AlertType.WARNING);
 
     public RobotContainer() {
@@ -46,7 +41,7 @@ public class RobotContainer {
     }
 
     private void configureAutos() {
-        autoCommandChooser.setDefaultOption("Nothing", new InstantCommand());
+        autoCommandChooser.setDefaultOption("Nothing", null);
         autoCommandChooser.addOption("UpDownWithRotation", new FollowPathCommand("WithRotation", true, driveSubsystem));
         autoCommandChooser.addOption("UpDownNoRotation", new FollowPathCommand("NoRotation", true, driveSubsystem));
         autoCommandChooser
@@ -55,13 +50,7 @@ public class RobotContainer {
                 .addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", true, driveSubsystem));
         autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", true, driveSubsystem));
 
-        NetworkTableInstance.getDefault().getTable("Shuffleboard").getSubTable("DriveTrainRaw")
-                .getSubTable("Auto Chooser").getEntry("selected").addListener(
-                        (EntryNotification notification) -> noAutoSelectedAlert
-                                .set(notification.value.getString().equals("Nothing")),
-                        EntryListenerFlags.kImmediate | EntryListenerFlags.kLocal | EntryListenerFlags.kUpdate
-                                | EntryListenerFlags.kNew
-                );
+        autoCommandChooser.addListener((command) -> noAutoSelectedAlert.set(command == null));
         Shuffleboard.getTab("DriveTrainRaw").add("Auto Chooser", autoCommandChooser);
     }
 
@@ -83,19 +72,15 @@ public class RobotContainer {
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
         driveTab.add("Drive Style", driveCommandChooser);
-        driveTab.add(
-                "Evaluate Drive Style", new NameableInstantRunWhenDisabledCommand("Evaluate", this::evaluateDriveStyle)
-        );
 
-        evaluateDriveStyle();
+        driveCommandChooser.addListener(this::evaluateDriveStyle);
 
         driverController.buttonOne.whenPressed(driveSubsystem::zeroHeading);
         driverController.buttonTwo.whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
         driverController.buttonThree.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
     }
 
-    private void evaluateDriveStyle() {
-        Command newCommand = driveCommandChooser.getSelected();
+    private void evaluateDriveStyle(Command newCommand) {
         Command oldCommand = driveSubsystem.getDefaultCommand();
 
         // Check if they are the same

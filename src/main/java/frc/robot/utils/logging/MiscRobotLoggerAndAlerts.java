@@ -3,10 +3,15 @@ package frc.robot.utils.logging;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class MiscRobotLoggerAndAlerts {
     private static final String tableName = "/robot/";
@@ -27,6 +32,22 @@ public class MiscRobotLoggerAndAlerts {
                     "Controller " + MiscConstants.usedControllerPorts[i] + " is disconnected.", AlertType.WARNING
             );
         }
+
+        File buildTimeFile = new File(Filesystem.getDeployDirectory(), "buildTime.txt");
+        Alert buildTimeAlert = null;
+        try (FileReader buildTimeReader = new FileReader(buildTimeFile)) {
+            char[] date = new char[19];
+            int read = buildTimeReader.read(date);
+            if (read == 19) {
+                buildTimeAlert = new Alert("Robot code was built " + new String(date) + ".", AlertType.INFO);
+            }
+        } catch (IOException ignored) {}
+
+        if (buildTimeAlert == null) {
+            buildTimeAlert = new Alert("Build time file could not be read.", AlertType.WARNING);
+        }
+
+        buildTimeAlert.set(true);
     }
 
     public void logValues() {

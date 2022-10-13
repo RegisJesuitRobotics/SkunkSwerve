@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.util.NameableInstantRunWhenDisabledCommand;
+import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.SwerveUtils;
@@ -75,7 +75,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         driveTab.add("Kill Back Right (3)", modules[3].getToggleDeadModeCommand());
 
         driveTab.add(
-                "Reset to Absolute", new NameableInstantRunWhenDisabledCommand("Reset", this::setAllModulesToAbsolute)
+                "Reset to Absolute", new InstantRunWhenDisabledCommand(this::setAllModulesToAbsolute).withName("Reset")
         );
         driveTab.addBoolean("All have been set to absolute", this::allModulesAtAbsolute);
 

@@ -1,4 +1,7 @@
+import edu.wpi.first.gradlerio.GradleRIOPlugin
 import edu.wpi.first.gradlerio.deploy.roborio.RoboRIO
+
+import java.text.SimpleDateFormat
 
 plugins {
     id "java"
@@ -88,7 +91,7 @@ wpi.sim.addDriverstation()
 // knows where to look for our Robot Class.
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
+    manifest GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
@@ -111,3 +114,11 @@ spotless {
         endWithNewline()
     }
 }
+
+tasks.register("writeBuildTime") {
+    Date date = new Date();
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    new File(projectDir.toString() + "/src/main/deploy", "buildTime.txt").text = dateFormatter.format(date);
+}
+
+jar.dependsOn tasks.named("writeBuildTime")

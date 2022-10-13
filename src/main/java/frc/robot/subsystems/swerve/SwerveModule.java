@@ -20,8 +20,8 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.commands.util.NameableInstantRunWhenDisabledCommand;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.PIDFFFGains;
@@ -348,8 +348,8 @@ public class SwerveModule implements Sendable {
         driveMotor.setNeutralMode(NeutralMode.Coast);
     }
 
-    public InstantCommand getToggleDeadModeCommand() {
-        return new NameableInstantRunWhenDisabledCommand("Toggle", () -> setDeadModule(!isDeadMode));
+    public CommandBase getToggleDeadModeCommand() {
+        return new InstantRunWhenDisabledCommand(() -> setDeadModule(!isDeadMode)).withName("Toggle");
     }
 
     /**
