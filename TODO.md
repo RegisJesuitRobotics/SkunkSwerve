@@ -1,5 +1,6 @@
 # TODO when robot is ready
 
 - [ ] Get encoder offsets
-- [ ] Tune modules with SysID
+- [ ] Tune steer modules with SysID
+- [ ] Tune modules with SysID velocity
 - [ ] Ensure current logging does not slow down code

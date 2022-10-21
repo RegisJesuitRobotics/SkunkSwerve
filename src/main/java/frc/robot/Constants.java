@@ -22,12 +22,13 @@ public final class Constants {
     private Constants() {}
 
     public static class DriveTrainConstants {
+        public static final int NUM_MODULES = 4;
         public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(4.0);
         public static final double DRIVE_GEAR_REDUCTION = (50.0 / 14) * (17.0 / 27) * (45.0 / 15);
 
         public static final double STEERING_GEAR_REDUCTION = 150.0 / 7.0;
 
-        public static final double DRIVE_CURRENT_LIMIT = 80.0;
+        public static final double DRIVE_CURRENT_LIMIT = 65.0;
         public static final double STEER_CURRENT_LIMIT = 20.0;
 
         public static final double NOMINAL_VOLTAGE = 12.0;

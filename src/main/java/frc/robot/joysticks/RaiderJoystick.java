@@ -44,7 +44,6 @@ public abstract class RaiderJoystick extends Joystick {
     }
 
     public static class ThumbStick extends JoystickButton {
-        public static final double DEAD_ZONE = 0.02;
         private final int xAxisPort;
         private final int yAxisPort;
 

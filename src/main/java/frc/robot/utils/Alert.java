@@ -6,12 +6,8 @@
 
 package frc.robot.utils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
-import java.util.HashMap;
-import java.util.Map;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;

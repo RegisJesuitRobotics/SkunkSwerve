@@ -9,9 +9,9 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.utils.logging.CommandSchedulerLogger;
-import frc.robot.utils.logging.MiscRobotLoggerAndAlerts;
-import frc.robot.utils.logging.PowerDistributionLogger;
+import frc.robot.logging.CommandSchedulerLogger;
+import frc.robot.logging.MiscRobotLoggerAndAlerts;
+import frc.robot.logging.PowerDistributionLogger;
 
 
 

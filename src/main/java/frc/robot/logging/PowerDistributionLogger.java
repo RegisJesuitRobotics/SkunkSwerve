@@ -1,4 +1,4 @@
-package frc.robot.utils.logging;
+package frc.robot.logging;
 
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;

@@ -31,7 +31,7 @@ import static frc.robot.Constants.DriveTrainConstants.*;
  * The subsystem containing all the swerve modules
  */
 public class SwerveDriveSubsystem extends SubsystemBase {
-    private final SwerveModule[] modules = new SwerveModule[4];
+    private final SwerveModule[] modules = new SwerveModule[NUM_MODULES];
 
     private final AHRS gyro = new AHRS();
     private final SwerveDrivePoseEstimator odometry = new SwerveDrivePoseEstimator(
@@ -157,7 +157,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param states   the desired states... Ordered front left, front right, back
      *                 left, back right
      */
-    public void setRawStates(boolean openLoop, SwerveModuleState... states) {
+    public void setRawStates(boolean openLoop, SwerveModuleState[] states) {
         if (states.length != modules.length) {
             throw new IllegalArgumentException("You must provide states for all modules");
         }

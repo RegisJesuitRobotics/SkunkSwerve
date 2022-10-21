@@ -2,7 +2,6 @@ package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.*;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
@@ -22,6 +21,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.commands.util.InstantRunWhenDisabledCommand;
+import frc.robot.logging.LoggableTalonFX;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.PIDFFFGains;
@@ -40,8 +40,6 @@ public class SwerveModule implements Sendable {
     private final DoubleLogEntry actualVelocityEntry;
     private final DoubleLogEntry actualHeadingEntry;
     private final DoubleLogEntry absoluteHeadingEntry;
-    private final DoubleLogEntry driveMotorAmpsEntry;
-    private final DoubleLogEntry steerMotorAmpsEntry;
     private final BooleanLogEntry setToAbsoluteEntry;
     private final StringLogEntry moduleEventEntry;
 
@@ -51,8 +49,8 @@ public class SwerveModule implements Sendable {
     private final Alert driveMotorFaultAlert;
     private final Alert inDeadModeAlert;
 
-    private final TalonFX driveMotor;
-    private final TalonFX steeringMotor;
+    private final LoggableTalonFX driveMotor;
+    private final LoggableTalonFX steeringMotor;
     private final CANCoder absoluteSteeringEncoder;
 
     private final double driveMotorConversionFactorVelocity;
@@ -79,8 +77,6 @@ public class SwerveModule implements Sendable {
         actualVelocityEntry = new DoubleLogEntry(logger, tableName + "actualVelocity");
         actualHeadingEntry = new DoubleLogEntry(logger, tableName + "actualHeading");
         absoluteHeadingEntry = new DoubleLogEntry(logger, tableName + "absoluteHeading");
-        driveMotorAmpsEntry = new DoubleLogEntry(logger, tableName + "driveMotorAmps");
-        steerMotorAmpsEntry = new DoubleLogEntry(logger, tableName + "steerMotorAmps");
         setToAbsoluteEntry = new BooleanLogEntry(logger, tableName + "setToAbsolute");
         moduleEventEntry = new StringLogEntry(logger, tableName + "events");
 
@@ -100,7 +96,7 @@ public class SwerveModule implements Sendable {
         inDeadModeAlert = new Alert(alertBeginning + "In dead mode", AlertType.WARNING);
 
         // Drive motor
-        this.driveMotor = new TalonFX(config.driveMotorPort);
+        this.driveMotor = new LoggableTalonFX(config.driveMotorPort, tableName + "driveMotor");
         configDriveMotor(config);
 
         // Steer encoder
@@ -108,7 +104,7 @@ public class SwerveModule implements Sendable {
         configSteeringEncoder(config);
 
         // Steer motor
-        this.steeringMotor = new TalonFX(config.steeringMotorPort);
+        this.steeringMotor = new LoggableTalonFX(config.steeringMotorPort, tableName + "steeringMotor");
         configSteeringMotor(config);
 
         this.driveMotorConversionFactorVelocity = (config.sharedConfiguration.wheelDiameterMeters * Math.PI * 10)
@@ -408,11 +404,11 @@ public class SwerveModule implements Sendable {
      * Log all telemetry values. Should be called (only) in subsystem periodic
      */
     public void logValues() {
+        driveMotor.logValues();
+        steeringMotor.logValues();
         actualHeadingEntry.append(getSteeringAngle().getDegrees());
         actualVelocityEntry.append(getDriveMotorVelocityMetersPerSecond());
         absoluteHeadingEntry.append(getAbsoluteDegrees());
-        driveMotorAmpsEntry.append(driveMotor.getSupplyCurrent());
-        steerMotorAmpsEntry.append(steeringMotor.getSupplyCurrent());
         setToAbsoluteEntry.append(setToAbsolute);
     }
 
@@ -424,8 +420,6 @@ public class SwerveModule implements Sendable {
         builder.addDoubleProperty("Desired Drive Velocity", () -> desiredState.speedMetersPerSecond, null);
         builder.addDoubleProperty("Desired Angle", () -> desiredState.angle.getDegrees(), null);
         builder.addBooleanProperty("Is Set to Absolute", () -> setToAbsolute, null);
-        builder.addDoubleProperty("Drive Motor Output Amps", driveMotor::getStatorCurrent, null);
-        builder.addDoubleProperty("Steering Motor Output Amps", steeringMotor::getStatorCurrent, null);
         builder.addBooleanProperty("In Dead Mode", () -> isDeadMode, null);
     }
 
