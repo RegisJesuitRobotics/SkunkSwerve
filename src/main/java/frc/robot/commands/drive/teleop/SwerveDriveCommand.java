@@ -1,17 +1,25 @@
 package frc.robot.commands.drive.teleop;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
+import frc.robot.utils.SwerveUtils;
 
 import java.util.function.DoubleSupplier;
 
 public abstract class SwerveDriveCommand extends CommandBase {
+    protected static final ChassisSpeeds zeroMovement = new ChassisSpeeds(0.0, 0.0, 0.0);
     protected final DoubleSupplier xAxisSupplier;
     protected final DoubleSupplier yAxisSupplier;
     protected final DoubleSupplier rotationSupplier;
     protected final SwerveDriveSubsystem driveSubsystem;
+
+    protected final SlewRateLimiter xRateLimiter;
+    protected final SlewRateLimiter yRateLimiter;
+    protected final SlewRateLimiter rotationLimiter;
 
     protected SwerveDriveCommand(
             DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier, DoubleSupplier rotationSupplier,
@@ -22,7 +30,20 @@ public abstract class SwerveDriveCommand extends CommandBase {
         this.rotationSupplier = rotationSupplier;
         this.driveSubsystem = driveSubsystem;
 
+        this.xRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
+        this.yRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
+        this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ROTATION_RATE_LIMIT_RADIANS_SECOND);
+
         addRequirements(driveSubsystem);
+    }
+
+    protected void setDriveChassisSpeedsWithDeadZone(ChassisSpeeds chassisSpeeds) {
+        if (SwerveUtils
+                .inEpoch(chassisSpeeds, zeroMovement, DriveTrainConstants.TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND)) {
+            driveSubsystem.stopMovement();
+        } else {
+            driveSubsystem.setChassisSpeeds(chassisSpeeds, true);
+        }
     }
 
     protected static double scaleXY(double value) {
@@ -31,6 +52,6 @@ public abstract class SwerveDriveCommand extends CommandBase {
     }
 
     protected static double scaleRotation(double value) {
-        return value * DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+        return value * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
     }
 }

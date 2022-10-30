@@ -19,12 +19,12 @@ public class FieldOrientatedDriveCommand extends SwerveDriveCommand {
     public void execute() {
         double[] normalized = SwerveUtils
                 .applyCircleDeadZone(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble(), 1.0);
-        driveSubsystem.setChassisSpeeds(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        scaleXY(normalized[0]), scaleXY(normalized[1]), scaleRotation(rotationSupplier.getAsDouble()),
-                        driveSubsystem.getPose().getRotation()
-                ), true
+        ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                xRateLimiter.calculate(scaleXY(normalized[0])), yRateLimiter.calculate(scaleXY(normalized[1])),
+                rotationLimiter.calculate(scaleRotation(rotationSupplier.getAsDouble())),
+                driveSubsystem.getPose().getRotation()
         );
+        setDriveChassisSpeedsWithDeadZone(chassisSpeeds);
     }
 
     @Override

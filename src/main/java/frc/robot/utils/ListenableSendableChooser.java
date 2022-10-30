@@ -10,12 +10,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 
 import static edu.wpi.first.wpilibj.util.ErrorMessages.requireNonNullParam;
 
 public class ListenableSendableChooser<V> implements NTSendable {
-    private final List<Consumer<V>> listeners = new ArrayList<>();
     private static final String DEFAULT = "default";
     private static final String SELECTED = "selected";
     private static final String ACTIVE = "active";
@@ -23,13 +21,19 @@ public class ListenableSendableChooser<V> implements NTSendable {
     private final Map<String, V> m_map = new LinkedHashMap<>();
     private String m_defaultChoice = "";
 
+    private boolean hasNewValue = true;
+
     public ListenableSendableChooser() {
         super();
     }
 
-    public void addListener(Consumer<V> listener) {
-        listeners.add(listener);
-        listener.accept(getSelected());
+
+    public boolean hasNewValue() {
+        try {
+            return hasNewValue;
+        } finally {
+            hasNewValue = false;
+        }
     }
 
     /**
@@ -124,11 +128,9 @@ public class ListenableSendableChooser<V> implements NTSendable {
                 for (NetworkTableEntry entry : m_activeEntries) {
                     entry.setString(val);
                 }
-                for (Consumer<V> listener : listeners) {
-                    listener.accept(getSelected());
-                }
             } finally {
                 m_mutex.unlock();
+                hasNewValue = true;
             }
         });
     }

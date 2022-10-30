@@ -1,18 +1,14 @@
-// Copyright (c) FIRST and other WPILib contributors.
-
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.swerve;
 
 import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -25,6 +21,7 @@ import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.SwerveUtils;
 
+
 import static frc.robot.Constants.DriveTrainConstants.*;
 
 /**
@@ -34,9 +31,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveModule[] modules = new SwerveModule[NUM_MODULES];
 
     private final AHRS gyro = new AHRS();
-    private final SwerveDrivePoseEstimator odometry = new SwerveDrivePoseEstimator(
-            getGyroRotation(), new Pose2d(), KINEMATICS, STATE_STD_DEVS, LOCAL_MEASUREMENT_STD_DEVS, VISION_STD_DEVS
-    );
+//    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
+//            getGyroRotation(), new Pose2d(), KINEMATICS, STATE_STD_DEVS, LOCAL_MEASUREMENT_STD_DEVS, VISION_STD_DEVS
+//    );
+    private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation());
 
     private final Alert navXNotConnectedFaultAlert = new Alert(
             "navX is not connected. Field-centric drive and odometry will be negatively effected!", AlertType.ERROR
@@ -44,9 +42,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final Alert navXCalibratingAlert = new Alert("navX is calibrating. Keep the robot still!", AlertType.INFO);
     private final DataLog logger = DataLogManager.getLog();
     private final DoubleLogEntry gyroEntry = new DoubleLogEntry(logger, "/drive/gyroDegrees");
-    private final DoubleLogEntry odometryXEntry = new DoubleLogEntry(logger, "/drive/estimatedX");
-    private final DoubleLogEntry odometryYEntry = new DoubleLogEntry(logger, "/drive/estimatedY");
-    private final DoubleLogEntry odometryHeadingEntry = new DoubleLogEntry(logger, "/drive/estimatedHeading");
+    private final DoubleArrayLogEntry odometryEntry = new DoubleArrayLogEntry(logger, "/drive/estimatedPose");
     private final StringLogEntry driveEventLogger = new StringLogEntry(logger, "/drive/events");
 
     private final Field2d field2d = new Field2d();
@@ -73,6 +69,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         driveTab.add("Kill Front Right (1)", modules[1].getToggleDeadModeCommand());
         driveTab.add("Kill Back Left (2)", modules[2].getToggleDeadModeCommand());
         driveTab.add("Kill Back Right (3)", modules[3].getToggleDeadModeCommand());
+        driveTab.addNumber("Gyro", () -> getGyroRotation().getDegrees());
 
         driveTab.add(
                 "Reset to Absolute", new InstantRunWhenDisabledCommand(this::setAllModulesToAbsolute).withName("Reset")
@@ -92,7 +89,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         if (gyro.isMagnetometerCalibrated()) {
             return Rotation2d.fromDegrees(gyro.getFusedHeading());
         }
-        return Rotation2d.fromDegrees(-gyro.getYaw());
+        // It is mounted upside-down so no invert
+        return Rotation2d.fromDegrees(gyro.getYaw());
     }
 
     /**
@@ -121,6 +119,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param pose2d the provided pose
      */
     public void resetOdometry(Pose2d pose2d) {
+//        poseEstimator.resetPosition(pose2d, getGyroRotation());
         odometry.resetPosition(pose2d, getGyroRotation());
 
         driveEventLogger.append("Odometry reset");
@@ -130,13 +129,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @return the estimated position of the robot
      */
     public Pose2d getPose() {
-        return odometry.getEstimatedPosition();
+//        return poseEstimator.getEstimatedPosition();
+        return odometry.getPoseMeters();
     }
 
     /**
      * Set the desired speed of the robot. Chassis speeds are always robot centric
      * but can be created from field centric values through
-     * <code>ChassisSpeeds.fromFieldRelativeSpeeds</code>
+     * {@link ChassisSpeeds#fromFieldRelativeSpeeds(double, double, double, Rotation2d)}
      *
      * @param chassisSpeeds the desired chassis speeds
      * @param openLoop      if true then velocity will be handled exclusivity with
@@ -176,16 +176,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      */
     public void stopMovement() {
         openLoop = true;
-        for (int i = 0; i < modules.length; i++) {
-            SwerveModule module = modules[i];
-            // Copy the current angle so everything stops moving
-            desiredStates[i] = new SwerveModuleState(0.0, module.getActualState().angle);
+        for (int i = 0; i < desiredStates.length; i++) {
+            desiredStates[i] = new SwerveModuleState(0.0, modules[i].getActualState().angle);
         }
     }
 
     /**
      * @return true if all modules are at the set desired states within the
-     *         threshold in <code>Constants.java</code>
+     *         threshold in {@link frc.robot.Constants}
      */
     public boolean atDesiredStates() {
         boolean atStates = true;
@@ -205,7 +203,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 VELOCITY_TOLERANCE_METERS_PER_SECOND
         );
         atState &= inTolerance(
-                actualState.angle.getDegrees(), desiredState.angle.getDegrees(), ANGLE_TOLERANCE_DEGREES
+                actualState.angle.getDegrees(), desiredState.angle.getDegrees(), ANGLE_TOLERANCE_RADIANS
         );
         return atState;
     }
@@ -241,6 +239,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             actualStates[i] = modules[i].getActualState();
         }
 
+//        poseEstimator.update(getGyroRotation(), actualStates);
         odometry.update(getGyroRotation(), actualStates);
 
         logValues();
@@ -250,11 +249,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         gyroEntry.append(getGyroRotation().getDegrees());
 
         Pose2d estimatedPose = getPose();
-        odometryXEntry.append(estimatedPose.getX());
-        odometryYEntry.append(estimatedPose.getY());
-        odometryHeadingEntry.append(estimatedPose.getRotation().getDegrees());
+        odometryEntry.append(
+                new double[] { estimatedPose.getX(), estimatedPose.getY(), estimatedPose.getRotation().getDegrees() }
+        );
 
         field2d.setRobotPose(estimatedPose);
+        for (int i = 0; i < modules.length; i++) {
+            field2d.getObject("module " + i).setPose(
+                    new Pose2d(MODULE_TRANSLATIONS[i], modules[i].getActualState().angle).relativeTo(estimatedPose)
+            );
+        }
 
         for (SwerveModule module : modules) {
             module.logValues();

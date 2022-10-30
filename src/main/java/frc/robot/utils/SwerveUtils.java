@@ -1,26 +1,28 @@
 package frc.robot.utils;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public class SwerveUtils {
     private SwerveUtils() {}
 
     /**
-     * @param currentAngle        what the controller currently reads
-     * @param targetAngleSetpoint the desired angle [-180, 180)
+     * @param currentAngle        what the controller currently reads (radians)
+     * @param targetAngleSetpoint the desired angle [-pi, pi)
      * @return the target angle in controller's scope
      */
     public static double calculateContinuousInputSetpoint(double currentAngle, double targetAngleSetpoint) {
-        targetAngleSetpoint = Math.IEEEremainder(targetAngleSetpoint, 360);
+        targetAngleSetpoint = Math.IEEEremainder(targetAngleSetpoint, Math.PI * 2);
 
-        double remainder = currentAngle % 360;
+        double remainder = currentAngle % (Math.PI * 2);
         double adjustedAngleSetpoint = targetAngleSetpoint + (currentAngle - remainder);
 
-        // We don't want to rotate over 180 degrees, so just rotate the other way
-        if (targetAngleSetpoint - remainder > 180.0) {
-            adjustedAngleSetpoint -= 360;
-        } else if (targetAngleSetpoint - remainder < -180.0) {
-            adjustedAngleSetpoint += 360;
+        // We don't want to rotate over 180 degrees, so just rotate the other way (add a
+        // full rotation)
+        if (adjustedAngleSetpoint - currentAngle > Math.PI) {
+            adjustedAngleSetpoint -= Math.PI * 2;
+        } else if (adjustedAngleSetpoint - currentAngle < -Math.PI) {
+            adjustedAngleSetpoint += Math.PI * 2;
         }
 
         return adjustedAngleSetpoint;
@@ -44,6 +46,13 @@ public class SwerveUtils {
             return new double[] { xValue / magnitude * maxMagnitude, yValue / magnitude * maxMagnitude };
         }
         return new double[] { xValue, yValue };
+    }
+
+    public static boolean inEpoch(ChassisSpeeds chassisSpeeds1, ChassisSpeeds chassisSpeeds2, double epoch) {
+        boolean inEpoch = Math.abs(chassisSpeeds1.omegaRadiansPerSecond - chassisSpeeds2.omegaRadiansPerSecond) < epoch;
+        inEpoch &= Math.abs(chassisSpeeds1.vxMetersPerSecond - chassisSpeeds2.vxMetersPerSecond) < epoch;
+        inEpoch &= Math.abs(chassisSpeeds1.vyMetersPerSecond - chassisSpeeds2.vyMetersPerSecond) < epoch;
+        return inEpoch;
     }
 
     /**

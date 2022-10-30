@@ -6,93 +6,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SwerveUtilsTest {
     @Test
-    void optimizeAngleSetpoint_Zero_Zero() {
+    void calculateContinuousInputSetpoint_0_0_0() {
         assertEquals(0, SwerveUtils.calculateContinuousInputSetpoint(0, 0));
     }
 
     @Test
-    void optimizeAngleSetpoint_Zero_Positive_NoWrap() {
-        assertEquals(10, SwerveUtils.calculateContinuousInputSetpoint(0, 10));
+    void calculateContinuousInputSetpoint_2PI_0_2PI() {
+        assertEquals(Math.PI * 2, SwerveUtils.calculateContinuousInputSetpoint(Math.PI * 2, 0));
     }
 
     @Test
-    void optimizeAngleSetpoint_Zero_Negative_NoWrap() {
-        assertEquals(-10, SwerveUtils.calculateContinuousInputSetpoint(0, -10));
+    void calculateContinuousInputSetpoint_0_2PI_0() {
+        assertEquals(0, SwerveUtils.calculateContinuousInputSetpoint(0, Math.PI * 2));
     }
 
     @Test
-    void optimizeAngleSetpoint_PositiveNotOver_Positive_NoWrap() {
-        assertEquals(60, SwerveUtils.calculateContinuousInputSetpoint(50, 60));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_PositiveNotOver_Negative_NoWrap() {
-        assertEquals(-10, SwerveUtils.calculateContinuousInputSetpoint(50, -10));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_PositiveNotOver_Negative_Wrap() {
-        assertEquals(265, SwerveUtils.calculateContinuousInputSetpoint(90, -95));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_NegativeNotOver_Negative_NoWrap() {
-        assertEquals(-60, SwerveUtils.calculateContinuousInputSetpoint(-50, -60));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_NegativeNotOver_Positive_NoWrap() {
-        assertEquals(10, SwerveUtils.calculateContinuousInputSetpoint(-50, 10));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_NegativeNotOver_Negative_Wrap() {
-        assertEquals(-265, SwerveUtils.calculateContinuousInputSetpoint(-90, 95));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_PositiveHalfOver_Positive_NoWrap() {
-        assertEquals(190, SwerveUtils.calculateContinuousInputSetpoint(181, 190));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_PositiveHalfOver_Positive_Wrap() {
-        assertEquals(362, SwerveUtils.calculateContinuousInputSetpoint(185, 2));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_PositiveOver_Positive_NoWrap() {
-        assertEquals(362, SwerveUtils.calculateContinuousInputSetpoint(361, 2));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_PositiveOver_Negative_NoWrap() {
-        assertEquals(719, SwerveUtils.calculateContinuousInputSetpoint(720, -1));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_PositiveOver_Negative_Wrap() {
-        assertEquals(985, SwerveUtils.calculateContinuousInputSetpoint(810, -95));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_NegativeHalfOver_Negative_NoWrap() {
-        assertEquals(-190, SwerveUtils.calculateContinuousInputSetpoint(-181, -190));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_NegativeHalfOver_Negative_Wrap() {
-        assertEquals(-362, SwerveUtils.calculateContinuousInputSetpoint(-185, -2));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_NegativeOver_Negative_NoWrap() {
-        assertEquals(-362, SwerveUtils.calculateContinuousInputSetpoint(-361, -2));
-    }
-
-    @Test
-    void optimizeAngleSetpoint_NegativeOver_Positive_NoWrap() {
-        assertEquals(-719, SwerveUtils.calculateContinuousInputSetpoint(-720, 1));
+    void calculateContinuousInputSetpoint_3PI_PI_3PI() {
+        assertEquals(Math.PI * 3, SwerveUtils.calculateContinuousInputSetpoint(Math.PI * 3, Math.PI));
     }
 
     @Test

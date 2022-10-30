@@ -2,8 +2,12 @@ package frc.robot.logging;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import edu.wpi.first.util.datalog.*;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.IntegerLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.Timer;
 
 public class LoggableTalonFX extends TalonFX {
     private final DoubleLogEntry outputAmpsEntry;
@@ -12,6 +16,8 @@ public class LoggableTalonFX extends TalonFX {
     private final DoubleLogEntry busVoltageEntry;
     private final DoubleLogEntry temperatureEntry;
     private final BooleanLogEntry inBrakeModeEntry;
+
+    private double lastLogTime = 0.0;
 
     public LoggableTalonFX(int deviceNumber, String logTable, String canbus) {
         super(deviceNumber, canbus);
@@ -41,10 +47,13 @@ public class LoggableTalonFX extends TalonFX {
     }
 
     public void logValues() {
-        outputAmpsEntry.append(super.getStatorCurrent());
-        inputAmpsEntry.append(super.getSupplyCurrent());
-        outputVoltageEntry.append(super.getMotorOutputVoltage());
-        busVoltageEntry.append(super.getBusVoltage());
-        temperatureEntry.append(super.getTemperature());
+        if (Timer.getFPGATimestamp() - lastLogTime > 1.0) {
+            lastLogTime = Timer.getFPGATimestamp();
+            outputAmpsEntry.append(super.getStatorCurrent());
+            inputAmpsEntry.append(super.getSupplyCurrent());
+            outputVoltageEntry.append(super.getMotorOutputPercent());
+            busVoltageEntry.append(super.getBusVoltage());
+            temperatureEntry.append(super.getTemperature());
+        }
     }
 }

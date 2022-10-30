@@ -9,8 +9,8 @@ public class PIDFFFGains extends PIDGains {
      * @param p     the p gain
      * @param i     the i gain
      * @param d     the d gain
-     * @param arbFF the arbitrary feedforward (also known as kS) (in volts per
-     *              meter/second)
+     * @param arbFF the arbitrary/static feedforward (also known as kS) (in volts
+     *              per meter/second)
      * @param vFF   the velocity feedforward (also known as kV) (in volts per
      *              meter/second)
      * @param aFF   the acceleration feedforward (also known as kA) (in volts

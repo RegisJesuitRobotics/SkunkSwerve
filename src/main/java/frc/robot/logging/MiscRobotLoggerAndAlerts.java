@@ -57,7 +57,7 @@ public class MiscRobotLoggerAndAlerts {
 
         double percentBusUsage = RobotController.getCANStatus().percentBusUtilization;
         canUtilizationEntry.append(percentBusUsage);
-        highCanUsageAlert.set(percentBusUsage > 90.0);
+        highCanUsageAlert.set(percentBusUsage > 80.0);
 
         for (int i = 0; i < controllerAlerts.length; i++) {
             controllerAlerts[i].set(!DriverStation.isJoystickConnected(MiscConstants.usedControllerPorts[i]));

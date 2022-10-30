@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2022.4.1"
-    id 'com.diffplug.spotless' version '6.1.2'
+    id 'com.diffplug.spotless' version '6.11.0'
 }
 
 def javaVersion = JavaVersion.VERSION_11

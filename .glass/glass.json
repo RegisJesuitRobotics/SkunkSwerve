@@ -5,34 +5,85 @@
         "Back Left (2)": {
           "open": true
         },
-        "open": false
+        "open": true
       },
       "open": true
     },
-    "SmartDashboard": {
-      "open": true
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/DriveTrainRaw/Auto Chooser": "String Chooser",
+      "/Shuffleboard/DriveTrainRaw/Drive Style": "String Chooser",
+      "/Shuffleboard/DriveTrainRaw/Field": "Field2d",
+      "/Shuffleboard/DriveTrainRaw/Kill Back Left (2)": "Command",
+      "/Shuffleboard/DriveTrainRaw/Kill Back Right (3)": "Command",
+      "/Shuffleboard/DriveTrainRaw/Kill Front Left (0)": "Command",
+      "/Shuffleboard/DriveTrainRaw/Kill Front Right (1)": "Command",
+      "/Shuffleboard/DriveTrainRaw/Reset to Absolute": "Command"
     },
-    "precision": 2,
     "windows": {
-      "/Shuffleboard/Auto/Field": {
-        "Robot": {
-          "length": 0.0,
-          "weight": 0.0,
-          "width": 0.0
-        },
-        "traj": {
-          "arrows": false,
-          "length": 0.0,
-          "selectable": false,
-          "weight": 0.0,
-          "width": 0.0
-        },
-        "units": ""
+      "/Shuffleboard/DriveTrainRaw/Auto Chooser": {
+        "window": {
+          "name": "Auto Chooser",
+          "visible": true
+        }
+      },
+      "/Shuffleboard/DriveTrainRaw/Drive Style": {
+        "window": {
+          "name": "Drive Style",
+          "visible": true
+        }
       },
       "/Shuffleboard/DriveTrainRaw/Field": {
         "Robot": {
-          "length": 0.7620000243186951,
-          "width": 0.7620000243186951
+          "arrowSize": 16
+        },
+        "module 0": {
+          "arrowWeight": 1.0,
+          "color": [
+            0.0,
+            1.0,
+            1.0,
+            255.0
+          ],
+          "length": 0.20000000298023224,
+          "weight": 1.0,
+          "width": 0.20000000298023224
+        },
+        "module 1": {
+          "arrowWeight": 1.0,
+          "color": [
+            0.0,
+            1.0,
+            1.0,
+            255.0
+          ],
+          "length": 0.20000000298023224,
+          "weight": 1.0,
+          "width": 0.20000000298023224
+        },
+        "module 2": {
+          "arrowWeight": 1.0,
+          "color": [
+            0.0,
+            1.0,
+            1.0,
+            255.0
+          ],
+          "length": 0.20000000298023224,
+          "weight": 1.0,
+          "width": 0.20000000298023224
+        },
+        "module 3": {
+          "arrowWeight": 1.0,
+          "color": [
+            0.0,
+            255.0,
+            112.49998474121094,
+            255.0
+          ],
+          "length": 0.20000000298023224,
+          "weight": 1.0,
+          "width": 0.20000000298023224
         },
         "window": {
           "name": "Field",
@@ -40,9 +91,6 @@
         }
       }
     }
-  },
-  "NetworkTables Log": {
-    "visible": true
   },
   "NetworkTables Settings": {
     "dsClient": false,
@@ -58,13 +106,20 @@
         {
           "axis": [
             {
+              "label": "Angle",
               "lockMax": true,
               "lockMin": true,
-              "max": 360.0
+              "max": 180.0,
+              "min": -180.0
+            },
+            {
+              "label": "Motor Percent",
+              "lockMax": true,
+              "lockMin": true,
+              "min": -1.0
             }
           ],
-          "height": 133,
-          "name": "Module 0",
+          "height": 338,
           "series": [
             {
               "color": [
@@ -73,8 +128,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Absolute Angle",
-              "name": "Absolute"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Desired Angle",
+              "name": "Desired Angle"
             },
             {
               "color": [
@@ -84,7 +139,7 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Read Angle",
-              "name": "Read"
+              "name": "Read Angle"
             },
             {
               "color": [
@@ -93,21 +148,48 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Desired Angle",
-              "name": "Desired"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Absolute Angle",
+              "name": "Absolute Angle"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Angle Motor Output Percent",
+              "name": "Motor Output",
+              "yAxis": 1
             }
-          ]
-        },
+          ],
+          "yaxis2": true
+        }
+      ],
+      "window": {
+        "name": "Front Left Angle"
+      }
+    },
+    "Plot <1>": {
+      "plots": [
         {
           "axis": [
             {
+              "label": "Angle",
               "lockMax": true,
               "lockMin": true,
-              "max": 360.0
+              "max": 180.0,
+              "min": -180.0
+            },
+            {
+              "label": "Motor Percent",
+              "lockMax": true,
+              "lockMin": true,
+              "min": -1.0
             }
           ],
-          "height": 133,
-          "name": "Module 1",
+          "crosshairs": true,
+          "height": 670,
           "series": [
             {
               "color": [
@@ -116,8 +198,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Absolute Angle",
-              "name": "Absolute"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Desired Angle",
+              "name": "Desired Angle"
             },
             {
               "color": [
@@ -127,7 +209,7 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Read Angle",
-              "name": "Read"
+              "name": "Read Angle"
             },
             {
               "color": [
@@ -136,22 +218,46 @@
                 0.4078431725502014,
                 1.0
               ],
-              "digital": "Auto",
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Desired Angle",
-              "name": "Desired"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Absolute Angle",
+              "name": "Absolute Angle"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Angle Motor Output Percent",
+              "name": "Motor Output",
+              "yAxis": 1
             }
-          ]
-        },
+          ],
+          "yaxis2": true
+        }
+      ],
+      "window": {
+        "name": "Front Right Angle"
+      }
+    },
+    "Plot <2>": {
+      "plots": [
         {
           "axis": [
             {
+              "label": "Angle",
               "lockMax": true,
               "lockMin": true,
-              "max": 360.0
+              "max": 180.0,
+              "min": -180.0
+            },
+            {
+              "lockMax": true,
+              "lockMin": true,
+              "min": -1.0
             }
           ],
-          "height": 133,
-          "name": "Module 2",
+          "height": 438,
           "series": [
             {
               "color": [
@@ -160,8 +266,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Absolute Angle",
-              "name": "Absolute"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Angle",
+              "name": "Desired Angle"
             },
             {
               "color": [
@@ -171,7 +277,7 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Read Angle",
-              "name": "Read"
+              "name": "Read Angle"
             },
             {
               "color": [
@@ -180,21 +286,47 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Angle",
-              "name": "Desired"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Absolute Angle",
+              "name": "Absolute Angle"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Angle Motor Output Percent",
+              "name": "Motor Output",
+              "yAxis": 1
             }
-          ]
-        },
+          ],
+          "yaxis2": true
+        }
+      ],
+      "window": {
+        "name": "Back Left Angle"
+      }
+    },
+    "Plot <3>": {
+      "plots": [
         {
           "axis": [
             {
+              "label": "Angle",
               "lockMax": true,
               "lockMin": true,
-              "max": 360.0
+              "max": 180.0,
+              "min": -180.0
+            },
+            {
+              "label": "Motor Percent",
+              "lockMax": true,
+              "lockMin": true,
+              "min": -1.0
             }
           ],
-          "height": 133,
-          "name": "Module 3",
+          "height": 339,
           "series": [
             {
               "color": [
@@ -203,8 +335,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Absolute Angle",
-              "name": "Absolute"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Desired Angle",
+              "name": "Desired Angle"
             },
             {
               "color": [
@@ -214,7 +346,7 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Read Angle",
-              "name": "Read"
+              "name": "Read Angle"
             },
             {
               "color": [
@@ -223,58 +355,55 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Desired Angle",
-              "name": "Desired"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Absolute Angle",
+              "name": "Absolute Angle"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Angle Motor Output Percent",
+              "name": "Motor Output",
+              "yAxis": 1
             }
-          ]
+          ],
+          "yaxis2": true
         }
       ],
       "window": {
-        "name": "Absolute vs Read vs Desired"
+        "name": "Back Right Angle"
       }
     },
-    "Plot <1>": {
+    "Plot <4>": {
       "plots": [
         {
-          "height": 134,
-          "name": "Module 0",
+          "axis": [
+            {
+              "autoFit": true,
+              "max": 180.0,
+              "min": -180.0
+            },
+            {
+              "label": "Motor Percent",
+              "lockMax": true,
+              "lockMin": true,
+              "min": -1.0
+            }
+          ],
+          "height": 338,
           "series": [
             {
               "color": [
                 0.2980392277240753,
                 0.44705885648727417,
                 0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Drive Velocity",
-              "name": "Drive Velocity"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Desired Drive Velocity",
-              "marker": "None",
-              "name": "Desired Drive Velocity"
-            }
-          ]
-        },
-        {
-          "height": 134,
-          "name": "Module 1",
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Drive Velocity",
-              "name": "Drive Velocity"
+              "name": "Desired Velocity"
             },
             {
               "color": [
@@ -283,66 +412,115 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Desired Drive Velocity",
-              "name": "Desired Drive Velocity"
-            }
-          ]
-        },
-        {
-          "height": 134,
-          "name": "Module 2",
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Drive Velocity",
-              "name": "Drive Velocity"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Drive Velocity",
-              "name": "Desired Drive Velocity"
-            }
-          ]
-        },
-        {
-          "height": 134,
-          "name": "Module 3",
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Drive Velocity",
-              "name": "Drive Velocity"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Desired Drive Velocity",
-              "name": "Desired Drive Velocity"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Drive Velocity",
+              "name": "Actual Velocity"
             }
           ]
         }
       ],
       "window": {
-        "name": "Velocity vs Desired"
+        "name": "Front Left Velocity"
+      }
+    },
+    "Plot <5>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": -37,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Desired Drive Velocity",
+              "name": "Desired Velocity"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Drive Velocity",
+              "name": "Actual Velocity"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "name": "Front Right Velocity"
+      }
+    },
+    "Plot <6>": {
+      "plots": [
+        {
+          "height": -37,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Drive Velocity",
+              "name": "Desired Velocity"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Drive Velocity",
+              "name": "Actual Velocity"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "name": "Back Left Velocity"
+      }
+    },
+    "Plot <7>": {
+      "plots": [
+        {
+          "height": -37,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Desired Drive Velocity",
+              "name": "Desired Velocity"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Drive Velocity",
+              "name": "Actual Velocity"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "name": "Back Right Velocity"
       }
     }
   }

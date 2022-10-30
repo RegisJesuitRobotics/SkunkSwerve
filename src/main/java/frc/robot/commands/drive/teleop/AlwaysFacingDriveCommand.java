@@ -15,7 +15,7 @@ public class AlwaysFacingDriveCommand extends SwerveDriveCommand {
     private final Translation2d point;
 
     private final ProfiledPIDController rotationController = new ProfiledPIDController(
-            DriveTrainConstants.PATH_ANGULAR_VELOCITY_P, 0.0, 0.0, DriveTrainConstants.ANGULAR_CONSTRAINTS
+            DriveTrainConstants.PATH_ANGULAR_POSITION_P, 0.0, 0.0, DriveTrainConstants.ANGULAR_CONSTRAINTS
     );
 
     /**

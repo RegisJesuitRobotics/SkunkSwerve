@@ -1,18 +1,19 @@
-// Copyright (c) FIRST and other WPILib contributors.
-
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
+import com.pathplanner.lib.server.PathPlannerServer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import frc.robot.commands.drive.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.MiscConstants;
+import frc.robot.commands.drive.FollowPathCommand;
+import frc.robot.commands.drive.HoldDrivePositionCommand;
+import frc.robot.commands.drive.SetModuleRotationCommand;
 import frc.robot.commands.drive.teleop.FieldOrientatedDriveCommand;
 import frc.robot.commands.drive.teleop.RobotOrientatedDriveCommand;
+import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.joysticks.ThrustMaster;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
-import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.ListenableSendableChooser;
@@ -41,6 +42,10 @@ public class RobotContainer {
     }
 
     private void configureAutos() {
+        if (MiscConstants.enablePathPlannerServer) {
+            PathPlannerServer.startServer(5810);
+        }
+
         autoCommandChooser.setDefaultOption("Nothing", null);
         autoCommandChooser.addOption("UpDownWithRotation", new FollowPathCommand("WithRotation", true, driveSubsystem));
         autoCommandChooser.addOption("UpDownNoRotation", new FollowPathCommand("NoRotation", true, driveSubsystem));
@@ -50,7 +55,12 @@ public class RobotContainer {
                 .addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", true, driveSubsystem));
         autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", true, driveSubsystem));
 
-        autoCommandChooser.addListener((command) -> noAutoSelectedAlert.set(command == null));
+        new Trigger(autoCommandChooser::hasNewValue).whenActive(
+                new InstantRunWhenDisabledCommand(
+                        () -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null)
+                )
+        );
+
         Shuffleboard.getTab("DriveTrainRaw").add("Auto Chooser", autoCommandChooser);
     }
 
@@ -58,14 +68,14 @@ public class RobotContainer {
         driveCommandChooser.setDefaultOption(
                 "Field Orientated",
                 new FieldOrientatedDriveCommand(
-                        driverController.stick::getXAxis, driverController.stick::getYAxis,
+                        () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
                         driverController.stick::getZAxis, driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Robot Orientated",
                 new RobotOrientatedDriveCommand(
-                        driverController.stick::getXAxis, driverController.stick::getYAxis,
+                        () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
                         driverController.stick::getZAxis, driveSubsystem
                 )
         );
@@ -73,9 +83,11 @@ public class RobotContainer {
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
         driveTab.add("Drive Style", driveCommandChooser);
 
-        driveCommandChooser.addListener(this::evaluateDriveStyle);
+        new Trigger(driveCommandChooser::hasNewValue).whenActive(
+                new InstantRunWhenDisabledCommand(() -> evaluateDriveStyle(driveCommandChooser.getSelected()))
+        );
 
-        driverController.buttonOne.whenPressed(driveSubsystem::zeroHeading);
+        driverController.buttonOne.whenPressed(new InstantRunWhenDisabledCommand(driveSubsystem::zeroHeading));
         driverController.buttonTwo.whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
         driverController.buttonThree.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
     }

@@ -1,7 +1,6 @@
 package frc.robot.commands.drive.teleop;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.SwerveUtils;
 
@@ -20,13 +19,12 @@ public class RobotOrientatedDriveCommand extends SwerveDriveCommand {
     public void execute() {
         double[] normalized = SwerveUtils
                 .applyCircleDeadZone(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble(), 1.0);
-        driveSubsystem.setChassisSpeeds(
-                new ChassisSpeeds(
-                        scaleXY(normalized[0]), scaleXY(normalized[1]),
-                        rotationSupplier.getAsDouble()
-                                * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND
-                ), true
+        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
+                xRateLimiter.calculate(scaleXY(normalized[0])), yRateLimiter.calculate(scaleXY(normalized[1])),
+                rotationLimiter.calculate(scaleRotation(rotationSupplier.getAsDouble()))
         );
+
+        setDriveChassisSpeedsWithDeadZone(chassisSpeeds);
     }
 
     @Override
