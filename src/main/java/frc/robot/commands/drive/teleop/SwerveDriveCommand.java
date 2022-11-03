@@ -37,6 +37,34 @@ public abstract class SwerveDriveCommand extends CommandBase {
         addRequirements(driveSubsystem);
     }
 
+    @Override
+    public void initialize() {
+        xRateLimiter.reset(0);
+        yRateLimiter.reset(0);
+        rotationLimiter.reset(0);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        driveSubsystem.stopMovement();
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
+
+
+    protected double[] getNormalizedScaledRateLimitedXYTheta() {
+        double[] normalized = SwerveUtils
+                .applyCircleDeadZone(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble(), 1.0);
+        double[] scaled = new double[3];
+        scaled[0] = xRateLimiter.calculate(scaleXY(normalized[0]));
+        scaled[1] = yRateLimiter.calculate(scaleXY(normalized[1]));
+        scaled[2] = rotationLimiter.calculate(scaleRotation(rotationSupplier.getAsDouble()));
+        return scaled;
+    }
+
     protected void setDriveChassisSpeedsWithDeadZone(ChassisSpeeds chassisSpeeds) {
         if (SwerveUtils
                 .inEpoch(chassisSpeeds, zeroMovement, DriveTrainConstants.TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND)) {

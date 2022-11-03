@@ -18,6 +18,7 @@ public class PowerDistributionLogger {
     public PowerDistributionLogger(PowerDistribution powerDistribution) {
         instances++;
         this.powerDistribution = powerDistribution;
+        powerDistribution.resetTotalEnergy();
 
         String thisTableName = tableName + instances + "/";
         totalEnergyEntry = new DoubleLogEntry(DataLogManager.getLog(), thisTableName + "totalEnergy");

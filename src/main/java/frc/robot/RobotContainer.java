@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.commands.drive.FollowPathCommand;
 import frc.robot.commands.drive.HoldDrivePositionCommand;
-import frc.robot.commands.drive.SetModuleRotationCommand;
 import frc.robot.commands.drive.teleop.FieldOrientatedDriveCommand;
+import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
 import frc.robot.commands.drive.teleop.RobotOrientatedDriveCommand;
 import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.joysticks.ThrustMaster;
@@ -66,6 +66,13 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         driveCommandChooser.setDefaultOption(
+                "Hybrid (Default to Field Relative but use robot when holding button)",
+                new HybridOrientatedDriveCommand(
+                        () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
+                        driverController.stick::getZAxis, driverController.buttonOne::get, driveSubsystem
+                )
+        );
+        driveCommandChooser.addOption(
                 "Field Orientated",
                 new FieldOrientatedDriveCommand(
                         () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
@@ -87,8 +94,7 @@ public class RobotContainer {
                 new InstantRunWhenDisabledCommand(() -> evaluateDriveStyle(driveCommandChooser.getSelected()))
         );
 
-        driverController.buttonOne.whenPressed(new InstantRunWhenDisabledCommand(driveSubsystem::zeroHeading));
-        driverController.buttonTwo.whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
+        driverController.buttonTwo.whenPressed(new InstantRunWhenDisabledCommand(driveSubsystem::zeroHeading));
         driverController.buttonThree.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
     }
 

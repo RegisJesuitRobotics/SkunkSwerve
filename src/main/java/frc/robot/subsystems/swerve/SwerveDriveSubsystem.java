@@ -82,7 +82,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     /**
      * @return the value from the gyro. This does not get reset when resetOdometry
      *         is called. Use <code>getPose().getRotation2d()</code> to get the
-     *         field centric value. Counterclockwise is positive (unit circle like).
+     *         field centric value. Counterclockwise is positive.
      */
     private Rotation2d getGyroRotation() {
         // We prefer to use this as it hypothetically has zero drift

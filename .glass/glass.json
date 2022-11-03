@@ -95,10 +95,7 @@
   "NetworkTables Settings": {
     "dsClient": false,
     "mode": "Client",
-    "serverTeam": "localhost"
-  },
-  "NetworkTables View": {
-    "visible": false
+    "serverTeam": "3729"
   },
   "Plots": {
     "Plot <0>": {
@@ -119,7 +116,7 @@
               "min": -1.0
             }
           ],
-          "height": 338,
+          "height": -37,
           "series": [
             {
               "color": [
@@ -159,8 +156,7 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Angle Motor Output Percent",
-              "name": "Motor Output",
-              "yAxis": 1
+              "name": "Motor Output"
             }
           ],
           "yaxis2": true
@@ -229,8 +225,7 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Angle Motor Output Percent",
-              "name": "Motor Output",
-              "yAxis": 1
+              "name": "Motor Output"
             }
           ],
           "yaxis2": true
@@ -257,7 +252,7 @@
               "min": -1.0
             }
           ],
-          "height": 438,
+          "height": -37,
           "series": [
             {
               "color": [
@@ -297,8 +292,7 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Angle Motor Output Percent",
-              "name": "Motor Output",
-              "yAxis": 1
+              "name": "Motor Output"
             }
           ],
           "yaxis2": true
@@ -366,8 +360,7 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Angle Motor Output Percent",
-              "name": "Motor Output",
-              "yAxis": 1
+              "name": "Motor Output"
             }
           ],
           "yaxis2": true
@@ -393,7 +386,7 @@
               "min": -1.0
             }
           ],
-          "height": 338,
+          "height": -37,
           "series": [
             {
               "color": [

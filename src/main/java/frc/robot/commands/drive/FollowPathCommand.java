@@ -92,7 +92,9 @@ public class FollowPathCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        driveSubsystem.stopMovement();
+        if (interrupted) {
+            driveSubsystem.stopMovement();
+        }
 
         timer.stop();
     }
