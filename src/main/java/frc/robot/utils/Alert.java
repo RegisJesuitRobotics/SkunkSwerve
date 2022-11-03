@@ -42,7 +42,8 @@ public class Alert {
     public Alert(String group, String text, AlertType type) {
         if (!groups.containsKey(group)) {
             groups.put(group, new SendableAlerts());
-            Shuffleboard.getTab("AlertsRaw").add(group, groups.get(group));
+            // FIXME
+            // Shuffleboard.getTab("AlertsRaw").add(group, groups.get(group));
         }
 
         this.text = text;

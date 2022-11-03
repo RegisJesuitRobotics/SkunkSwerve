@@ -1,11 +1,15 @@
 package frc.robot.subsystems.swerve;
 
-import com.kauailabs.navx.frc.AHRS;
+import com.kauailabs.navx.frc.AHRSFixed;
+
+import edu.wpi.first.hal.SimDouble;
+import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
@@ -16,7 +20,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.SwerveUtils;
@@ -30,11 +33,11 @@ import static frc.robot.Constants.DriveTrainConstants.*;
 public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveModule[] modules = new SwerveModule[NUM_MODULES];
 
-    private final AHRS gyro = new AHRS();
+    private final AHRSFixed gyro = new AHRSFixed();
 //    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
 //            getGyroRotation(), new Pose2d(), KINEMATICS, STATE_STD_DEVS, LOCAL_MEASUREMENT_STD_DEVS, VISION_STD_DEVS
 //    );
-    private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation());
+    private final SwerveDriveOdometry odometry;
 
     private final Alert navXNotConnectedFaultAlert = new Alert(
             "navX is not connected. Field-centric drive and odometry will be negatively effected!", AlertType.ERROR
@@ -55,25 +58,31 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         modules[1] = new SwerveModule(FRONT_RIGHT_MODULE_CONFIGURATION);
         modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION);
         modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION);
+
+        SwerveModulePosition[] actualPositions = new SwerveModulePosition[modules.length];
+        for (int i = 0; i < modules.length; i++) {
+            actualPositions[i] = modules[i].getActualPosition();
+        }
+        odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation(), actualPositions);
         driveEventLogger.append("Swerve modules initialized");
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
 
         driveTab.add("Field", field2d);
-        driveTab.add("Front Left (0)", modules[0]).withSize(2, 3);
-        driveTab.add("Front Right (1)", modules[1]).withSize(2, 3);
-        driveTab.add("Back Left (2)", modules[2]).withSize(2, 3);
-        driveTab.add("Back Right (3)", modules[3]).withSize(2, 3);
+        // driveTab.add("Front Left (0)", modules[0]).withSize(2, 3);
+        // driveTab.add("Front Right (1)", modules[1]).withSize(2, 3);
+        // driveTab.add("Back Left (2)", modules[2]).withSize(2, 3);
+        // driveTab.add("Back Right (3)", modules[3]).withSize(2, 3);
 
-        driveTab.add("Kill Front Left (0)", modules[0].getToggleDeadModeCommand());
-        driveTab.add("Kill Front Right (1)", modules[1].getToggleDeadModeCommand());
-        driveTab.add("Kill Back Left (2)", modules[2].getToggleDeadModeCommand());
-        driveTab.add("Kill Back Right (3)", modules[3].getToggleDeadModeCommand());
-        driveTab.addNumber("Gyro", () -> getGyroRotation().getDegrees());
+        // driveTab.add("Kill Front Left (0)", modules[0].getToggleDeadModeCommand());
+        // driveTab.add("Kill Front Right (1)", modules[1].getToggleDeadModeCommand());
+        // driveTab.add("Kill Back Left (2)", modules[2].getToggleDeadModeCommand());
+        // driveTab.add("Kill Back Right (3)", modules[3].getToggleDeadModeCommand());
+        // driveTab.addNumber("Gyro", () -> 0.0);
 
-        driveTab.add(
-                "Reset to Absolute", new InstantRunWhenDisabledCommand(this::setAllModulesToAbsolute).withName("Reset")
-        );
+        // driveTab.add(
+        //         "Reset to Absolute", new InstantCommand(this::setAllModulesToAbsolute).withName("Reset").ignoringDisable(true)
+        // );
         driveTab.addBoolean("All have been set to absolute", this::allModulesAtAbsolute);
 
         stopMovement();
@@ -234,13 +243,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             modules[i].setDesiredState(desiredStates[i], openLoop);
         }
 
-        SwerveModuleState[] actualStates = new SwerveModuleState[modules.length];
+        SwerveModulePosition[] actualPositions = new SwerveModulePosition[modules.length];
         for (int i = 0; i < modules.length; i++) {
-            actualStates[i] = modules[i].getActualState();
+            actualPositions[i] = modules[i].getActualPosition();
         }
 
-//        poseEstimator.update(getGyroRotation(), actualStates);
-        odometry.update(getGyroRotation(), actualStates);
+//        poseEstimator.update(getGyroRotation(), actualPositions);
+        odometry.update(getGyroRotation(), actualPositions);
 
         logValues();
     }
