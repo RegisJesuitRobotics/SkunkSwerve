@@ -2,8 +2,6 @@ package frc.robot.subsystems.swerve;
 
 import com.kauailabs.navx.frc.AHRSFixed;
 
-import edu.wpi.first.hal.SimDouble;
-import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -59,12 +57,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION);
         modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION);
 
-        SwerveModulePosition[] actualPositions = new SwerveModulePosition[modules.length];
-        for (int i = 0; i < modules.length; i++) {
-            actualPositions[i] = modules[i].getActualPosition();
-        }
-        odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation(), actualPositions);
         driveEventLogger.append("Swerve modules initialized");
+
+        odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation(), getModulePositions());
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
 
@@ -81,7 +76,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         // driveTab.addNumber("Gyro", () -> 0.0);
 
         // driveTab.add(
-        //         "Reset to Absolute", new InstantCommand(this::setAllModulesToAbsolute).withName("Reset").ignoringDisable(true)
+        // "Reset to Absolute", new
+        // InstantCommand(this::setAllModulesToAbsolute).withName("Reset").ignoringDisable(true)
         // );
         driveTab.addBoolean("All have been set to absolute", this::allModulesAtAbsolute);
 
@@ -235,6 +231,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return Math.abs(target - val) <= tolerance;
     }
 
+    private SwerveModulePosition[] getModulePositions() {
+        SwerveModulePosition[] actualPositions = new SwerveModulePosition[modules.length];
+        for (int i = 0; i < modules.length; i++) {
+            actualPositions[i] = modules[i].getActualPosition();
+        }
+
+        return actualPositions;
+    }
+
     @Override
     public void periodic() {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
@@ -243,13 +248,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             modules[i].setDesiredState(desiredStates[i], openLoop);
         }
 
-        SwerveModulePosition[] actualPositions = new SwerveModulePosition[modules.length];
-        for (int i = 0; i < modules.length; i++) {
-            actualPositions[i] = modules[i].getActualPosition();
-        }
-
-//        poseEstimator.update(getGyroRotation(), actualPositions);
-        odometry.update(getGyroRotation(), actualPositions);
+//        poseEstimator.update(getGyroRotation(), getModulePositions());
+        odometry.update(getGyroRotation(), getModulePositions());
 
         logValues();
     }

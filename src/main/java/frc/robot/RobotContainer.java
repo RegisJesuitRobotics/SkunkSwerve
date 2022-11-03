@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.MiscConstants;
@@ -57,9 +56,8 @@ public class RobotContainer {
         autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", true, driveSubsystem));
 
         new Trigger(autoCommandChooser::hasNewValue).onTrue(
-                new InstantCommand(
-                        () -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null)
-                ).ignoringDisable(true)
+                new InstantCommand(() -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null))
+                        .ignoringDisable(true)
         );
 
         // Shuffleboard.getTab("DriveTrainRaw").add("Auto Chooser", autoCommandChooser);
@@ -69,21 +67,24 @@ public class RobotContainer {
         driveCommandChooser.setDefaultOption(
                 "Hybrid (Default to Field Relative but use robot when holding button)",
                 new HybridOrientatedDriveCommand(
-                        () -> -driverController.getRawAxis(driverController.getYChannel()), () -> -driverController.getRawAxis(driverController.getXChannel()),
+                        () -> -driverController.getRawAxis(driverController.getYChannel()),
+                        () -> -driverController.getRawAxis(driverController.getXChannel()),
                         () -> driverController.getTwist(), driverController.button(1), driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Field Orientated",
                 new FieldOrientatedDriveCommand(
-                        () -> -driverController.getRawAxis(driverController.getYChannel()), () -> -driverController.getRawAxis(driverController.getXChannel()),
+                        () -> -driverController.getRawAxis(driverController.getYChannel()),
+                        () -> -driverController.getRawAxis(driverController.getXChannel()),
                         () -> driverController.getTwist(), driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Robot Orientated",
                 new RobotOrientatedDriveCommand(
-                        () -> -driverController.getRawAxis(driverController.getYChannel()), () -> -driverController.getRawAxis(driverController.getXChannel()),
+                        () -> -driverController.getRawAxis(driverController.getYChannel()),
+                        () -> -driverController.getRawAxis(driverController.getXChannel()),
                         () -> driverController.getTwist(), driveSubsystem
                 )
         );

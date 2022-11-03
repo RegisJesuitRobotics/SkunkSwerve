@@ -91,11 +91,14 @@ public class SwerveModule implements Sendable {
 
         String alertBeginning = "Module " + instanceId + ": ";
         notSetToAbsoluteAlert = new Alert(
-                alertBeginning + "Steering is not reset to absolute position", AlertType.ERROR);
+                alertBeginning + "Steering is not reset to absolute position", AlertType.ERROR
+        );
         steeringEncoderFaultAlert = new Alert(
-                alertBeginning + "Steering encoder had a fault initializing", AlertType.ERROR);
+                alertBeginning + "Steering encoder had a fault initializing", AlertType.ERROR
+        );
         steeringMotorFaultAlert = new Alert(
-                alertBeginning + "Steering motor had a fault initializing", AlertType.ERROR);
+                alertBeginning + "Steering motor had a fault initializing", AlertType.ERROR
+        );
         driveMotorFaultAlert = new Alert(alertBeginning + "Drive motor had a fault initializing", AlertType.ERROR);
         inDeadModeAlert = new Alert(alertBeginning + "In dead mode", AlertType.WARNING);
 
@@ -127,7 +130,8 @@ public class SwerveModule implements Sendable {
 
     private void configDriveMotor(SwerveModuleConfiguration config) {
         boolean faultInitializing = checkCTREError(
-                driveMotor.configFactoryDefault(CAN_TIMEOUT_MS), "Could not config drive motor factory default");
+                driveMotor.configFactoryDefault(CAN_TIMEOUT_MS), "Could not config drive motor factory default"
+        );
 
         TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
         applyCommonMotorConfiguration(motorConfiguration, config);
@@ -135,14 +139,17 @@ public class SwerveModule implements Sendable {
         config.sharedConfiguration.driveVelocityGains.setSlot(motorConfiguration.slot0);
 
         faultInitializing |= checkCTREError(
-                driveMotor.configAllSettings(motorConfiguration, CAN_TIMEOUT_MS), "Could not configure drive motor");
+                driveMotor.configAllSettings(motorConfiguration, CAN_TIMEOUT_MS), "Could not configure drive motor"
+        );
 
         driveMotor.setInverted(
-                config.driveMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise);
+                config.driveMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise
+        );
 
         faultInitializing |= checkCTREError(
                 driveMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, CAN_TIMEOUT_MS),
-                "Could not config drive motor sensor");
+                "Could not config drive motor sensor"
+        );
 
         driveMotor.setSensorPhase(false);
 
@@ -157,7 +164,8 @@ public class SwerveModule implements Sendable {
 
     private void configSteeringMotor(SwerveModuleConfiguration config) {
         boolean faultInitializing = checkCTREError(
-                steeringMotor.configFactoryDefault(), "Could not config steer motor factory default");
+                steeringMotor.configFactoryDefault(), "Could not config steer motor factory default"
+        );
 
         TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
         applyCommonMotorConfiguration(motorConfiguration, config);
@@ -167,14 +175,17 @@ public class SwerveModule implements Sendable {
                 / steeringMotorConversionFactorPosition;
 
         faultInitializing |= checkCTREError(
-                steeringMotor.configAllSettings(motorConfiguration, CAN_TIMEOUT_MS), "Could not configure steer motor");
+                steeringMotor.configAllSettings(motorConfiguration, CAN_TIMEOUT_MS), "Could not configure steer motor"
+        );
 
         steeringMotor.setInverted(
-                config.steeringMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise);
+                config.steeringMotorInverted ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise
+        );
 
         faultInitializing |= checkCTREError(
                 steeringMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, CAN_TIMEOUT_MS),
-                "Could not config steer motor sensor");
+                "Could not config steer motor sensor"
+        );
 
         // Because + on motor is clockwise, and we want + on encoder to be
         // counter-clockwise we have to set the sensor phase
@@ -190,7 +201,8 @@ public class SwerveModule implements Sendable {
     }
 
     private void applyCommonMotorConfiguration(
-            TalonFXConfiguration motorConfiguration, SwerveModuleConfiguration config) {
+            TalonFXConfiguration motorConfiguration, SwerveModuleConfiguration config
+    ) {
         // Current limit
         motorConfiguration.supplyCurrLimit.currentLimit = config.sharedConfiguration.driveContinuousCurrentLimit;
         motorConfiguration.supplyCurrLimit.triggerThresholdCurrent = config.sharedConfiguration.drivePeakCurrentLimit;
@@ -209,14 +221,16 @@ public class SwerveModule implements Sendable {
 
         boolean faultInitializing = checkCTREError(
                 absoluteSteeringEncoder.configAllSettings(encoderConfiguration, CAN_TIMEOUT_MS),
-                "Could not configure steer encoder");
+                "Could not configure steer encoder"
+        );
 
         // Because we are only reading this at the beginning we do not have to update it
         // often
         faultInitializing |= checkCTREError(
                 absoluteSteeringEncoder
                         .setStatusFramePeriod(CANCoderStatusFrame.SensorData, CANCODER_PERIOD_MS, CAN_TIMEOUT_MS),
-                "Could not set steer encoder status frame");
+                "Could not set steer encoder status frame"
+        );
 
         steeringEncoderFaultAlert.set(faultInitializing);
         moduleEventEntry.append("Steer encoder initialized" + (faultInitializing ? " with faults" : ""));
@@ -282,7 +296,8 @@ public class SwerveModule implements Sendable {
             absolutePosition = getAbsoluteDegrees();
             // If no error
             if (!checkCTREError(
-                    absoluteSteeringEncoder.getLastError(), "Could not get absolute position from encoder")) {
+                    absoluteSteeringEncoder.getLastError(), "Could not get absolute position from encoder"
+            )) {
                 gotAbsolutePosition = true;
                 break;
             }
@@ -290,8 +305,8 @@ public class SwerveModule implements Sendable {
 
         if (gotAbsolutePosition) {
             ErrorCode settingPositionError = steeringMotor.setSelectedSensorPosition(
-                    Units.degreesToRadians(absolutePosition) / steeringMotorConversionFactorPosition, 0,
-                    CAN_TIMEOUT_MS);
+                    Units.degreesToRadians(absolutePosition) / steeringMotorConversionFactorPosition, 0, CAN_TIMEOUT_MS
+            );
             // If no error
             if (!checkCTREError(settingPositionError, "Could not set steer motor encoder to absolute position")) {
                 setToAbsolute = true;
@@ -385,8 +400,8 @@ public class SwerveModule implements Sendable {
         if (currentTime - lastAbsoluteResetTime > 5.0 && currentTime - lastMoveTime > 1.5
                 && Math.abs(absoluteSteeringEncoder.getVelocity()) < 0.5
                 && Math.abs(
-                        steeringMotor.getSelectedSensorVelocity() * steeringMotorConversionFactorPosition * 10) < Units
-                                .degreesToRadians(0.5)) {
+                        steeringMotor.getSelectedSensorVelocity() * steeringMotorConversionFactorPosition * 10
+                ) < Units.degreesToRadians(0.5)) {
             resetSteeringToAbsolute();
         }
     }
@@ -396,7 +411,8 @@ public class SwerveModule implements Sendable {
         steeringMotor.set(
                 TalonFXControlMode.Position,
                 SwerveUtils.calculateContinuousInputSetpoint(getSteeringAngleRadiansNoWrap(), targetAngleRadians)
-                        / steeringMotorConversionFactorPosition);
+                        / steeringMotorConversionFactorPosition
+        );
     }
 
     private void setDriveReference(double targetVelocityMetersPerSecond, boolean openLoop) {
@@ -410,7 +426,8 @@ public class SwerveModule implements Sendable {
             driveMotor.set(
                     TalonFXControlMode.Velocity, targetVelocityMetersPerSecond / driveMotorConversionFactorVelocity,
                     DemandType.ArbitraryFeedForward,
-                    driveMotorFF.calculate(targetVelocityMetersPerSecond) / nominalVoltage);
+                    driveMotorFF.calculate(targetVelocityMetersPerSecond) / nominalVoltage
+            );
         }
     }
 
@@ -439,19 +456,16 @@ public class SwerveModule implements Sendable {
         builder.addBooleanProperty("In Dead Mode", () -> isDeadMode, null);
     }
 
-    public static record SwerveModuleConfiguration(
-            int driveMotorPort, int steeringMotorPort, int steeringEncoderPort, boolean driveMotorInverted,
-            boolean steeringMotorInverted, double offsetDegrees, boolean steeringEncoderInverted,
-            SharedSwerveModuleConfiguration sharedConfiguration) {}
+    public record SwerveModuleConfiguration(int driveMotorPort, int steeringMotorPort, int steeringEncoderPort,
+            boolean driveMotorInverted, boolean steeringMotorInverted, double offsetDegrees,
+            boolean steeringEncoderInverted, SharedSwerveModuleConfiguration sharedConfiguration) {}
 
     /**
      * This is all the options that are not module specific
      */
-    public static record SharedSwerveModuleConfiguration(
-            double driveGearRatio, double steerGearRatio, double drivePeakCurrentLimit,
-            double driveContinuousCurrentLimit, double drivePeakCurrentDurationSeconds,
-            double steerPeakCurrentLimit, double steerContinuousCurrentLimit,
-            double steerPeakCurrentDurationSeconds, double nominalVoltage, double wheelDiameterMeters,
-            double openLoopMaxSpeed, PIDFFFGains driveVelocityGains, PIDGains steerPositionGains,
-            double angleErrorToleranceRadians) {}
+    public record SharedSwerveModuleConfiguration(double driveGearRatio, double steerGearRatio,
+            double drivePeakCurrentLimit, double driveContinuousCurrentLimit, double drivePeakCurrentDurationSeconds,
+            double steerPeakCurrentLimit, double steerContinuousCurrentLimit, double steerPeakCurrentDurationSeconds,
+            double nominalVoltage, double wheelDiameterMeters, double openLoopMaxSpeed, PIDFFFGains driveVelocityGains,
+            PIDGains steerPositionGains, double angleErrorToleranceRadians) {}
 }

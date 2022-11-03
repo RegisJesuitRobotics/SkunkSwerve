@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 /** Class for managing persistent alerts to be sent over NetworkTables. */
 public class Alert {
