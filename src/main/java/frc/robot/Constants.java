@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.swerve.SwerveModule.SwerveModuleConfiguration;
 import frc.robot.subsystems.swerve.SwerveModule.SwerveModuleConfiguration.SharedSwerveModuleConfiguration;
@@ -41,7 +40,7 @@ public final class Constants {
         public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(
                 0.012232, 0.0, 0.0, 0.5816, 2.2249, 0.119
         );
-        public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.010121, 0.0, 0.37496);
+        public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
 
         // Left right distance between center of wheels
         public static final double TRACKWIDTH_METERS = Units.inchesToMeters(24.75);
@@ -60,7 +59,7 @@ public final class Constants {
         public static final double MOTOR_FREE_SPEED_RPM = 6380.0;
         public static final double MAX_VELOCITY_METERS_PER_SECOND = (MOTOR_FREE_SPEED_RPM * WHEEL_DIAMETER_METERS
                 * Math.PI) / (60.0 * DRIVE_GEAR_REDUCTION);
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 1.5;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 2;
 
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = MAX_VELOCITY_METERS_PER_SECOND / 1.75;
         public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
@@ -71,9 +70,6 @@ public final class Constants {
 
         public static final double PATH_POSITIONAL_VELOCITY_P = 0.5;
         public static final double PATH_ANGULAR_POSITION_P = 1.0;
-        public static final Constraints ANGULAR_CONSTRAINTS = new Constraints(
-                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED
-        );
 
         public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND = 5.0;
         public static final double ROTATION_RATE_LIMIT_RADIANS_SECOND = 5.0;
