@@ -49,6 +49,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final Field2d field2d = new Field2d();
 
     private SwerveModuleState[] desiredStates = new SwerveModuleState[4];
+    private boolean activeSteer = true;
     private boolean openLoop = true;
 
     public SwerveDriveSubsystem() {
@@ -149,7 +150,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      *                      will be used (mostly used for auto)
      */
     public void setChassisSpeeds(ChassisSpeeds chassisSpeeds, boolean openLoop) {
-        setRawStates(openLoop, KINEMATICS.toSwerveModuleStates(chassisSpeeds));
+        setRawStates(true, openLoop, KINEMATICS.toSwerveModuleStates(chassisSpeeds));
     }
 
     /**
@@ -162,12 +163,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param states   the desired states... Ordered front left, front right, back
      *                 left, back right
      */
-    public void setRawStates(boolean openLoop, SwerveModuleState[] states) {
+    public void setRawStates(boolean activeSteer, boolean openLoop, SwerveModuleState[] states) {
         if (states.length != modules.length) {
             throw new IllegalArgumentException("You must provide states for all modules");
         }
 
         this.openLoop = openLoop;
+        this.activeSteer = activeSteer;
 
         // Deep copy of states array
         desiredStates = new SwerveModuleState[states.length];
@@ -180,10 +182,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * Sets each module velocity to zero and desired angle to what it currently is
      */
     public void stopMovement() {
-        openLoop = true;
+        SwerveModuleState[] newStates = new SwerveModuleState[desiredStates.length];
         for (int i = 0; i < desiredStates.length; i++) {
-            desiredStates[i] = new SwerveModuleState(0.0, modules[i].getActualState().angle);
+            newStates[i] = new SwerveModuleState(0.0, modules[i].getActualState().angle);
         }
+        setRawStates(false, true, newStates);
     }
 
     /**
@@ -245,7 +248,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
 
         for (int i = 0; i < modules.length; i++) {
-            modules[i].setDesiredState(desiredStates[i], openLoop);
+            modules[i].setDesiredState(desiredStates[i], activeSteer, openLoop);
         }
 
 //        poseEstimator.update(getGyroRotation(), getModulePositions());

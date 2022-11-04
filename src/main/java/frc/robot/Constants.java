@@ -41,7 +41,7 @@ public final class Constants {
         public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(
                 0.012232, 0.0, 0.0, 0.5816, 2.2249, 0.119
         );
-        public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
+        public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.010121, 0.0, 0.37496);
 
         // Left right distance between center of wheels
         public static final double TRACKWIDTH_METERS = Units.inchesToMeters(24.75);
@@ -95,19 +95,19 @@ public final class Constants {
         );
 
         public static final SwerveModuleConfiguration FRONT_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                1, 5, 9, true, true, -70.6, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                1, 5, 9, true, true, -67.8, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration FRONT_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                2, 6, 10, false, true, -104.8, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                2, 6, 10, true, true, 75.05, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration BACK_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                3, 7, 11, true, true, 77.5, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                3, 7, 11, true, true, 78.84, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                4, 8, 12, false, true, 23.95, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                4, 8, 12, true, true, -156.8, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
     }
 
