@@ -31,7 +31,7 @@ public class HoldDrivePositionCommand extends CommandBase {
 
     @Override
     public void execute() {
-        driveSubsystem.setRawStates(true, states);
+        driveSubsystem.setRawStates(true, true, states);
     }
 
     @Override
