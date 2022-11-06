@@ -10,9 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.commands.drive.FollowPathCommand;
 import frc.robot.commands.drive.HoldDrivePositionCommand;
-import frc.robot.commands.drive.teleop.FieldOrientatedDriveCommand;
 import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
-import frc.robot.commands.drive.teleop.RobotOrientatedDriveCommand;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
@@ -69,28 +67,28 @@ public class RobotContainer {
                 new HybridOrientatedDriveCommand(
                         () -> -driverController.getRawAxis(driverController.getYChannel()),
                         () -> -driverController.getRawAxis(driverController.getXChannel()),
-                        () -> driverController.getTwist(), driverController.button(1), driveSubsystem
+                        () -> -driverController.getTwist(), driverController.button(1).negate(), driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Field Orientated",
-                new FieldOrientatedDriveCommand(
+                new HybridOrientatedDriveCommand(
                         () -> -driverController.getRawAxis(driverController.getYChannel()),
                         () -> -driverController.getRawAxis(driverController.getXChannel()),
-                        () -> driverController.getTwist(), driveSubsystem
+                        () -> -driverController.getTwist(), () -> true, driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Robot Orientated",
-                new RobotOrientatedDriveCommand(
+                new HybridOrientatedDriveCommand(
                         () -> -driverController.getRawAxis(driverController.getYChannel()),
                         () -> -driverController.getRawAxis(driverController.getXChannel()),
-                        () -> driverController.getTwist(), driveSubsystem
+                        () -> -driverController.getTwist(), () -> false, driveSubsystem
                 )
         );
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
-        // driveTab.add("Drive Style", driveCommandChooser);
+        driveTab.add("Drive Style", driveCommandChooser);
 
         new Trigger(driveCommandChooser::hasNewValue).onTrue(
                 new InstantCommand(() -> evaluateDriveStyle(driveCommandChooser.getSelected())).ignoringDisable(true)
