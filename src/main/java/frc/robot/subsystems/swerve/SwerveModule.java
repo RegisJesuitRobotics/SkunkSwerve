@@ -404,7 +404,7 @@ public class SwerveModule implements Sendable {
     private void setAngleReference(double targetAngleRadians, boolean activeSteer) {
         activeSteerEntry.append(activeSteer);
         desiredHeadingEntry.append(targetAngleRadians);
-        if (!activeSteer) {
+        if (activeSteer) {
             steeringMotor.set(
                     TalonFXControlMode.Position,
                     SwerveUtils.calculateContinuousInputSetpoint(getSteeringAngleRadiansNoWrap(), targetAngleRadians)

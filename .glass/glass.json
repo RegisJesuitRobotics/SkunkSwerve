@@ -185,7 +185,7 @@
             }
           ],
           "crosshairs": true,
-          "height": 670,
+          "height": -37,
           "series": [
             {
               "color": [
@@ -455,7 +455,7 @@
     "Plot <6>": {
       "plots": [
         {
-          "height": -37,
+          "height": 390,
           "series": [
             {
               "color": [
@@ -487,7 +487,7 @@
     "Plot <7>": {
       "plots": [
         {
-          "height": -37,
+          "height": 338,
           "series": [
             {
               "color": [
