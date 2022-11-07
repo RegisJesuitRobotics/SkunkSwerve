@@ -66,8 +66,8 @@ public final class Constants {
         public static final double MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
                 * 0.5;
 
-        public static final double PATH_POSITIONAL_VELOCITY_P = 3;
-        public static final double PATH_ANGULAR_POSITION_P = 1;
+        public static final double PATH_POSITIONAL_VELOCITY_P = 1;
+        public static final double PATH_ANGULAR_POSITION_P = 5;
 
         public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND = 6.0;
         public static final double ROTATION_RATE_LIMIT_RADIANS_SECOND = 2.5 * Math.PI;

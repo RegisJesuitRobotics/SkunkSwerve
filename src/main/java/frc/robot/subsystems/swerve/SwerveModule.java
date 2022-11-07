@@ -401,6 +401,13 @@ public class SwerveModule implements Sendable {
         }
     }
 
+    public void setCharacterizationVoltage(double voltage) {
+        setAngleReference(0.0, true);
+
+        // Divide by the value our voltage compensation is set as
+        driveMotor.set(TalonFXControlMode.PercentOutput, voltage / nominalVoltage);
+    }
+
     private void setAngleReference(double targetAngleRadians, boolean activeSteer) {
         activeSteerEntry.append(activeSteer);
         desiredHeadingEntry.append(targetAngleRadians);
