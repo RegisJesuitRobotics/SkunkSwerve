@@ -1,9 +1,7 @@
 name: Java Format Check with Spotless
 on:
   push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
   workflow_dispatch:
 jobs:
   checkformat:
