@@ -92,18 +92,14 @@ public class SwerveModule implements Sendable {
         setToAbsoluteEntry = new BooleanLogEntry(logger, tableName + "setToAbsolute");
         moduleEventEntry = new StringLogEntry(logger, tableName + "events");
 
-        String alertBeginning = "Module " + instanceId + ": ";
-        notSetToAbsoluteAlert = new Alert(
-                alertBeginning + "Steering is not reset to absolute position", AlertType.ERROR
-        );
+        String alertPrefix = "Module " + instanceId + ": ";
+        notSetToAbsoluteAlert = new Alert(alertPrefix + "Steering is not reset to absolute position", AlertType.ERROR);
         steeringEncoderFaultAlert = new Alert(
-                alertBeginning + "Steering encoder had a fault initializing", AlertType.ERROR
+                alertPrefix + "Steering encoder had a fault initializing", AlertType.ERROR
         );
-        steeringMotorFaultAlert = new Alert(
-                alertBeginning + "Steering motor had a fault initializing", AlertType.ERROR
-        );
-        driveMotorFaultAlert = new Alert(alertBeginning + "Drive motor had a fault initializing", AlertType.ERROR);
-        inDeadModeAlert = new Alert(alertBeginning + "In dead mode", AlertType.WARNING);
+        steeringMotorFaultAlert = new Alert(alertPrefix + "Steering motor had a fault initializing", AlertType.ERROR);
+        driveMotorFaultAlert = new Alert(alertPrefix + "Drive motor had a fault initializing", AlertType.ERROR);
+        inDeadModeAlert = new Alert(alertPrefix + "In dead mode", AlertType.WARNING);
 
         this.driveMotorConversionFactorPosition = (config.sharedConfiguration.wheelDiameterMeters * Math.PI)
                 / (config.sharedConfiguration.driveGearRatio * 2048);
@@ -329,7 +325,7 @@ public class SwerveModule implements Sendable {
     }
 
     private double getAbsoluteDegrees() {
-        return Math.IEEEremainder(absoluteSteeringEncoder.getAbsolutePosition() + steeringEncoderOffset, 360);
+        return absoluteSteeringEncoder.getAbsolutePosition() + steeringEncoderOffset % 360;
     }
 
     private double getSteeringAngleRadiansNoWrap() {
@@ -340,7 +336,7 @@ public class SwerveModule implements Sendable {
      * @return the rotation of the wheel
      */
     private Rotation2d getSteeringAngle() {
-        return new Rotation2d(Math.IEEEremainder(getSteeringAngleRadiansNoWrap(), Math.PI * 2));
+        return new Rotation2d(getSteeringAngleRadiansNoWrap() % (Math.PI * 2));
     }
 
     private double getDriveMotorVelocityMetersPerSecond() {
@@ -409,6 +405,13 @@ public class SwerveModule implements Sendable {
                         .degreesToRadians(0.5)) {
             resetSteeringToAbsolute();
         }
+    }
+
+    public void setCharacterizationVoltage(double voltage) {
+        setAngleReference(0.0, true);
+
+        // Divide by the value our voltage compensation is set as
+        driveMotor.set(TalonFXControlMode.PercentOutput, voltage / nominalVoltage);
     }
 
     private void setAngleReference(double targetAngleRadians, boolean activeSteer) {

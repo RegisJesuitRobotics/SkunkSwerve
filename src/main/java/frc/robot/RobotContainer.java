@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.MiscConstants;
+import frc.robot.commands.drive.CharacterizeDriveCommand;
 import frc.robot.commands.drive.FollowPathCommand;
 import frc.robot.commands.drive.HoldDrivePositionCommand;
 import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
@@ -52,6 +53,11 @@ public class RobotContainer {
         autoCommandChooser
                 .addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", true, driveSubsystem));
         autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", true, driveSubsystem));
+        autoCommandChooser.addOption(
+                "FigureEightsWithRotation", new FollowPathCommand("FigureEightsWithRotation", true, driveSubsystem)
+        );
+        autoCommandChooser.addOption("FUN", new FollowPathCommand("FUN", true, driveSubsystem));
+        autoCommandChooser.addOption("CharacterizeDriveTrain", new CharacterizeDriveCommand(driveSubsystem));
 
         new Trigger(autoCommandChooser::hasNewValue).onTrue(
                 new InstantCommand(() -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null))

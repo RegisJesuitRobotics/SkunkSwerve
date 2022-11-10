@@ -2,6 +2,7 @@ package frc.robot.commands.drive.teleop;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriveTrainConstants;
@@ -56,11 +57,11 @@ public abstract class SwerveDriveCommand extends CommandBase {
 
 
     protected double[] getNormalizedScaledRateLimitedXYTheta() {
-        double[] normalized = SwerveUtils
-                .applyCircleDeadZone(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble(), 1.0);
+        Translation2d normalized = SwerveUtils
+                .applyCircleDeadZone(new Translation2d(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble()), 1.0);
         double[] scaled = new double[3];
-        scaled[0] = xRateLimiter.calculate(scaleXY(normalized[0]));
-        scaled[1] = yRateLimiter.calculate(scaleXY(normalized[1]));
+        scaled[0] = xRateLimiter.calculate(scaleXY(normalized.getX()));
+        scaled[1] = yRateLimiter.calculate(scaleXY(normalized.getY()));
         scaled[2] = rotationLimiter.calculate(scaleRotation(rotationSupplier.getAsDouble()));
         return scaled;
     }
@@ -75,7 +76,8 @@ public abstract class SwerveDriveCommand extends CommandBase {
     }
 
     protected static double scaleXY(double value) {
-        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 7.0 / 2) * Math.signum(value)
+        // TODO: re-evaluate
+        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2.0) * Math.signum(value)
                 * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND;
     }
 

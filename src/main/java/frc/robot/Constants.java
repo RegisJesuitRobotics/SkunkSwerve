@@ -37,7 +37,9 @@ public final class Constants {
         public static final double NOMINAL_VOLTAGE = 12.0;
 
         // For talons PID full output is 1023 except for all FFF gains
-        public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(0.02, 0.0, 0.0, 0.5816, 2.2249, 0.119);
+        public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(
+                0.04, 0.0, 0.0, 0.6712106209979143, 2.019606167307655, 0.0
+        );
         public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
 
         // Left right distance between center of wheels
@@ -60,20 +62,19 @@ public final class Constants {
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 2;
 
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = MAX_VELOCITY_METERS_PER_SECOND / 2.0;
-        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 
         public static final double MAX_TELEOP_VELOCITY_METERS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND * 0.9;
         public static final double MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
                 * 0.5;
 
-        public static final double PATH_POSITIONAL_VELOCITY_P = 3;
-        public static final double PATH_ANGULAR_POSITION_P = 1;
+        public static final double PATH_POSITIONAL_VELOCITY_P = 5;
+        public static final double PATH_ANGULAR_POSITION_P = 5;
 
         public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND = 6.0;
         public static final double ROTATION_RATE_LIMIT_RADIANS_SECOND = 2.5 * Math.PI;
         public static final double TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND = 0.25;
 
-        public static final double ANGLE_TOLERANCE_RADIANS = Units.degreesToRadians(0.5);
+        public static final double ANGLE_TOLERANCE_RADIANS = Units.degreesToRadians(0.25);
         public static final double VELOCITY_TOLERANCE_METERS_PER_SECOND = 0.05;
 
         // For pose estimation. Increase to trust model LESS

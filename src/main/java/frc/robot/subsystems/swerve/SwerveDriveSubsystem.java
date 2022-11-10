@@ -29,6 +29,12 @@ import static frc.robot.Constants.DriveTrainConstants.*;
  * The subsystem containing all the swerve modules
  */
 public class SwerveDriveSubsystem extends SubsystemBase {
+    enum DriveMode {
+        OPEN_LOOP,
+        CLOSE_LOOP,
+        CHARACTERIZATION
+    }
+
     private final SwerveModule[] modules = new SwerveModule[NUM_MODULES];
 
     private final AHRSFixed gyro = new AHRSFixed();
@@ -50,7 +56,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     private SwerveModuleState[] desiredStates = new SwerveModuleState[4];
     private boolean activeSteer = true;
-    private boolean openLoop = true;
+    private DriveMode driveMode = DriveMode.OPEN_LOOP;
+    private double characterizationVoltage = 0.0;
 
     public SwerveDriveSubsystem() {
         modules[0] = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION);
@@ -168,7 +175,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             throw new IllegalArgumentException("You must provide states for all modules");
         }
 
-        this.openLoop = openLoop;
+        driveMode = openLoop ? DriveMode.OPEN_LOOP : DriveMode.CLOSE_LOOP;
         this.activeSteer = activeSteer;
 
         // Deep copy of states array
@@ -187,6 +194,21 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             newStates[i] = new SwerveModuleState(0.0, modules[i].getActualState().angle);
         }
         setRawStates(false, true, newStates);
+    }
+
+    public void setCharacterizationVoltage(double voltage) {
+        driveMode = DriveMode.CHARACTERIZATION;
+        characterizationVoltage = voltage;
+    }
+
+    public double getAverageDriveVelocityMetersSecond() {
+        SwerveModuleState[] actualStates = getActualStates();
+        double sum = 0.0;
+        for (SwerveModuleState state : actualStates) {
+            sum += state.speedMetersPerSecond;
+        }
+
+        return sum / actualStates.length;
     }
 
     /**
@@ -230,6 +252,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return allSet;
     }
 
+    private SwerveModuleState[] getActualStates() {
+        SwerveModuleState[] actualStates = new SwerveModuleState[modules.length];
+        for (int i = 0; i < modules.length; i++) {
+            actualStates[i] = modules[i].getActualState();
+        }
+        return actualStates;
+    }
+
     private static boolean inTolerance(double val, double target, double tolerance) {
         return Math.abs(target - val) <= tolerance;
     }
@@ -245,10 +275,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
+        switch (driveMode) {
+            case OPEN_LOOP:
+            case CLOSE_LOOP:
+                SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
 
-        for (int i = 0; i < modules.length; i++) {
-            modules[i].setDesiredState(desiredStates[i], activeSteer, openLoop);
+                for (int i = 0; i < modules.length; i++) {
+                    modules[i].setDesiredState(desiredStates[i], activeSteer, driveMode == DriveMode.OPEN_LOOP);
+                }
+                break;
+            case CHARACTERIZATION:
+                for (SwerveModule module : modules) {
+                    module.setCharacterizationVoltage(characterizationVoltage);
+                }
+                break;
         }
 
 //        poseEstimator.update(getGyroRotation(), getModulePositions());
@@ -258,11 +298,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     private void logValues() {
-        gyroEntry.append(getGyroRotation().getDegrees());
+        gyroEntry.append(getGyroRotation().getRadians());
 
         Pose2d estimatedPose = getPose();
         odometryEntry.append(
-                new double[] { estimatedPose.getX(), estimatedPose.getY(), estimatedPose.getRotation().getDegrees() }
+                new double[] { estimatedPose.getX(), estimatedPose.getY(), estimatedPose.getRotation().getRadians() }
         );
 
         field2d.setRobotPose(estimatedPose);
