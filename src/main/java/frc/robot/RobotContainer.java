@@ -53,6 +53,10 @@ public class RobotContainer {
         autoCommandChooser
                 .addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", true, driveSubsystem));
         autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", true, driveSubsystem));
+        autoCommandChooser.addOption(
+                "FigureEightsWithRotation", new FollowPathCommand("FigureEightsWithRotation", true, driveSubsystem)
+        );
+        autoCommandChooser.addOption("FUN", new FollowPathCommand("FUN", true, driveSubsystem));
         autoCommandChooser.addOption("CharacterizeDriveTrain", new CharacterizeDriveCommand(driveSubsystem));
 
         new Trigger(autoCommandChooser::hasNewValue).whenActive(

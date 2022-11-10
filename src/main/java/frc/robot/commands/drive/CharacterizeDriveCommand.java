@@ -1,5 +1,7 @@
 package frc.robot.commands.drive;
 
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
@@ -8,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CharacterizeDriveCommand extends CommandBase {
-    private static final double RAMP_RATE_VOLT_SECOND = 0.05;
+    private static final double RAMP_RATE_VOLT_SECOND = 0.20;
 
     private final SwerveDriveSubsystem driveSubsystem;
     private final Timer timer = new Timer();
@@ -47,9 +49,11 @@ public class CharacterizeDriveCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.println(voltageList.size());
-        System.out.println(voltageList);
-        System.out.println(velocityList);
+        NetworkTableEntry voltageListEntry = NetworkTableInstance.getDefault().getTable("Char").getEntry("voltageList");
+        NetworkTableEntry velocityListEntry = NetworkTableInstance.getDefault().getTable("Char")
+                .getEntry("velocityList");
+        voltageListEntry.setDoubleArray(voltageList.stream().mapToDouble(Double::doubleValue).toArray());
+        velocityListEntry.setDoubleArray(velocityList.stream().mapToDouble(Double::doubleValue).toArray());
 
         driveSubsystem.stopMovement();
     }

@@ -1,5 +1,6 @@
 package frc.robot.utils;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -12,7 +13,7 @@ public class SwerveUtils {
      * @return the target angle in controller's scope
      */
     public static double calculateContinuousInputSetpoint(double currentAngle, double targetAngleSetpoint) {
-        targetAngleSetpoint = Math.IEEEremainder(targetAngleSetpoint, Math.PI * 2);
+        targetAngleSetpoint = targetAngleSetpoint % (Math.PI * 2);
 
         double remainder = currentAngle % (Math.PI * 2);
         double adjustedAngleSetpoint = targetAngleSetpoint + (currentAngle - remainder);
@@ -32,20 +33,16 @@ public class SwerveUtils {
      * Some controllers are not circular, so they can return something like (1, 1)
      * which has a magnitude of over 1 which could result in requesting too much
      * from the system. This makes sure that nothing goes over the maxMagnitude.
-     * Simple example:
-     * <a href="https://www.desmos.com/calculator/gohl0rmvez">Desmos</a>
      *
-     * @param xValue       the x value
-     * @param yValue       the y value
+     * @param translation  the translation vector
      * @param maxMagnitude the maximum magnitude of the values
-     * @return the normalized x and y value. [x, y]
+     * @return the normalized x and y value.
      */
-    public static double[] applyCircleDeadZone(double xValue, double yValue, double maxMagnitude) {
-        double magnitude = Math.hypot(xValue, yValue);
-        if (magnitude > maxMagnitude) {
-            return new double[] { xValue / magnitude * maxMagnitude, yValue / magnitude * maxMagnitude };
+    public static Translation2d applyCircleDeadZone(Translation2d translation, double maxMagnitude) {
+        if (translation.getNorm() > maxMagnitude) {
+            return translation.div(translation.getNorm()).times(maxMagnitude);
         }
-        return new double[] { xValue, yValue };
+        return translation;
     }
 
     public static boolean inEpoch(ChassisSpeeds chassisSpeeds1, ChassisSpeeds chassisSpeeds2, double epoch) {

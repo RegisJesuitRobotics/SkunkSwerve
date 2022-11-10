@@ -261,16 +261,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (driveMode == DriveMode.CHARACTERIZATION) {
-            for (SwerveModule module : modules) {
-                module.setCharacterizationVoltage(characterizationVoltage);
-            }
-        } else {
-            SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
+        switch (driveMode) {
+            case OPEN_LOOP:
+            case CLOSE_LOOP:
+                SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
 
-            for (int i = 0; i < modules.length; i++) {
-                modules[i].setDesiredState(desiredStates[i], activeSteer, driveMode == DriveMode.OPEN_LOOP);
-            }
+                for (int i = 0; i < modules.length; i++) {
+                    modules[i].setDesiredState(desiredStates[i], activeSteer, driveMode == DriveMode.OPEN_LOOP);
+                }
+                break;
+            case CHARACTERIZATION:
+                for (SwerveModule module : modules) {
+                    module.setCharacterizationVoltage(characterizationVoltage);
+                }
+                break;
         }
 
 //        poseEstimator.update(getGyroRotation(), actualStates);
@@ -280,11 +284,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     private void logValues() {
-        gyroEntry.append(getGyroRotation().getDegrees());
+        gyroEntry.append(getGyroRotation().getRadians());
 
         Pose2d estimatedPose = getPose();
         odometryEntry.append(
-                new double[] { estimatedPose.getX(), estimatedPose.getY(), estimatedPose.getRotation().getDegrees() }
+                new double[] { estimatedPose.getX(), estimatedPose.getY(), estimatedPose.getRotation().getRadians() }
         );
 
         field2d.setRobotPose(estimatedPose);
