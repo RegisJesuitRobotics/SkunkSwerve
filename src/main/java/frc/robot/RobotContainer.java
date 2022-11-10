@@ -11,7 +11,7 @@ import frc.robot.commands.drive.FollowPathCommand;
 import frc.robot.commands.drive.HoldDrivePositionCommand;
 import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
 import frc.robot.commands.util.InstantRunWhenDisabledCommand;
-import frc.robot.joysticks.ThrustMaster;
+import frc.robot.joysticks.PlaystationController;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
@@ -29,7 +29,7 @@ import frc.robot.utils.ListenableSendableChooser;
 public class RobotContainer {
     private final SwerveDriveSubsystem driveSubsystem = new SwerveDriveSubsystem();
 
-    private final ThrustMaster driverController = new ThrustMaster(0);
+    private final PlaystationController driverController = new PlaystationController(0);
 
     private final ListenableSendableChooser<Command> driveCommandChooser = new ListenableSendableChooser<>();
     private final ListenableSendableChooser<Command> autoCommandChooser = new ListenableSendableChooser<>();
@@ -70,25 +70,25 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         driveCommandChooser.setDefaultOption(
-                "Hybrid (Default to Field Relative but use robot when holding button)",
+                "Hybrid (Default to Field Relative but use robot centric when holding button)",
                 new HybridOrientatedDriveCommand(
-                        () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
-                        () -> -driverController.stick.getZAxis(), () -> !driverController.buttonOne.get(),
+                        () -> -driverController.leftThumb.getXAxis(), () -> -driverController.leftThumb.getYAxis(),
+                        () -> -driverController.rightThumb.getXAxis(), () -> !driverController.rightButton.get(),
                         driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Field Orientated",
                 new HybridOrientatedDriveCommand(
-                        () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
-                        () -> -driverController.stick.getZAxis(), () -> true, driveSubsystem
+                        () -> -driverController.leftThumb.getXAxis(), () -> -driverController.leftThumb.getYAxis(),
+                        () -> -driverController.rightThumb.getXAxis(), () -> true, driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Robot Orientated",
                 new HybridOrientatedDriveCommand(
-                        () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
-                        () -> -driverController.stick.getZAxis(), () -> false, driveSubsystem
+                        () -> -driverController.leftThumb.getXAxis(), () -> -driverController.leftThumb.getYAxis(),
+                        () -> -driverController.rightThumb.getXAxis(), () -> false, driveSubsystem
                 )
         );
 
@@ -99,8 +99,8 @@ public class RobotContainer {
                 new InstantRunWhenDisabledCommand(() -> evaluateDriveStyle(driveCommandChooser.getSelected()))
         );
 
-        driverController.buttonTwo.whenPressed(new InstantRunWhenDisabledCommand(driveSubsystem::zeroHeading));
-        driverController.buttonThree.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
+        driverController.circle.whenPressed(new InstantRunWhenDisabledCommand(driveSubsystem::zeroHeading));
+        driverController.leftButton.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
     }
 
     private void evaluateDriveStyle(Command newCommand) {
