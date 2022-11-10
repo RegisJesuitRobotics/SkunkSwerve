@@ -1,5 +1,6 @@
 package frc.robot.utils;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,22 +28,29 @@ class SwerveUtilsTest {
 
     @Test
     void applyCircleDeadZone_InsideCircle_NoChange() {
-        assertArrayEquals(new double[] { 0.5, 0.5 }, SwerveUtils.applyCircleDeadZone(0.5, 0.5, 1.0));
+        assertEquals(new Translation2d(0.5, 0.5), SwerveUtils.applyCircleDeadZone(new Translation2d(0.5, 0.5), 1.0));
     }
 
     @Test
     void applyCircleDeadZone_InsideCircle_NonOneMax_NoChange() {
-        assertArrayEquals(new double[] { 1.0, 1.5 }, SwerveUtils.applyCircleDeadZone(1.0, 1.5, 10.0));
+        assertEquals(new Translation2d(1.0, 1.5), SwerveUtils.applyCircleDeadZone(new Translation2d(1.0, 1.5), 10.0));
     }
+
+    private static final double rootTwoOverTwo = Math.sqrt(2.0) / 2;
 
     @Test
     void applyCircleDeadZone_OutsideCircle_Normalized() {
-        // sqrt(2) / 2
-        assertArrayEquals(new double[] { 0.707, 0.707 }, SwerveUtils.applyCircleDeadZone(1.0, 1.0, 1.0), 0.001);
+        assertEquals(
+                new Translation2d(rootTwoOverTwo, rootTwoOverTwo),
+                SwerveUtils.applyCircleDeadZone(new Translation2d(1.0, 1.0), 1.0)
+        );
     }
 
     @Test
     void applyCircleDeadZone_OutsideCircle_Negative_Normalized() {
-        assertArrayEquals(new double[] { -0.707, 0.707 }, SwerveUtils.applyCircleDeadZone(-1.0, 1.0, 1.0), 0.001);
+        assertEquals(
+                new Translation2d(-rootTwoOverTwo, rootTwoOverTwo),
+                SwerveUtils.applyCircleDeadZone(new Translation2d(-1.0, 1.0), 1.0)
+        );
     }
 }

@@ -6,11 +6,10 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.MiscConstants;
+import frc.robot.commands.drive.CharacterizeDriveCommand;
 import frc.robot.commands.drive.FollowPathCommand;
 import frc.robot.commands.drive.HoldDrivePositionCommand;
-import frc.robot.commands.drive.SetModuleRotationCommand;
-import frc.robot.commands.drive.teleop.FieldOrientatedDriveCommand;
-import frc.robot.commands.drive.teleop.RobotOrientatedDriveCommand;
+import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
 import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.joysticks.ThrustMaster;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
@@ -54,6 +53,11 @@ public class RobotContainer {
         autoCommandChooser
                 .addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", true, driveSubsystem));
         autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", true, driveSubsystem));
+        autoCommandChooser.addOption(
+                "FigureEightsWithRotation", new FollowPathCommand("FigureEightsWithRotation", true, driveSubsystem)
+        );
+        autoCommandChooser.addOption("FUN", new FollowPathCommand("FUN", true, driveSubsystem));
+        autoCommandChooser.addOption("CharacterizeDriveTrain", new CharacterizeDriveCommand(driveSubsystem));
 
         new Trigger(autoCommandChooser::hasNewValue).whenActive(
                 new InstantRunWhenDisabledCommand(
@@ -66,17 +70,25 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         driveCommandChooser.setDefaultOption(
-                "Field Orientated",
-                new FieldOrientatedDriveCommand(
+                "Hybrid (Default to Field Relative but use robot when holding button)",
+                new HybridOrientatedDriveCommand(
                         () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
-                        driverController.stick::getZAxis, driveSubsystem
+                        () -> -driverController.stick.getZAxis(), () -> !driverController.buttonOne.get(),
+                        driveSubsystem
+                )
+        );
+        driveCommandChooser.addOption(
+                "Field Orientated",
+                new HybridOrientatedDriveCommand(
+                        () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
+                        () -> -driverController.stick.getZAxis(), () -> true, driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Robot Orientated",
-                new RobotOrientatedDriveCommand(
+                new HybridOrientatedDriveCommand(
                         () -> -driverController.stick.getYAxis(), () -> -driverController.stick.getXAxis(),
-                        driverController.stick::getZAxis, driveSubsystem
+                        () -> -driverController.stick.getZAxis(), () -> false, driveSubsystem
                 )
         );
 
@@ -87,8 +99,7 @@ public class RobotContainer {
                 new InstantRunWhenDisabledCommand(() -> evaluateDriveStyle(driveCommandChooser.getSelected()))
         );
 
-        driverController.buttonOne.whenPressed(new InstantRunWhenDisabledCommand(driveSubsystem::zeroHeading));
-        driverController.buttonTwo.whenHeld(new SetModuleRotationCommand(0.0, driveSubsystem));
+        driverController.buttonTwo.whenPressed(new InstantRunWhenDisabledCommand(driveSubsystem::zeroHeading));
         driverController.buttonThree.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
     }
 

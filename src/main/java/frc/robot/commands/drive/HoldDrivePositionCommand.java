@@ -13,7 +13,7 @@ public class HoldDrivePositionCommand extends CommandBase {
     private static final Rotation2d fortyFiveDegrees = Rotation2d.fromDegrees(45);
     private static final SwerveModuleState[] states = new SwerveModuleState[] {
             new SwerveModuleState(0.0, fortyFiveDegrees), new SwerveModuleState(0.0, fortyFiveDegrees.unaryMinus()),
-            new SwerveModuleState(0.0, fortyFiveDegrees), new SwerveModuleState(0.0, fortyFiveDegrees.unaryMinus()) };
+            new SwerveModuleState(0.0, fortyFiveDegrees.unaryMinus()), new SwerveModuleState(0.0, fortyFiveDegrees) };
 
     private final SwerveDriveSubsystem driveSubsystem;
 
@@ -31,7 +31,7 @@ public class HoldDrivePositionCommand extends CommandBase {
 
     @Override
     public void execute() {
-        driveSubsystem.setRawStates(true, states);
+        driveSubsystem.setRawStates(true, true, states);
     }
 
     @Override

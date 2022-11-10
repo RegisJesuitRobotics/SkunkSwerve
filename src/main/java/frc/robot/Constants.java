@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.swerve.SwerveModule.SwerveModuleConfiguration;
 import frc.robot.subsystems.swerve.SwerveModule.SwerveModuleConfiguration.SharedSwerveModuleConfiguration;
@@ -39,7 +38,7 @@ public final class Constants {
 
         // For talons PID full output is 1023 except for all FFF gains
         public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(
-                0.012232, 0.0, 0.0, 0.5816, 2.2249, 0.119
+                0.04, 0.0, 0.0, 0.6712106209979143, 2.019606167307655, 0.0
         );
         public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
 
@@ -60,26 +59,22 @@ public final class Constants {
         public static final double MOTOR_FREE_SPEED_RPM = 6380.0;
         public static final double MAX_VELOCITY_METERS_PER_SECOND = (MOTOR_FREE_SPEED_RPM * WHEEL_DIAMETER_METERS
                 * Math.PI) / (60.0 * DRIVE_GEAR_REDUCTION);
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 1.5;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 2;
 
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = MAX_VELOCITY_METERS_PER_SECOND / 1.75;
-        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = MAX_VELOCITY_METERS_PER_SECOND / 2.0;
 
         public static final double MAX_TELEOP_VELOCITY_METERS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND * 0.9;
         public static final double MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
                 * 0.5;
 
-        public static final double PATH_POSITIONAL_VELOCITY_P = 0.5;
-        public static final double PATH_ANGULAR_POSITION_P = 1.0;
-        public static final Constraints ANGULAR_CONSTRAINTS = new Constraints(
-                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED
-        );
+        public static final double PATH_POSITIONAL_VELOCITY_P = 5;
+        public static final double PATH_ANGULAR_POSITION_P = 5;
 
-        public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND = 5.0;
-        public static final double ROTATION_RATE_LIMIT_RADIANS_SECOND = 5.0;
+        public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND = 6.0;
+        public static final double ROTATION_RATE_LIMIT_RADIANS_SECOND = 2.5 * Math.PI;
         public static final double TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND = 0.25;
 
-        public static final double ANGLE_TOLERANCE_RADIANS = Units.degreesToRadians(0.5);
+        public static final double ANGLE_TOLERANCE_RADIANS = Units.degreesToRadians(0.25);
         public static final double VELOCITY_TOLERANCE_METERS_PER_SECOND = 0.05;
 
         // For pose estimation. Increase to trust model LESS
@@ -95,19 +90,19 @@ public final class Constants {
         );
 
         public static final SwerveModuleConfiguration FRONT_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                1, 5, 9, true, true, -70.6, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                1, 5, 9, true, true, -67.8, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration FRONT_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                2, 6, 10, false, true, -104.8, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                2, 6, 10, true, true, 75.05, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration BACK_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                3, 7, 11, true, true, 77.5, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                3, 7, 11, true, true, 78.84, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                4, 8, 12, false, true, 23.95, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                4, 8, 12, true, true, -156.8, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
     }
 

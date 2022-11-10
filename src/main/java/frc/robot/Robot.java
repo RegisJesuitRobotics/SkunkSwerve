@@ -36,7 +36,7 @@ public class Robot extends TimedRobot {
         // No reason to log them as everything on NT is already logged
         DataLogManager.logNetworkTables(false);
         DataLogManager.start();
-        DataLogManager.getLog().pause();
+//        DataLogManager.getLog().pause();
         DriverStation.startDataLog(DataLogManager.getLog());
 
         CommandSchedulerLogger.getInstance().start();
