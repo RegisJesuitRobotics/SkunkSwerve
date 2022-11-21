@@ -16,20 +16,23 @@ import frc.robot.Constants.MiscConstants;
 import frc.robot.logging.LoggablePIDController;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 
+import java.util.function.Supplier;
+
 public class FollowPathCommand extends CommandBase {
     private final SwerveDriveSubsystem driveSubsystem;
-    private final PathPlannerTrajectory path;
+    private final Supplier<PathPlannerTrajectory> pathSupplier;
+    private PathPlannerTrajectory currentPath;
     private final boolean shouldResetOdometry;
 
     private final NetworkTable baseTable = NetworkTableInstance.getDefault().getTable("followPath");
     private final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
             new LoggablePIDController(
                     "followPath/xController", baseTable.getSubTable("xController"),
-                    DriveTrainConstants.PATH_POSITIONAL_VELOCITY_P, 0.0, 0.0
+                    DriveTrainConstants.PATH_TRANSLATION_POSITION_P, 0.0, 0.0
             ),
             new LoggablePIDController(
                     "followPath/yController", baseTable.getSubTable("yController"),
-                    DriveTrainConstants.PATH_POSITIONAL_VELOCITY_P, 0.0, 0.0
+                    DriveTrainConstants.PATH_TRANSLATION_POSITION_P, 0.0, 0.0
             ),
             new LoggablePIDController(
                     "followPath/thetaController", baseTable.getSubTable("thetaController"),
@@ -48,26 +51,28 @@ public class FollowPathCommand extends CommandBase {
      * @param driveSubsystem      the swerve drive subsystem
      */
     public FollowPathCommand(String pathName, boolean shouldResetOdometry, SwerveDriveSubsystem driveSubsystem) {
-        this(
-                PathPlanner.loadPath(
-                        pathName, DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-                        DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
-                ), shouldResetOdometry, driveSubsystem
-        );
+        this(PathPlanner.loadPath(pathName, DriveTrainConstants.PATH_CONSTRAINTS), shouldResetOdometry, driveSubsystem);
+    }
+
+    public FollowPathCommand(
+            PathPlannerTrajectory path, boolean shouldResetOdometry, SwerveDriveSubsystem driveSubsystem
+    ) {
+        this(() -> path, shouldResetOdometry, driveSubsystem);
     }
 
     /**
      * A follow path command made with the trajectory
      *
-     * @param path                the trajectory
+     * @param pathSupplier        the trajectory
      * @param shouldResetOdometry if odometry should be reset to the position at the
      *                            beginning of the path
      * @param driveSubsystem      the swerve drive subsystem
      */
     public FollowPathCommand(
-            PathPlannerTrajectory path, boolean shouldResetOdometry, SwerveDriveSubsystem driveSubsystem
+            Supplier<PathPlannerTrajectory> pathSupplier, boolean shouldResetOdometry,
+            SwerveDriveSubsystem driveSubsystem
     ) {
-        this.path = path;
+        this.pathSupplier = pathSupplier;
         this.shouldResetOdometry = shouldResetOdometry;
         this.driveSubsystem = driveSubsystem;
 
@@ -76,11 +81,12 @@ public class FollowPathCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        currentPath = pathSupplier.get();
         if (shouldResetOdometry) {
-            driveSubsystem.resetOdometry(path.getInitialHolonomicPose());
+            driveSubsystem.resetOdometry(currentPath.getInitialHolonomicPose());
         }
         if (MiscConstants.enablePathPlannerServer) {
-            PathPlannerServer.sendActivePath(path.getStates());
+            PathPlannerServer.sendActivePath(currentPath.getStates());
         }
         timer.reset();
         timer.start();
@@ -89,7 +95,7 @@ public class FollowPathCommand extends CommandBase {
     @Override
     public void execute() {
         double currentTime = timer.get();
-        PathPlannerState desiredState = (PathPlannerState) path.sample(currentTime);
+        PathPlannerState desiredState = (PathPlannerState) currentPath.sample(currentTime);
         Pose2d currentPose = driveSubsystem.getPose();
         ChassisSpeeds chassisSpeeds = driveController.calculate(currentPose, desiredState);
 
@@ -113,6 +119,6 @@ public class FollowPathCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(path.getTotalTimeSeconds());
+        return timer.hasElapsed(currentPath.getTotalTimeSeconds());
     }
 }

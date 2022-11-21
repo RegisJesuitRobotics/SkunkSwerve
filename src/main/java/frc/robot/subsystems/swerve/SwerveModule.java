@@ -323,7 +323,7 @@ public class SwerveModule implements Sendable {
     }
 
     private double getAbsoluteDegrees() {
-        return absoluteSteeringEncoder.getAbsolutePosition() + steeringEncoderOffset % 360;
+        return Math.IEEEremainder(absoluteSteeringEncoder.getAbsolutePosition() + steeringEncoderOffset, 360);
     }
 
     private double getSteeringAngleRadiansNoWrap() {
@@ -334,7 +334,7 @@ public class SwerveModule implements Sendable {
      * @return the rotation of the wheel
      */
     private Rotation2d getSteeringAngle() {
-        return new Rotation2d(getSteeringAngleRadiansNoWrap() % (Math.PI * 2));
+        return new Rotation2d(Math.IEEEremainder(getSteeringAngleRadiansNoWrap(), Math.PI * 2));
     }
 
     private double getDriveMotorVelocityMetersPerSecond() {
@@ -382,7 +382,7 @@ public class SwerveModule implements Sendable {
         state = SwerveModuleState.optimize(state, getSteeringAngle());
 
         setDriveReference(state.speedMetersPerSecond, openLoop);
-        setAngleReference(state.angle.getRadians(), activeSteer);
+        setAngleReference(Math.IEEEremainder(state.angle.getRadians(), 2 * Math.PI), activeSteer);
 
         desiredState = state;
 
@@ -449,7 +449,9 @@ public class SwerveModule implements Sendable {
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty("Absolute Angle", this::getAbsoluteDegrees, null);
-        builder.addDoubleProperty("Read Angle Degrees", () -> getSteeringAngle().getDegrees(), null);
+        builder.addDoubleProperty(
+                "Read Angle Degrees", () -> Math.IEEEremainder(getSteeringAngle().getDegrees(), 360), null
+        );
         builder.addDoubleProperty("Drive Velocity", this::getDriveMotorVelocityMetersPerSecond, null);
         builder.addDoubleProperty("Desired Drive Velocity", () -> desiredState.speedMetersPerSecond, null);
         builder.addDoubleProperty("Drive Motor Output Percent", driveMotor::getMotorOutputPercent, null);

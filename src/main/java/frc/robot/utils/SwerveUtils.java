@@ -13,7 +13,7 @@ public class SwerveUtils {
      * @return the target angle in controller's scope
      */
     public static double calculateContinuousInputSetpoint(double currentAngle, double targetAngleSetpoint) {
-        targetAngleSetpoint = targetAngleSetpoint % (Math.PI * 2);
+        targetAngleSetpoint = Math.IEEEremainder(targetAngleSetpoint, Math.PI * 2);
 
         double remainder = currentAngle % (Math.PI * 2);
         double adjustedAngleSetpoint = targetAngleSetpoint + (currentAngle - remainder);

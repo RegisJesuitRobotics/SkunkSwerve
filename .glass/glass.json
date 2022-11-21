@@ -18,14 +18,17 @@
           "open": true
         },
         "open": true
-      }
+      },
+      "open": true
     },
     "followPath": {
-      "open": true,
       "thetaController": {
         "open": true
       },
       "xController": {
+        "open": true
+      },
+      "yController": {
         "open": true
       }
     },
@@ -126,8 +129,8 @@
               "label": "Angle",
               "lockMax": true,
               "lockMin": true,
-              "max": 180.0,
-              "min": -180.0
+              "max": 200.0,
+              "min": -200.0
             },
             {
               "label": "Motor Percent",
@@ -136,7 +139,7 @@
               "min": -1.0
             }
           ],
-          "height": -37,
+          "height": 338,
           "series": [
             {
               "color": [
@@ -183,7 +186,8 @@
         }
       ],
       "window": {
-        "name": "Front Left Angle"
+        "name": "Front Left Angle",
+        "visible": false
       }
     },
     "Plot <10>": {
@@ -208,13 +212,28 @@
                 1.0
               ],
               "id": "NT:/followPath/thetaController/setpoint"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/followPath/xController/currentMeasurement"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/followPath/xController/setpoint"
             }
           ]
         }
-      ],
-      "window": {
-        "visible": false
-      }
+      ]
     },
     "Plot <1>": {
       "plots": [
@@ -370,7 +389,7 @@
               "min": -1.0
             }
           ],
-          "height": 339,
+          "height": -37,
           "series": [
             {
               "color": [
@@ -410,8 +429,7 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Angle Motor Output Percent",
-              "name": "Motor Output",
-              "yAxis": 1
+              "name": "Motor Output"
             }
           ],
           "yaxis2": true
@@ -437,7 +455,7 @@
               "min": -1.0
             }
           ],
-          "height": -37,
+          "height": 338,
           "series": [
             {
               "color": [
@@ -515,8 +533,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Drive Velocity",
-              "name": "Desired Velocity"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Drive Velocity"
             },
             {
               "color": [
@@ -525,8 +542,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Drive Velocity",
-              "name": "Actual Velocity"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Drive Velocity"
             }
           ]
         }
@@ -538,6 +554,12 @@
     "Plot <7>": {
       "plots": [
         {
+          "axis": [
+            {
+              "lockMax": true,
+              "lockMin": true
+            }
+          ],
           "height": 338,
           "series": [
             {
@@ -568,17 +590,22 @@
     "Plot <8>": {
       "plots": [
         {
+          "axis": [
+            {
+              "lockMax": true,
+              "lockMin": true,
+              "max": 380.0,
+              "min": -20.0
+            },
+            {
+              "lockMax": true,
+              "lockMin": true,
+              "max": 200.0,
+              "min": -200.0
+            }
+          ],
           "height": 338,
           "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/followPath/thetaController/currentMeasurement"
-            },
             {
               "color": [
                 0.8666667342185974,
@@ -586,9 +613,21 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/followPath/thetaController/setpoint"
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Read Angle Degrees",
+              "yAxis": 1
+            },
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Angle Degrees",
+              "yAxis": 1
             }
-          ]
+          ],
+          "yaxis2": true
         }
       ]
     },
@@ -601,7 +640,7 @@
               "autoFit": true
             }
           ],
-          "height": 338,
+          "height": 587,
           "series": [
             {
               "color": [
@@ -628,13 +667,42 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/followPath/xController/output",
-              "yAxis": 1
+              "id": "NT:/followPath/thetaController/currentMeasurement"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/followPath/thetaController/setpoint"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:/followPath/yController/currentMeasurement"
+            },
+            {
+              "color": [
+                0.5764706134796143,
+                0.4705882668495178,
+                0.3764706254005432,
+                1.0
+              ],
+              "id": "NT:/followPath/yController/setpoint"
             }
           ],
           "yaxis2": true
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     }
   }
 }
