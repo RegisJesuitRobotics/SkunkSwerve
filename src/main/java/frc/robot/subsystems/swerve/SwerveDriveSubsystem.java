@@ -121,6 +121,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         resetOdometry(newPose);
     }
 
+    public void resetOdometry() {
+        resetOdometry(new Pose2d());
+    }
+
     /**
      * Set the current perceived location of the robot to the provided pose
      *
@@ -139,6 +143,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public Pose2d getPose() {
 //        return poseEstimator.getEstimatedPosition();
         return odometry.getPoseMeters();
+    }
+
+    public ChassisSpeeds getCurrentChassisSpeeds() {
+        return KINEMATICS.toChassisSpeeds(getActualStates());
     }
 
     /**

@@ -61,7 +61,7 @@ public abstract class RaiderJoystick extends Joystick {
         }
 
         public double getYAxis() {
-            return -parent.getRawAxis(yAxisPort);
+            return parent.getRawAxis(yAxisPort);
         }
     }
 

@@ -1,17 +1,24 @@
 package frc.robot;
 
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.server.PathPlannerServer;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.commands.drive.CharacterizeDriveCommand;
 import frc.robot.commands.drive.FollowPathCommand;
 import frc.robot.commands.drive.HoldDrivePositionCommand;
 import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
 import frc.robot.commands.util.InstantRunWhenDisabledCommand;
-import frc.robot.joysticks.PlaystationController;
+import frc.robot.joysticks.PseudoXboxController;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
@@ -29,13 +36,14 @@ import frc.robot.utils.ListenableSendableChooser;
 public class RobotContainer {
     private final SwerveDriveSubsystem driveSubsystem = new SwerveDriveSubsystem();
 
-    private final PlaystationController driverController = new PlaystationController(0);
+    private final PseudoXboxController driverController = new PseudoXboxController(0);
 
     private final ListenableSendableChooser<Command> driveCommandChooser = new ListenableSendableChooser<>();
     private final ListenableSendableChooser<Command> autoCommandChooser = new ListenableSendableChooser<>();
     private final Alert noAutoSelectedAlert = new Alert("No Auto Routine Selected", AlertType.WARNING);
 
     public RobotContainer() {
+        NetworkTableInstance.getDefault().setUpdateRate(0.01);
         configureButtonBindings();
         configureAutos();
     }
@@ -72,7 +80,7 @@ public class RobotContainer {
         driveCommandChooser.setDefaultOption(
                 "Hybrid (Default to Field Relative but use robot centric when holding button)",
                 new HybridOrientatedDriveCommand(
-                        () -> -driverController.leftThumb.getXAxis(), () -> -driverController.leftThumb.getYAxis(),
+                        () -> -driverController.leftThumb.getYAxis(), () -> -driverController.leftThumb.getXAxis(),
                         () -> -driverController.rightThumb.getXAxis(), () -> !driverController.rightButton.get(),
                         driveSubsystem
                 )
@@ -80,14 +88,14 @@ public class RobotContainer {
         driveCommandChooser.addOption(
                 "Field Orientated",
                 new HybridOrientatedDriveCommand(
-                        () -> -driverController.leftThumb.getXAxis(), () -> -driverController.leftThumb.getYAxis(),
+                        () -> -driverController.leftThumb.getYAxis(), () -> -driverController.leftThumb.getXAxis(),
                         () -> -driverController.rightThumb.getXAxis(), () -> true, driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Robot Orientated",
                 new HybridOrientatedDriveCommand(
-                        () -> -driverController.leftThumb.getXAxis(), () -> -driverController.leftThumb.getYAxis(),
+                        () -> -driverController.leftThumb.getYAxis(), () -> -driverController.leftThumb.getXAxis(),
                         () -> -driverController.rightThumb.getXAxis(), () -> false, driveSubsystem
                 )
         );
@@ -99,8 +107,23 @@ public class RobotContainer {
                 new InstantRunWhenDisabledCommand(() -> evaluateDriveStyle(driveCommandChooser.getSelected()))
         );
 
-        driverController.circle.whenPressed(new InstantRunWhenDisabledCommand(driveSubsystem::zeroHeading));
+        driverController.circle.whenPressed(new InstantRunWhenDisabledCommand(driveSubsystem::resetOdometry));
         driverController.leftButton.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
+        driverController.square.debounce(0.5).whenActive(new FollowPathCommand(() -> {
+            Pose2d currentPose = driveSubsystem.getPose();
+            return PathPlanner.generatePath(
+                    DriveTrainConstants.PATH_CONSTRAINTS,
+                    new PathPoint(
+                            currentPose.getTranslation(),
+                            new Rotation2d(currentPose.getX(), currentPose.getY()).unaryMinus(),
+                            currentPose.getRotation()
+                    ),
+                    new PathPoint(
+                            new Translation2d(0, 0), new Rotation2d(currentPose.getX(), currentPose.getY()),
+                            new Rotation2d(0)
+                    )
+            );
+        }, false, driveSubsystem));
     }
 
     private void evaluateDriveStyle(Command newCommand) {

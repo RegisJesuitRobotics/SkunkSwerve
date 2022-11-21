@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.pathplanner.lib.PathConstraints;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -38,7 +39,7 @@ public final class Constants {
 
         // For talons PID full output is 1023 except for all FFF gains
         public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(
-                0.04, 0.0, 0.0, 0.6712106209979143, 2.019606167307655, 0.0
+                0.02, 0.0, 0.0, 0.6712106209979143, 2.019606167307655, 0.0
         );
         public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
 
@@ -61,14 +62,17 @@ public final class Constants {
                 * Math.PI) / (60.0 * DRIVE_GEAR_REDUCTION);
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 2;
 
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = MAX_VELOCITY_METERS_PER_SECOND / 2.0;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = MAX_VELOCITY_METERS_PER_SECOND / 4.0;
 
         public static final double MAX_TELEOP_VELOCITY_METERS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND * 0.9;
         public static final double MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
                 * 0.5;
 
-        public static final double PATH_POSITIONAL_VELOCITY_P = 5;
-        public static final double PATH_ANGULAR_POSITION_P = 5;
+        public static final double PATH_TRANSLATION_POSITION_P = 1;
+        public static final double PATH_ANGULAR_POSITION_P = 7;
+        public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
+        );
 
         public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND = 6.0;
         public static final double ROTATION_RATE_LIMIT_RADIANS_SECOND = 2.5 * Math.PI;
