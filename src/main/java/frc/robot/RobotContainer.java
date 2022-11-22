@@ -13,9 +13,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.MiscConstants;
-import frc.robot.commands.drive.CharacterizeDriveCommand;
 import frc.robot.commands.drive.FollowPathCommand;
 import frc.robot.commands.drive.HoldDrivePositionCommand;
+import frc.robot.commands.drive.characterize.DynamicCharacterizeDriveCommand;
+import frc.robot.commands.drive.characterize.QuasistaticCharacterizeDriveCommand;
 import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
 import frc.robot.commands.util.InstantRunWhenDisabledCommand;
 import frc.robot.joysticks.PseudoXboxController;
@@ -65,7 +66,11 @@ public class RobotContainer {
                 "FigureEightsWithRotation", new FollowPathCommand("FigureEightsWithRotation", true, driveSubsystem)
         );
         autoCommandChooser.addOption("FUN", new FollowPathCommand("FUN", true, driveSubsystem));
-        autoCommandChooser.addOption("CharacterizeDriveTrain", new CharacterizeDriveCommand(driveSubsystem));
+        autoCommandChooser.addOption(
+                "QuasistaticCharacterizeDriveCommand", new QuasistaticCharacterizeDriveCommand(0.2, driveSubsystem)
+        );
+        autoCommandChooser
+                .addOption("DynamicCharacterizeDriveCommand", new DynamicCharacterizeDriveCommand(8.0, driveSubsystem));
 
         new Trigger(autoCommandChooser::hasNewValue).whenActive(
                 new InstantRunWhenDisabledCommand(
@@ -111,19 +116,21 @@ public class RobotContainer {
         driverController.leftButton.whileHeld(new HoldDrivePositionCommand(driveSubsystem));
         driverController.square.debounce(0.5).whenActive(new FollowPathCommand(() -> {
             Pose2d currentPose = driveSubsystem.getPose();
+            Pose2d targetPose = new Pose2d();
+            Translation2d translation = currentPose.minus(targetPose).getTranslation();
             return PathPlanner.generatePath(
                     DriveTrainConstants.PATH_CONSTRAINTS,
                     new PathPoint(
                             currentPose.getTranslation(),
-                            new Rotation2d(currentPose.getX(), currentPose.getY()).unaryMinus(),
+                            new Rotation2d(translation.getX(), translation.getY()).unaryMinus(),
                             currentPose.getRotation()
                     ),
                     new PathPoint(
-                            new Translation2d(0, 0), new Rotation2d(currentPose.getX(), currentPose.getY()),
+                            new Translation2d(0, 0), new Rotation2d(translation.getX(), translation.getY()),
                             new Rotation2d(0)
                     )
             );
-        }, false, driveSubsystem));
+        }, false, driveSubsystem).until(driverController.rightButton::get));
     }
 
     private void evaluateDriveStyle(Command newCommand) {

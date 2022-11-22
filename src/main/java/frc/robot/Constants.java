@@ -68,8 +68,8 @@ public final class Constants {
         public static final double MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
                 * 0.5;
 
-        public static final double PATH_TRANSLATION_POSITION_P = 1;
-        public static final double PATH_ANGULAR_POSITION_P = 7;
+        public static final PIDGains PATH_TRANSLATION_POSITION_GAINS = new PIDGains(1.0, 0.0, 0.0);
+        public static final PIDGains PATH_ANGULAR_POSITION_GAINS = new PIDGains(1.0, 0.0, 0.0);
         public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
         );

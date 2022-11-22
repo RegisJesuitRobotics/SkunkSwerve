@@ -6,14 +6,14 @@ import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.server.PathPlannerServer;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.MiscConstants;
-import frc.robot.logging.LoggablePIDController;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 
 import java.util.function.Supplier;
@@ -24,20 +24,16 @@ public class FollowPathCommand extends CommandBase {
     private PathPlannerTrajectory currentPath;
     private final boolean shouldResetOdometry;
 
-    private final NetworkTable baseTable = NetworkTableInstance.getDefault().getTable("followPath");
     private final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
-            new LoggablePIDController(
-                    "followPath/xController", baseTable.getSubTable("xController"),
-                    DriveTrainConstants.PATH_TRANSLATION_POSITION_P, 0.0, 0.0
-            ),
-            new LoggablePIDController(
-                    "followPath/yController", baseTable.getSubTable("yController"),
-                    DriveTrainConstants.PATH_TRANSLATION_POSITION_P, 0.0, 0.0
-            ),
-            new LoggablePIDController(
-                    "followPath/thetaController", baseTable.getSubTable("thetaController"),
-                    DriveTrainConstants.PATH_ANGULAR_POSITION_P, 0.0, 0.0
-            )
+            DriveTrainConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/xController"),
+            DriveTrainConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/yController"),
+            DriveTrainConstants.PATH_ANGULAR_POSITION_GAINS.createLoggablePIDController("followPath/thetaController")
+    );
+
+    private final PPHolonomicDriveController nextDriveController = new PPHolonomicDriveController(
+            DriveTrainConstants.PATH_TRANSLATION_POSITION_GAINS.createPIDController(),
+            DriveTrainConstants.PATH_TRANSLATION_POSITION_GAINS.createPIDController(),
+            DriveTrainConstants.PATH_ANGULAR_POSITION_GAINS.createPIDController()
     );
 
     private final Timer timer = new Timer();
@@ -95,11 +91,23 @@ public class FollowPathCommand extends CommandBase {
     @Override
     public void execute() {
         double currentTime = timer.get();
-        PathPlannerState desiredState = (PathPlannerState) currentPath.sample(currentTime);
         Pose2d currentPose = driveSubsystem.getPose();
+
+        PathPlannerState desiredState = (PathPlannerState) currentPath.sample(currentTime);
         ChassisSpeeds chassisSpeeds = driveController.calculate(currentPose, desiredState);
 
-        driveSubsystem.setChassisSpeeds(chassisSpeeds, false);
+        PathPlannerState nextDesiredState = (PathPlannerState) currentPath.sample(currentTime + 0.02);
+        Pose2d assumedNextPose = currentPose
+                .plus(
+                        new Transform2d(
+                                new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond)
+                                        .times(0.02),
+                                new Rotation2d(chassisSpeeds.omegaRadiansPerSecond).times(0.02)
+                        )
+                );
+        ChassisSpeeds nextChassisSpeeds = nextDriveController.calculate(assumedNextPose, nextDesiredState);
+
+        driveSubsystem.setChassisSpeeds(chassisSpeeds, nextChassisSpeeds, false);
 
         if (MiscConstants.enablePathPlannerServer) {
             PathPlannerServer.sendPathFollowingData(
@@ -119,6 +127,6 @@ public class FollowPathCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(currentPath.getTotalTimeSeconds());
+        return timer.hasElapsed(currentPath.getTotalTimeSeconds()) && driveController.atReference();
     }
 }

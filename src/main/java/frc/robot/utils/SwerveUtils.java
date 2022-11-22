@@ -59,4 +59,12 @@ public class SwerveUtils {
     public static SwerveModuleState copySwerveState(SwerveModuleState swerveModuleState) {
         return new SwerveModuleState(swerveModuleState.speedMetersPerSecond, swerveModuleState.angle);
     }
+
+    public static SwerveModuleState[] copySwerveStateArray(SwerveModuleState[] swerveModuleStates) {
+        SwerveModuleState[] copied = new SwerveModuleState[swerveModuleStates.length];
+        for (int i = 0; i < swerveModuleStates.length; i++) {
+            copied[i] = copySwerveState(swerveModuleStates[i]);
+        }
+        return copied;
+    }
 }

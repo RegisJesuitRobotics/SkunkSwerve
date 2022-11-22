@@ -1,9 +1,8 @@
-package frc.robot.logging;
+package frc.robot.telemetry;
 
-import edu.wpi.first.util.datalog.StringLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.telemetry.types.StringTelemetryEntry;
 
 public class CommandSchedulerLogger {
     private static CommandSchedulerLogger instance;
@@ -16,11 +15,11 @@ public class CommandSchedulerLogger {
         return instance;
     }
 
-    private final StringLogEntry initializedCommandsEntry = new StringLogEntry(
-            DataLogManager.getLog(), tableName + "initialized"
+    private final StringTelemetryEntry initializedCommandsEntry = new StringTelemetryEntry(
+            tableName + "initialized", false, false
     );
-    private final StringLogEntry finishedCommandsEntry = new StringLogEntry(
-            DataLogManager.getLog(), tableName + "finished"
+    private final StringTelemetryEntry finishedCommandsEntry = new StringTelemetryEntry(
+            tableName + "finished", false, false
     );
 
     private final CommandScheduler commandScheduler;
