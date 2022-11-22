@@ -2,7 +2,7 @@ import java.text.SimpleDateFormat
 
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2023.1.1-beta-2"
+    id "edu.wpi.first.GradleRIO" version "2023.1.1-beta-4"
     id 'com.diffplug.spotless' version '6.11.0'
 }
 
@@ -117,9 +117,9 @@ repositories {
 }
 
 tasks.register("writeBuildTime") {
-    Date date = new Date();
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    new File(projectDir.toString() + "/src/main/deploy", "buildTime.txt").text = dateFormatter.format(date);
+    Date date = new Date()
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    new File(projectDir.toString() + "/src/main/deploy", "buildTime.txt").text = dateFormatter.format(date)
 }
 
 jar.dependsOn tasks.named("writeBuildTime")

@@ -76,12 +76,12 @@ public abstract class SwerveDriveCommand extends CommandBase {
     }
 
     protected static double scaleXY(double value) {
-        // TODO: re-evaluate
         return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2.0) * Math.signum(value)
                 * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND;
     }
 
     protected static double scaleRotation(double value) {
-        return value * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2) * Math.signum(value)
+                * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
     }
 }

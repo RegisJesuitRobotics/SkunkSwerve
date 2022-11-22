@@ -1,10 +1,6 @@
 # TODO when robot is ready
 
-- [x] Get encoder offsets
-- [x] Tune steer modules with SysID
-- [x] Confirm turn sensor phase (CCW+?)
-- [x] Tune modules with SysID velocity
+- [ ] Test acceleration stuff, test end of path condition
 - [ ] Ensure current logging does not slow down code
-- [x] Update PDP firmware
 - [ ] Figure out the status frame stuff
-- [x] Calibrate navX
+- [ ] Re characterize the robot

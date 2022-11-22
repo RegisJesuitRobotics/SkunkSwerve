@@ -13,7 +13,7 @@ public class SwerveUtils {
      * @return the target angle in controller's scope
      */
     public static double calculateContinuousInputSetpoint(double currentAngle, double targetAngleSetpoint) {
-        targetAngleSetpoint = targetAngleSetpoint % (Math.PI * 2);
+        targetAngleSetpoint = Math.IEEEremainder(targetAngleSetpoint, Math.PI * 2);
 
         double remainder = currentAngle % (Math.PI * 2);
         double adjustedAngleSetpoint = targetAngleSetpoint + (currentAngle - remainder);
@@ -58,5 +58,13 @@ public class SwerveUtils {
      */
     public static SwerveModuleState copySwerveState(SwerveModuleState swerveModuleState) {
         return new SwerveModuleState(swerveModuleState.speedMetersPerSecond, swerveModuleState.angle);
+    }
+
+    public static SwerveModuleState[] copySwerveStateArray(SwerveModuleState[] swerveModuleStates) {
+        SwerveModuleState[] copied = new SwerveModuleState[swerveModuleStates.length];
+        for (int i = 0; i < swerveModuleStates.length; i++) {
+            copied[i] = copySwerveState(swerveModuleStates[i]);
+        }
+        return copied;
     }
 }
