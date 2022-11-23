@@ -11,12 +11,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.telemetry.LoggableTalonFX;
 import frc.robot.telemetry.types.BooleanTelemetryEntry;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
-import frc.robot.telemetry.types.StringTelemetryEntry;
+import frc.robot.telemetry.types.EventTelemetryEntry;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.PIDFFFGains;
@@ -43,7 +43,7 @@ public class SwerveModule {
     private final DoubleTelemetryEntry actualHeadingEntry;
     private final DoubleTelemetryEntry absoluteHeadingEntry;
     private final BooleanTelemetryEntry setToAbsoluteEntry;
-    private final StringTelemetryEntry moduleEventEntry;
+    private final EventTelemetryEntry moduleEventEntry;
 
     private final Alert notSetToAbsoluteAlert;
     private final Alert steeringEncoderFaultAlert;
@@ -86,7 +86,7 @@ public class SwerveModule {
         actualHeadingEntry = new DoubleTelemetryEntry(tableName + "actualHeading", true);
         absoluteHeadingEntry = new DoubleTelemetryEntry(tableName + "absoluteHeading", true);
         setToAbsoluteEntry = new BooleanTelemetryEntry(tableName + "setToAbsolute", true);
-        moduleEventEntry = new StringTelemetryEntry(tableName + "events", false, false);
+        moduleEventEntry = new EventTelemetryEntry(tableName + "events");
 
         String alertPrefix = "Module " + instanceId + ": ";
         notSetToAbsoluteAlert = new Alert(alertPrefix + "Steering is not reset to absolute position", AlertType.ERROR);
@@ -331,7 +331,7 @@ public class SwerveModule {
      * @return the rotation of the wheel
      */
     private Rotation2d getSteeringAngle() {
-        return new Rotation2d(Math.IEEEremainder(getSteeringAngleRadiansNoWrap(), Math.PI * 2));
+        return new Rotation2d(getSteeringAngleRadiansNoWrap());
     }
 
     private double getDriveMotorVelocityMetersPerSecond() {
@@ -350,8 +350,8 @@ public class SwerveModule {
         driveMotor.setNeutralMode(isDeadMode ? NeutralMode.Coast : NeutralMode.Brake);
     }
 
-    public Command getToggleDeadModeCommand() {
-        return new InstantCommand(() -> setDeadModule(!isDeadMode)).withName("Toggle").ignoringDisable(true);
+    public CommandBase getToggleDeadModeCommand() {
+        return Commands.runOnce(() -> setDeadModule(!isDeadMode)).withName("Toggle").ignoringDisable(true);
     }
 
     /**
@@ -392,8 +392,6 @@ public class SwerveModule {
 
         setDriveReference(state.speedMetersPerSecond, nextState.speedMetersPerSecond, openLoop);
         setAngleReference(Math.IEEEremainder(state.angle.getRadians(), 2 * Math.PI), activeSteer);
-
-        SwerveModuleState desiredState = state;
 
         // If we have not reset in 5 seconds, been still for 1.5 seconds and our steer
         // velocity is less than half a degree per second (could happen if we are being

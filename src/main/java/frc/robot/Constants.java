@@ -28,6 +28,8 @@ public final class Constants {
 
         public static final double STEERING_GEAR_REDUCTION = 150.0 / 7.0;
 
+        public static final boolean INVERT_GYRO = false;
+
         public static final double DRIVE_PEAK_CURRENT_LIMIT = 65.0;
         public static final double DRIVE_CONTINUOUS_CURRENT_LIMIT = 35.0;
         public static final double DRIVE_CONTINUOUS_CURRENT_LIMIT_TIME_SECONDS = 100.0;
@@ -38,8 +40,9 @@ public final class Constants {
         public static final double NOMINAL_VOLTAGE = 12.0;
 
         // For talons PID full output is 1023 except for all FFF gains
+        // TUNE
         public static final PIDFFFGains DRIVE_VELOCITY_GAINS = new PIDFFFGains(
-                0.02, 0.0, 0.0, 0.6712106209979143, 2.019606167307655, 0.0
+                0.02, 0.0, 0.0, 0.6712106209979143, 2.019606167307655, 2.0
         );
         public static final PIDGains STEER_POSITION_GAINS = new PIDGains(0.2, 0.0, 0.1);
 
@@ -67,12 +70,6 @@ public final class Constants {
         public static final double MAX_TELEOP_VELOCITY_METERS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND * 0.9;
         public static final double MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
                 * 0.5;
-
-        public static final PIDGains PATH_TRANSLATION_POSITION_GAINS = new PIDGains(1.0, 0.0, 0.0);
-        public static final PIDGains PATH_ANGULAR_POSITION_GAINS = new PIDGains(1.0, 0.0, 0.0);
-        public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(
-                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
-        );
 
         public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND = 6.0;
         public static final double ROTATION_RATE_LIMIT_RADIANS_SECOND = 2.5 * Math.PI;
@@ -107,6 +104,14 @@ public final class Constants {
 
         public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
                 4, 8, 12, true, true, -156.8, false, SHARED_SWERVE_MODULE_CONFIGURATION
+        );
+    }
+
+    public static class AutoConstants {
+        public static final PIDGains PATH_TRANSLATION_POSITION_GAINS = new PIDGains(1.0, 0.0, 0.0);
+        public static final PIDGains PATH_ANGULAR_POSITION_GAINS = new PIDGains(1.0, 0.0, 0.0);
+        public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(
+                DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND, DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
         );
     }
 

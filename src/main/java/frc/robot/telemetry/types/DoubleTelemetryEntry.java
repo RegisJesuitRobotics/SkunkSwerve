@@ -20,13 +20,14 @@ public class DoubleTelemetryEntry extends TelemetryEntry {
         logEntry = new DoubleLogEntry(DataLogManager.getLog(), path);
         if (shouldNT) {
             networkPublisher = NetworkTableInstance.getDefault().getDoubleTopic(path).publish();
+            networkPublisher.setDefault(0.0);
         } else {
             networkPublisher = null;
         }
     }
 
     public void append(double value) {
-        if (shouldLog(lastValue == value)) {
+        if (shouldLog(() -> lastValue == value)) {
             logEntry.append(value);
 
             if (networkPublisher != null) {

@@ -2,7 +2,7 @@ package frc.robot.telemetry;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.telemetry.types.StringTelemetryEntry;
+import frc.robot.telemetry.types.EventTelemetryEntry;
 
 public class CommandSchedulerLogger {
     private static CommandSchedulerLogger instance;
@@ -15,12 +15,8 @@ public class CommandSchedulerLogger {
         return instance;
     }
 
-    private final StringTelemetryEntry initializedCommandsEntry = new StringTelemetryEntry(
-            tableName + "initialized", false, false
-    );
-    private final StringTelemetryEntry finishedCommandsEntry = new StringTelemetryEntry(
-            tableName + "finished", false, false
-    );
+    private final EventTelemetryEntry initializedCommandsEntry = new EventTelemetryEntry(tableName + "initialized");
+    private final EventTelemetryEntry finishedCommandsEntry = new EventTelemetryEntry(tableName + "finished");
 
     private final CommandScheduler commandScheduler;
 

@@ -9,10 +9,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.DriveTrainConstants;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.commands.drive.FollowPathCommand;
 import frc.robot.commands.drive.HoldDrivePositionCommand;
@@ -21,8 +21,8 @@ import frc.robot.commands.drive.characterize.QuasistaticCharacterizeDriveCommand
 import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.Alert;
-import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.ListenableSendableChooser;
+import frc.robot.utils.Alert.AlertType;
 
 
 
@@ -71,11 +71,11 @@ public class RobotContainer {
                 .addOption("DynamicCharacterizeDriveCommand", new DynamicCharacterizeDriveCommand(8.0, driveSubsystem));
 
         new Trigger(autoCommandChooser::hasNewValue).onTrue(
-                new InstantCommand(() -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null))
+                Commands.runOnce(() -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null))
                         .ignoringDisable(true)
         );
 
-        // Shuffleboard.getTab("DriveTrainRaw").add("Auto Chooser", autoCommandChooser);
+        Shuffleboard.getTab("DriveTrainRaw").add("Auto Chooser", autoCommandChooser);
     }
 
     private void configureButtonBindings() {
@@ -105,17 +105,17 @@ public class RobotContainer {
         driveTab.add("Drive Style", driveCommandChooser);
 
         new Trigger(driveCommandChooser::hasNewValue).onTrue(
-                new InstantCommand(() -> evaluateDriveStyle(driveCommandChooser.getSelected())).ignoringDisable(true)
+                Commands.runOnce(() -> evaluateDriveStyle(driveCommandChooser.getSelected())).ignoringDisable(true)
         );
 
-        driverController.b().onTrue(new InstantCommand(driveSubsystem::resetOdometry).ignoringDisable(true));
+        driverController.b().onTrue(Commands.runOnce(driveSubsystem::resetOdometry).ignoringDisable(true));
         driverController.leftBumper().whileTrue(new HoldDrivePositionCommand(driveSubsystem).repeatedly());
         driverController.x().debounce(0.5).onTrue(new FollowPathCommand(() -> {
             Pose2d currentPose = driveSubsystem.getPose();
             Pose2d targetPose = new Pose2d();
             Translation2d translation = currentPose.minus(targetPose).getTranslation();
             return PathPlanner.generatePath(
-                    DriveTrainConstants.PATH_CONSTRAINTS,
+                    AutoConstants.PATH_CONSTRAINTS,
                     new PathPoint(
                             currentPose.getTranslation(),
                             new Rotation2d(translation.getX(), translation.getY()).unaryMinus(),

@@ -20,13 +20,14 @@ public class StringTelemetryEntry extends TelemetryEntry {
         logEntry = new StringLogEntry(DataLogManager.getLog(), path);
         if (shouldNT) {
             networkPublisher = NetworkTableInstance.getDefault().getStringTopic(path).publish();
+            networkPublisher.setDefault("");
         } else {
             networkPublisher = null;
         }
     }
 
     public void append(String value) {
-        if (shouldLog(lastValue.equals(value))) {
+        if (shouldLog(() -> lastValue.equals(value))) {
             logEntry.append(value);
 
             if (networkPublisher != null) {
