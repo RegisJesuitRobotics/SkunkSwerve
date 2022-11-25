@@ -1,6 +1,5 @@
-package frc.robot.commands.drive;
+package frc.robot.commands.drive.auto;
 
-import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -37,18 +36,6 @@ public class FollowPathCommand extends CommandBase {
     );
 
     private final Timer timer = new Timer();
-
-    /**
-     * A follow path command made with the path name
-     *
-     * @param pathName            the name of the path in path planner
-     * @param shouldResetOdometry if odometry should be reset to the position at the
-     *                            beginning of the path
-     * @param driveSubsystem      the swerve drive subsystem
-     */
-    public FollowPathCommand(String pathName, boolean shouldResetOdometry, SwerveDriveSubsystem driveSubsystem) {
-        this(PathPlanner.loadPath(pathName, AutoConstants.PATH_CONSTRAINTS), shouldResetOdometry, driveSubsystem);
-    }
 
     public FollowPathCommand(
             PathPlannerTrajectory path, boolean shouldResetOdometry, SwerveDriveSubsystem driveSubsystem

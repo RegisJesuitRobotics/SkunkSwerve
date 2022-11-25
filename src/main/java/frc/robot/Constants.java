@@ -63,16 +63,13 @@ public final class Constants {
         public static final double MOTOR_FREE_SPEED_RPM = 6380.0;
         public static final double MAX_VELOCITY_METERS_PER_SECOND = (MOTOR_FREE_SPEED_RPM * WHEEL_DIAMETER_METERS
                 * Math.PI) / (60.0 * DRIVE_GEAR_REDUCTION);
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 2;
 
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = MAX_VELOCITY_METERS_PER_SECOND / 4.0;
 
-        public static final double MAX_TELEOP_VELOCITY_METERS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND * 0.9;
-        public static final double MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
-                * 0.5;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 2;
 
         public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND = 6.0;
-        public static final double ROTATION_RATE_LIMIT_RADIANS_SECOND = 2.5 * Math.PI;
+        public static final double ANGULAR_RATE_LIMIT_RADIANS_SECOND = 2.5 * Math.PI;
         public static final double TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND = 0.25;
 
         public static final double ANGLE_TOLERANCE_RADIANS = Units.degreesToRadians(0.25);
@@ -111,7 +108,8 @@ public final class Constants {
         public static final PIDGains PATH_TRANSLATION_POSITION_GAINS = new PIDGains(1.0, 0.0, 0.0);
         public static final PIDGains PATH_ANGULAR_POSITION_GAINS = new PIDGains(1.0, 0.0, 0.0);
         public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(
-                DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND, DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
+                DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+                DriveTrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
         );
     }
 

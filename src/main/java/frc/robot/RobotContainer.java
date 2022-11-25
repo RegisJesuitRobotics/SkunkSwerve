@@ -6,6 +6,8 @@ import com.pathplanner.lib.server.PathPlannerServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,16 +15,20 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.MiscConstants;
-import frc.robot.commands.drive.FollowPathCommand;
-import frc.robot.commands.drive.HoldDrivePositionCommand;
-import frc.robot.commands.drive.characterize.DynamicCharacterizeDriveCommand;
-import frc.robot.commands.drive.characterize.QuasistaticCharacterizeDriveCommand;
+import frc.robot.commands.drive.auto.Autos;
+import frc.robot.commands.drive.auto.FollowPathCommand;
+import frc.robot.commands.drive.LockModulesCommand;
 import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.Alert;
 import frc.robot.utils.ListenableSendableChooser;
 import frc.robot.utils.Alert.AlertType;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.DoubleSupplier;
 
 
 
@@ -53,51 +59,52 @@ public class RobotContainer {
         }
 
         autoCommandChooser.setDefaultOption("Nothing", null);
-        autoCommandChooser.addOption("UpDownWithRotation", new FollowPathCommand("WithRotation", true, driveSubsystem));
-        autoCommandChooser.addOption("UpDownNoRotation", new FollowPathCommand("NoRotation", true, driveSubsystem));
-        autoCommandChooser
-                .addOption("StraightWithRotation", new FollowPathCommand("StraightWithRotation", true, driveSubsystem));
-        autoCommandChooser
-                .addOption("StraightNoRotation", new FollowPathCommand("StraightNoRotation", true, driveSubsystem));
-        autoCommandChooser.addOption("FigureEights", new FollowPathCommand("FigureEights", true, driveSubsystem));
-        autoCommandChooser.addOption(
-                "FigureEightsWithRotation", new FollowPathCommand("FigureEightsWithRotation", true, driveSubsystem)
-        );
-        autoCommandChooser.addOption("FUN", new FollowPathCommand("FUN", true, driveSubsystem));
-        autoCommandChooser.addOption(
-                "QuasistaticCharacterizeDriveCommand", new QuasistaticCharacterizeDriveCommand(0.2, driveSubsystem)
-        );
-        autoCommandChooser
-                .addOption("DynamicCharacterizeDriveCommand", new DynamicCharacterizeDriveCommand(8.0, driveSubsystem));
+        Autos autos = new Autos(driveSubsystem);
+        for (Entry<String, Command> auto : autos.getAutos().entrySet()) {
+            autoCommandChooser.addOption(auto.getKey(), auto.getValue());
+        }
 
         new Trigger(autoCommandChooser::hasNewValue).onTrue(
                 Commands.runOnce(() -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null))
-                        .ignoringDisable(true)
+                        .withName("Auto Alert Checker").ignoringDisable(true)
         );
 
         Shuffleboard.getTab("DriveTrainRaw").add("Auto Chooser", autoCommandChooser);
     }
 
     private void configureButtonBindings() {
+        GenericEntry maxTranslationSpeedEntry = Shuffleboard.getTab("DriveTrainRaw")
+                .add("Max Translational Speed (Percent)", 1.0).withWidget(BuiltInWidgets.kNumberSlider)
+                .withProperties(Map.of("min", 0, "max", 1.0)).getEntry();
+        GenericEntry maxAngularSpeedEntry = Shuffleboard.getTab("DriveTrainRaw").add("Max Angular Speed (Percent)", 1.0)
+                .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0, "max", 1.0)).getEntry();
+        DoubleSupplier translationalMaxSpeedSuppler = () -> maxTranslationSpeedEntry.getDouble(0.9)
+                * DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
+        DoubleSupplier angularMaxSpeedSupplier = () -> maxAngularSpeedEntry.getDouble(1.0)
+                * DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+
         driveCommandChooser.setDefaultOption(
                 "Hybrid (Default to Field Relative but use robot centric when holding button)",
                 new HybridOrientatedDriveCommand(
                         () -> -driverController.getLeftX(), () -> -driverController.getLeftY(),
-                        () -> -driverController.getRightX(), driverController.rightBumper().negate(), driveSubsystem
+                        () -> -driverController.getRightX(), driverController.rightBumper().negate(),
+                        translationalMaxSpeedSuppler, angularMaxSpeedSupplier, driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Field Orientated",
                 new HybridOrientatedDriveCommand(
                         () -> -driverController.getLeftX(), () -> -driverController.getLeftY(),
-                        () -> -driverController.getRightX(), () -> true, driveSubsystem
+                        () -> -driverController.getRightX(), () -> true, translationalMaxSpeedSuppler,
+                        angularMaxSpeedSupplier, driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Robot Orientated",
                 new HybridOrientatedDriveCommand(
                         () -> -driverController.getLeftX(), () -> -driverController.getLeftY(),
-                        () -> -driverController.getRightX(), () -> false, driveSubsystem
+                        () -> -driverController.getRightX(), () -> false, translationalMaxSpeedSuppler,
+                        angularMaxSpeedSupplier, driveSubsystem
                 )
         );
 
@@ -105,11 +112,15 @@ public class RobotContainer {
         driveTab.add("Drive Style", driveCommandChooser);
 
         new Trigger(driveCommandChooser::hasNewValue).onTrue(
-                Commands.runOnce(() -> evaluateDriveStyle(driveCommandChooser.getSelected())).ignoringDisable(true)
+                Commands.runOnce(() -> evaluateDriveStyle(driveCommandChooser.getSelected()))
+                        .withName("Drive Style Checker").ignoringDisable(true)
         );
 
-        driverController.b().onTrue(Commands.runOnce(driveSubsystem::resetOdometry).ignoringDisable(true));
-        driverController.leftBumper().whileTrue(new HoldDrivePositionCommand(driveSubsystem).repeatedly());
+        driverController.b().onTrue(
+                Commands.runOnce(driveSubsystem::resetOdometry).withName("Reset Odometry").ignoringDisable(true)
+        );
+        driverController.leftBumper().whileTrue(new LockModulesCommand(driveSubsystem).repeatedly());
+
         driverController.x().debounce(0.5).onTrue(new FollowPathCommand(() -> {
             Pose2d currentPose = driveSubsystem.getPose();
             Pose2d targetPose = new Pose2d();

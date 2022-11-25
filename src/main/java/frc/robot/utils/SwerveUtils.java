@@ -8,11 +8,14 @@ public class SwerveUtils {
     private SwerveUtils() {}
 
     /**
-     * @param currentAngleRadians        what the controller currently reads (radians)
+     * @param currentAngleRadians        what the controller currently reads
+     *                                   (radians)
      * @param targetAngleSetpointRadians the desired angle [-pi, pi)
      * @return the target angle in controller's scope
      */
-    public static double calculateContinuousInputSetpoint(double currentAngleRadians, double targetAngleSetpointRadians) {
+    public static double calculateContinuousInputSetpoint(
+            double currentAngleRadians, double targetAngleSetpointRadians
+    ) {
         targetAngleSetpointRadians = Math.IEEEremainder(targetAngleSetpointRadians, Math.PI * 2);
 
         double remainder = currentAngleRadians % (Math.PI * 2);

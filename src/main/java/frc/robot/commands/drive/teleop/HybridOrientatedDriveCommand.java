@@ -11,9 +11,13 @@ public class HybridOrientatedDriveCommand extends SwerveDriveCommand {
 
     public HybridOrientatedDriveCommand(
             DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier, DoubleSupplier rotationSupplier,
-            BooleanSupplier shouldFieldRelative, SwerveDriveSubsystem driveSubsystem
+            BooleanSupplier shouldFieldRelative, DoubleSupplier translationalMaxSpeedSupplier,
+            DoubleSupplier angularMaxSpeedSupplier, SwerveDriveSubsystem driveSubsystem
     ) {
-        super(xAxisSupplier, yAxisSupplier, rotationSupplier, driveSubsystem);
+        super(
+                xAxisSupplier, yAxisSupplier, rotationSupplier, translationalMaxSpeedSupplier, angularMaxSpeedSupplier,
+                driveSubsystem
+        );
         this.shouldFieldRelative = shouldFieldRelative;
     }
 

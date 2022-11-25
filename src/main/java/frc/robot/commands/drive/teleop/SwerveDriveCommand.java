@@ -16,6 +16,8 @@ public abstract class SwerveDriveCommand extends CommandBase {
     protected final DoubleSupplier xAxisSupplier;
     protected final DoubleSupplier yAxisSupplier;
     protected final DoubleSupplier rotationSupplier;
+    protected final DoubleSupplier translationalMaxSpeedSupplier;
+    protected final DoubleSupplier angularMaxSpeedSupplier;
     protected final SwerveDriveSubsystem driveSubsystem;
 
     protected final SlewRateLimiter xRateLimiter;
@@ -24,16 +26,19 @@ public abstract class SwerveDriveCommand extends CommandBase {
 
     protected SwerveDriveCommand(
             DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier, DoubleSupplier rotationSupplier,
+            DoubleSupplier translationalMaxSpeedSupplier, DoubleSupplier angularMaxSpeedSupplier,
             SwerveDriveSubsystem driveSubsystem
     ) {
         this.xAxisSupplier = xAxisSupplier;
         this.yAxisSupplier = yAxisSupplier;
         this.rotationSupplier = rotationSupplier;
+        this.translationalMaxSpeedSupplier = translationalMaxSpeedSupplier;
+        this.angularMaxSpeedSupplier = angularMaxSpeedSupplier;
         this.driveSubsystem = driveSubsystem;
 
         this.xRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
         this.yRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
-        this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ROTATION_RATE_LIMIT_RADIANS_SECOND);
+        this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND);
 
         addRequirements(driveSubsystem);
     }
@@ -60,9 +65,10 @@ public abstract class SwerveDriveCommand extends CommandBase {
         Translation2d normalized = SwerveUtils
                 .applyCircleDeadZone(new Translation2d(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble()), 1.0);
         double[] scaled = new double[3];
-        scaled[0] = xRateLimiter.calculate(scaleXY(normalized.getX()));
-        scaled[1] = yRateLimiter.calculate(scaleXY(normalized.getY()));
-        scaled[2] = rotationLimiter.calculate(scaleRotation(rotationSupplier.getAsDouble()));
+        scaled[0] = xRateLimiter.calculate(scaleXY(normalized.getX(), translationalMaxSpeedSupplier.getAsDouble()));
+        scaled[1] = yRateLimiter.calculate(scaleXY(normalized.getY(), translationalMaxSpeedSupplier.getAsDouble()));
+        scaled[2] = rotationLimiter
+                .calculate(scaleRotation(rotationSupplier.getAsDouble(), angularMaxSpeedSupplier.getAsDouble()));
         return scaled;
     }
 
@@ -75,13 +81,11 @@ public abstract class SwerveDriveCommand extends CommandBase {
         }
     }
 
-    protected static double scaleXY(double value) {
-        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2.0) * Math.signum(value)
-                * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND;
+    protected static double scaleXY(double value, double maxSpeed) {
+        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2.0) * Math.signum(value) * maxSpeed;
     }
 
-    protected static double scaleRotation(double value) {
-        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2) * Math.signum(value)
-                * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+    protected static double scaleRotation(double value, double maxSpeed) {
+        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2) * Math.signum(value) * maxSpeed;
     }
 }
