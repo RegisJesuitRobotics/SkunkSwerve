@@ -3,10 +3,8 @@ package frc.robot.telemetry;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 
-public class PowerDistributionLogger {
+public class TelemetryPowerDistribution extends PowerDistribution {
     private final static String tableName = "/power/";
-    private static int instances = 0;
-    private final PowerDistribution powerDistribution;
 
     private final DoubleTelemetryEntry totalEnergyEntry;
     private final DoubleTelemetryEntry totalPowerEntry;
@@ -14,12 +12,11 @@ public class PowerDistributionLogger {
     private final DoubleTelemetryEntry temperatureEntry;
     private final DoubleTelemetryEntry inputVoltageEntry;
 
-    public PowerDistributionLogger(PowerDistribution powerDistribution) {
-        instances++;
-        this.powerDistribution = powerDistribution;
-        powerDistribution.resetTotalEnergy();
+    public TelemetryPowerDistribution(int module, ModuleType moduleType) {
+        super(module, moduleType);
+        super.resetTotalEnergy();
 
-        String thisTableName = tableName + instances + "/";
+        String thisTableName = tableName + module + "/";
         totalEnergyEntry = new DoubleTelemetryEntry(thisTableName + "totalEnergy", true);
         totalPowerEntry = new DoubleTelemetryEntry(thisTableName + "totalPower", false);
         totalCurrentEntry = new DoubleTelemetryEntry(thisTableName + "totalCurrent", false);
@@ -28,10 +25,10 @@ public class PowerDistributionLogger {
     }
 
     public void logValues() {
-        totalEnergyEntry.append(powerDistribution.getTotalEnergy());
-        totalPowerEntry.append(powerDistribution.getTotalPower());
-        totalCurrentEntry.append(powerDistribution.getTotalCurrent());
-        temperatureEntry.append(powerDistribution.getTemperature());
-        inputVoltageEntry.append(powerDistribution.getVoltage());
+        totalEnergyEntry.append(super.getTotalEnergy());
+        totalPowerEntry.append(super.getTotalPower());
+        totalCurrentEntry.append(super.getTotalCurrent());
+        temperatureEntry.append(super.getTemperature());
+        inputVoltageEntry.append(super.getVoltage());
     }
 }

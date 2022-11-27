@@ -6,7 +6,7 @@ import frc.robot.telemetry.types.BooleanTelemetryEntry;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.telemetry.types.IntegerTelemetryEntry;
 
-public class LoggableTalonFX extends TalonFX {
+public class TelemetryTalonFX extends TalonFX {
     private final DoubleTelemetryEntry outputAmpsEntry;
     private final DoubleTelemetryEntry inputAmpsEntry;
     private final DoubleTelemetryEntry outputPercentEntry;
@@ -14,7 +14,7 @@ public class LoggableTalonFX extends TalonFX {
     private final BooleanTelemetryEntry inBrakeModeEntry;
 
 
-    public LoggableTalonFX(int deviceNumber, String logTable, String canbus) {
+    public TelemetryTalonFX(int deviceNumber, String logTable, String canbus) {
         super(deviceNumber, canbus);
 
         logTable += "/";
@@ -28,7 +28,7 @@ public class LoggableTalonFX extends TalonFX {
         firmwareVersionEntry.append(super.getFirmwareVersion());
     }
 
-    public LoggableTalonFX(int deviceNumber, String logTable) {
+    public TelemetryTalonFX(int deviceNumber, String logTable) {
         this(deviceNumber, logTable, "");
     }
 

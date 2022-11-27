@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class MiscRobotLoggerAndAlerts {
+public class MiscRobotTelemetryAndAlerts {
     private static final String tableName = "/robot/";
 
     private final Alert lowBatteryVoltageAlert = new Alert("Low Battery Voltage", AlertType.WARNING);
@@ -26,7 +26,7 @@ public class MiscRobotLoggerAndAlerts {
     private final DoubleTelemetryEntry voltageEntry = new DoubleTelemetryEntry(tableName + "voltage", false);
     private final DoubleTelemetryEntry canUtilizationEntry = new DoubleTelemetryEntry(tableName + "canUse", true);
 
-    public MiscRobotLoggerAndAlerts() {
+    public MiscRobotTelemetryAndAlerts() {
         for (int i = 0; i < controllerAlerts.length; i++) {
             controllerAlerts[i] = new Alert(
                     "Controller " + MiscConstants.usedControllerPorts[i] + " is disconnected.", AlertType.WARNING

@@ -78,6 +78,7 @@ public class RobotContainer {
                 .withProperties(Map.of("min", 0, "max", 1.0)).getEntry();
         GenericEntry maxAngularSpeedEntry = Shuffleboard.getTab("DriveTrainRaw").add("Max Angular Speed (Percent)", 1.0)
                 .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0, "max", 1.0)).getEntry();
+
         DoubleSupplier translationalMaxSpeedSuppler = () -> maxTranslationSpeedEntry.getDouble(0.9)
                 * DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
         DoubleSupplier angularMaxSpeedSupplier = () -> maxAngularSpeedEntry.getDouble(1.0)

@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.telemetry.LoggableTalonFX;
+import frc.robot.telemetry.TelemetryTalonFX;
 import frc.robot.telemetry.types.BooleanTelemetryEntry;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.telemetry.types.EventTelemetryEntry;
@@ -51,8 +51,8 @@ public class SwerveModule {
     private final Alert driveMotorFaultAlert;
     private final Alert inDeadModeAlert;
 
-    private final LoggableTalonFX driveMotor;
-    private final LoggableTalonFX steeringMotor;
+    private final TelemetryTalonFX driveMotor;
+    private final TelemetryTalonFX steeringMotor;
     private final CANCoder absoluteSteeringEncoder;
 
     private final double driveMotorConversionFactorPosition;
@@ -104,7 +104,7 @@ public class SwerveModule {
         this.steeringMotorConversionFactorVelocity = steeringMotorConversionFactorPosition * 10.0;
 
         // Drive motor
-        this.driveMotor = new LoggableTalonFX(config.driveMotorPort, tableName + "driveMotor");
+        this.driveMotor = new TelemetryTalonFX(config.driveMotorPort, tableName + "driveMotor");
         configDriveMotor(config);
 
         // Steer encoder
@@ -112,7 +112,7 @@ public class SwerveModule {
         configSteeringEncoder(config);
 
         // Steer motor
-        this.steeringMotor = new LoggableTalonFX(config.steeringMotorPort, tableName + "steeringMotor");
+        this.steeringMotor = new TelemetryTalonFX(config.steeringMotorPort, tableName + "steeringMotor");
         configSteeringMotor(config);
 
         this.nominalVoltage = config.sharedConfiguration.nominalVoltage;

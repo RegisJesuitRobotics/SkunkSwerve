@@ -2,7 +2,7 @@ package frc.robot.utils;
 
 import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import edu.wpi.first.math.controller.PIDController;
-import frc.robot.telemetry.LoggablePIDController;
+import frc.robot.telemetry.TelemetryPIDController;
 
 public class PIDGains {
     public final double p;
@@ -25,7 +25,7 @@ public class PIDGains {
         return new PIDController(p, i, d);
     }
 
-    public LoggablePIDController createLoggablePIDController(String logTable) {
-        return new LoggablePIDController(logTable, p, i, d);
+    public TelemetryPIDController createLoggablePIDController(String logTable) {
+        return new TelemetryPIDController(logTable, p, i, d);
     }
 }

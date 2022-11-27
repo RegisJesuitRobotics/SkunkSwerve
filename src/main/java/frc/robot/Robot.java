@@ -6,8 +6,8 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.telemetry.CommandSchedulerLogger;
-import frc.robot.telemetry.MiscRobotLoggerAndAlerts;
-import frc.robot.telemetry.PowerDistributionLogger;
+import frc.robot.telemetry.MiscRobotTelemetryAndAlerts;
+import frc.robot.telemetry.TelemetryPowerDistribution;
 
 
 
@@ -22,8 +22,8 @@ public class Robot extends TimedRobot {
 
     private RobotContainer robotContainer;
 
-    private PowerDistributionLogger powerDistributionLogger;
-    private MiscRobotLoggerAndAlerts miscRobotLoggerAndAlerts;
+    private TelemetryPowerDistribution telemetryPowerDistribution;
+    private MiscRobotTelemetryAndAlerts miscRobotTelemetryAndAlerts;
 
     /**
      * This method is run when the robot is first started up and should be used for
@@ -40,8 +40,8 @@ public class Robot extends TimedRobot {
 
         CommandSchedulerLogger.getInstance().start();
 
-        powerDistributionLogger = new PowerDistributionLogger(new PowerDistribution(0, ModuleType.kCTRE));
-        miscRobotLoggerAndAlerts = new MiscRobotLoggerAndAlerts();
+        telemetryPowerDistribution = new TelemetryPowerDistribution(0, ModuleType.kCTRE);
+        miscRobotTelemetryAndAlerts = new MiscRobotTelemetryAndAlerts();
 
         robotContainer = new RobotContainer();
     }
@@ -60,8 +60,8 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
 
-        miscRobotLoggerAndAlerts.logValues();
-        powerDistributionLogger.logValues();
+        miscRobotTelemetryAndAlerts.logValues();
+        telemetryPowerDistribution.logValues();
     }
 
 
