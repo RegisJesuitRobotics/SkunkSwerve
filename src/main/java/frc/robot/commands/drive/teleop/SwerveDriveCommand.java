@@ -9,37 +9,42 @@ import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.SwerveUtils;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-public abstract class SwerveDriveCommand extends CommandBase {
+public class SwerveDriveCommand extends CommandBase {
     protected static final ChassisSpeeds zeroMovement = new ChassisSpeeds(0.0, 0.0, 0.0);
-    protected final DoubleSupplier xAxisSupplier;
-    protected final DoubleSupplier yAxisSupplier;
-    protected final DoubleSupplier rotationSupplier;
-    protected final DoubleSupplier translationalMaxSpeedSupplier;
-    protected final DoubleSupplier angularMaxSpeedSupplier;
-    protected final SwerveDriveSubsystem driveSubsystem;
+    private final DoubleSupplier xAxisSupplier;
+    private final DoubleSupplier yAxisSupplier;
+    private final DoubleSupplier rotationSupplier;
+    private final DoubleSupplier translationalMaxSpeedSupplier;
+    private final DoubleSupplier angularMaxSpeedSupplier;
+    private final BooleanSupplier shouldFieldRelative;
+    private final SwerveDriveSubsystem driveSubsystem;
 
-    protected final SlewRateLimiter xRateLimiter;
-    protected final SlewRateLimiter yRateLimiter;
-    protected final SlewRateLimiter rotationLimiter;
+    private final SlewRateLimiter xRateLimiter;
+    private final SlewRateLimiter yRateLimiter;
+    private final SlewRateLimiter rotationLimiter;
 
-    protected SwerveDriveCommand(
+    private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
+
+    public SwerveDriveCommand(
             DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier, DoubleSupplier rotationSupplier,
-            DoubleSupplier translationalMaxSpeedSupplier, DoubleSupplier angularMaxSpeedSupplier,
-            SwerveDriveSubsystem driveSubsystem
+            BooleanSupplier shouldFieldRelative, DoubleSupplier translationalMaxSpeedSupplier,
+            DoubleSupplier angularMaxSpeedSupplier, SwerveDriveSubsystem driveSubsystem
     ) {
         this.xAxisSupplier = xAxisSupplier;
         this.yAxisSupplier = yAxisSupplier;
         this.rotationSupplier = rotationSupplier;
+        this.shouldFieldRelative = shouldFieldRelative;
         this.translationalMaxSpeedSupplier = translationalMaxSpeedSupplier;
         this.angularMaxSpeedSupplier = angularMaxSpeedSupplier;
-        this.driveSubsystem = driveSubsystem;
 
         this.xRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
         this.yRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
         this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND);
 
+        this.driveSubsystem = driveSubsystem;
         addRequirements(driveSubsystem);
     }
 
@@ -48,6 +53,26 @@ public abstract class SwerveDriveCommand extends CommandBase {
         xRateLimiter.reset(0);
         yRateLimiter.reset(0);
         rotationLimiter.reset(0);
+    }
+
+    @Override
+    public void execute() {
+        double[] inputs = getNormalizedScaledRateLimitedXYTheta();
+        ChassisSpeeds nextChassisSpeeds;
+        if (shouldFieldRelative.getAsBoolean()) {
+            nextChassisSpeeds = ChassisSpeeds
+                    .fromFieldRelativeSpeeds(inputs[0], inputs[1], inputs[2], driveSubsystem.getPose().getRotation());
+        } else {
+            nextChassisSpeeds = new ChassisSpeeds(inputs[0], inputs[1], inputs[2]);
+        }
+
+        if (SwerveUtils
+                .inEpoch(chassisSpeeds, zeroMovement, DriveTrainConstants.TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND)) {
+            driveSubsystem.stopMovement();
+        } else {
+            driveSubsystem.setChassisSpeeds(chassisSpeeds, nextChassisSpeeds, true);
+        }
+        chassisSpeeds = nextChassisSpeeds;
     }
 
     @Override
@@ -60,32 +85,18 @@ public abstract class SwerveDriveCommand extends CommandBase {
         return false;
     }
 
-
-    protected double[] getNormalizedScaledRateLimitedXYTheta() {
+    private double[] getNormalizedScaledRateLimitedXYTheta() {
         Translation2d normalized = SwerveUtils
                 .applyCircleDeadZone(new Translation2d(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble()), 1.0);
         double[] scaled = new double[3];
-        scaled[0] = xRateLimiter.calculate(scaleXY(normalized.getX(), translationalMaxSpeedSupplier.getAsDouble()));
-        scaled[1] = yRateLimiter.calculate(scaleXY(normalized.getY(), translationalMaxSpeedSupplier.getAsDouble()));
+        scaled[0] = xRateLimiter.calculate(scaleValue(normalized.getX(), translationalMaxSpeedSupplier.getAsDouble()));
+        scaled[1] = yRateLimiter.calculate(scaleValue(normalized.getY(), translationalMaxSpeedSupplier.getAsDouble()));
         scaled[2] = rotationLimiter
-                .calculate(scaleRotation(rotationSupplier.getAsDouble(), angularMaxSpeedSupplier.getAsDouble()));
+                .calculate(scaleValue(rotationSupplier.getAsDouble(), angularMaxSpeedSupplier.getAsDouble()));
         return scaled;
     }
 
-    protected void setDriveChassisSpeedsWithDeadZone(ChassisSpeeds chassisSpeeds) {
-        if (SwerveUtils
-                .inEpoch(chassisSpeeds, zeroMovement, DriveTrainConstants.TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND)) {
-            driveSubsystem.stopMovement();
-        } else {
-            driveSubsystem.setChassisSpeeds(chassisSpeeds, true);
-        }
-    }
-
-    protected static double scaleXY(double value, double maxSpeed) {
+    private static double scaleValue(double value, double maxSpeed) {
         return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2.0) * Math.signum(value) * maxSpeed;
-    }
-
-    protected static double scaleRotation(double value, double maxSpeed) {
-        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2) * Math.signum(value) * maxSpeed;
     }
 }

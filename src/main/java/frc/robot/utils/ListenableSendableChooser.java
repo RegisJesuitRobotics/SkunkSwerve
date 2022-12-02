@@ -51,11 +51,10 @@ public class ListenableSendableChooser<V> implements NTSendable, AutoCloseable {
     /** A map linking strings to the objects the represent. */
     private final Map<String, V> m_map = new LinkedHashMap<>();
 
+    private boolean hasNewValue = true;
     private String m_defaultChoice = "";
     private final int m_instance;
     private static final AtomicInteger s_instances = new AtomicInteger();
-
-    private boolean hasNewValue = true;
 
     /** Instantiates a {@link SendableChooser}. */
     public ListenableSendableChooser() {
@@ -80,7 +79,7 @@ public class ListenableSendableChooser<V> implements NTSendable, AutoCloseable {
         try {
             return hasNewValue;
         } finally {
-            hasNewValue = false;
+            hasNewValue = !hasNewValue;
         }
     }
 
@@ -168,9 +167,9 @@ public class ListenableSendableChooser<V> implements NTSendable, AutoCloseable {
                 for (StringPublisher pub : m_activePubs) {
                     pub.set(val);
                 }
+                hasNewValue = true;
             } finally {
                 m_mutex.unlock();
-                hasNewValue = true;
             }
         });
     }

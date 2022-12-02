@@ -16,6 +16,6 @@ public abstract class TelemetryEntry {
             firstRun = false;
             return true;
         }
-        return !isLastEqual.getAsBoolean() && shouldLazyLog;
+        return !shouldLazyLog || !isLastEqual.getAsBoolean();
     }
 }

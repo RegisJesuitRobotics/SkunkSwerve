@@ -3,6 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.server.PathPlannerServer;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,7 +21,7 @@ import frc.robot.Constants.MiscConstants;
 import frc.robot.commands.drive.auto.Autos;
 import frc.robot.commands.drive.auto.FollowPathCommand;
 import frc.robot.commands.drive.LockModulesCommand;
-import frc.robot.commands.drive.teleop.HybridOrientatedDriveCommand;
+import frc.robot.commands.drive.teleop.SwerveDriveCommand;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.Alert;
 import frc.robot.utils.ListenableSendableChooser;
@@ -86,26 +87,43 @@ public class RobotContainer {
 
         driveCommandChooser.setDefaultOption(
                 "Hybrid (Default to Field Relative but use robot centric when holding button)",
-                new HybridOrientatedDriveCommand(
-                        () -> -driverController.getLeftX(), () -> -driverController.getLeftY(),
+                new SwerveDriveCommand(
+                        () -> -driverController.getLeftY(), () -> -driverController.getLeftX(),
                         () -> -driverController.getRightX(), driverController.rightBumper().negate(),
                         translationalMaxSpeedSuppler, angularMaxSpeedSupplier, driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Field Orientated",
-                new HybridOrientatedDriveCommand(
-                        () -> -driverController.getLeftX(), () -> -driverController.getLeftY(),
+                new SwerveDriveCommand(
+                        () -> -driverController.getLeftY(), () -> -driverController.getLeftX(),
                         () -> -driverController.getRightX(), () -> true, translationalMaxSpeedSuppler,
                         angularMaxSpeedSupplier, driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
                 "Robot Orientated",
-                new HybridOrientatedDriveCommand(
-                        () -> -driverController.getLeftX(), () -> -driverController.getLeftY(),
+                new SwerveDriveCommand(
+                        () -> -driverController.getLeftY(), () -> -driverController.getLeftX(),
                         () -> -driverController.getRightX(), () -> false, translationalMaxSpeedSuppler,
                         angularMaxSpeedSupplier, driveSubsystem
+                )
+        );
+        PIDController alwaysFacingAngularController = AutoConstants.PATH_ANGULAR_POSITION_GAINS
+                .createLoggablePIDController("AlwaysFacingController");
+        driveCommandChooser.addOption(
+                "Always Facing (0, 0)",
+                // This isn't optimal so if we were to actually use this in season we would have
+                // some FF with where we predict we will be
+                new SwerveDriveCommand(() -> -driverController.getLeftX(), () -> -driverController.getLeftY(), () -> {
+                    Pose2d robotPose = driveSubsystem.getPose();
+                    Translation2d subtracted = robotPose.getTranslation().minus(new Translation2d());
+                    Rotation2d desiredHeading = new Rotation2d(subtracted.getX(), subtracted.getY());
+
+                    return alwaysFacingAngularController
+                            .calculate(robotPose.getRotation().getRadians(), desiredHeading.getRadians());
+                }, driverController.rightBumper().negate(), translationalMaxSpeedSuppler,
+                        () -> DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND, driveSubsystem
                 )
         );
 
@@ -138,7 +156,7 @@ public class RobotContainer {
                             new Rotation2d(0)
                     )
             );
-        }, false, driveSubsystem).until(driverController.rightBumper()));
+        }, driveSubsystem).until(driverController.rightBumper()));
     }
 
     private void evaluateDriveStyle(Command newCommand) {

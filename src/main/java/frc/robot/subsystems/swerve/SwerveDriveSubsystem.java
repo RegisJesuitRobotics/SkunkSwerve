@@ -38,9 +38,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     private final AHRS gyro = new AHRS();
 
-//    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
-//            getGyroRotation(), new Pose2d(), KINEMATICS, STATE_STD_DEVS, LOCAL_MEASUREMENT_STD_DEVS, VISION_STD_DEVS
-//    );
     private final SwerveDriveOdometry odometry;
 
     private final Alert navXNotConnectedFaultAlert = new Alert(
@@ -127,7 +124,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param pose2d the provided pose
      */
     public void resetOdometry(Pose2d pose2d) {
-//        poseEstimator.resetPosition(pose2d, getGyroRotation());
         odometry.resetPosition(getGyroRotation(), getModulePositions(), pose2d);
 
         driveEventLogger.append("Odometry reset");
@@ -137,7 +133,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @return the estimated position of the robot
      */
     public Pose2d getPose() {
-//        return poseEstimator.getEstimatedPosition();
         return odometry.getPoseMeters();
     }
 
@@ -182,7 +177,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * Sets the desired swerve drive states for the modules. This method also takes
      * a copy of the states, so they will not be changed. Assumes zero acceleration.
      *
-     * @param activeSteer if false will not actively power the steering motor
+     * @param activeSteer if false will not actively power the steer motor
      * @param openLoop    if true then velocity will be handled exclusivity with
      *                    feedforward (for teleop mostly). If false a PIDF will be
      *                    used (for auto)
@@ -197,7 +192,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * Sets the desired swerve drive states for the modules. This method also takes
      * a copy of the states, so they will not be changed
      *
-     * @param activeSteer if false will not actively power the steering motor
+     * @param activeSteer if false will not actively power the steer motor
      * @param openLoop    if true then velocity will be handled exclusivity with
      *                    feedforward (for teleop mostly). If false a PIDF will be
      *                    used (for auto)
@@ -245,6 +240,22 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return sum / actualStates.length;
     }
 
+    public double getAverageDrivePositionMeters() {
+        SwerveModulePosition[] positions = getModulePositions();
+        double sum = 0.0;
+        for (SwerveModulePosition position : positions) {
+            sum += position.distanceMeters;
+        }
+
+        return sum / positions.length;
+    }
+
+    public void resetModuleEncoderPositions() {
+        for (SwerveModule module : modules) {
+            module.resetDriveMotorPosition();
+        }
+    }
+
     /**
      * @return true if all modules are at the set desired states within the
      *         threshold in {@link frc.robot.Constants}
@@ -274,7 +285,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public void setAllModulesToAbsolute() {
         for (SwerveModule module : modules) {
-            module.resetSteeringToAbsolute();
+            module.resetSteerToAbsolute();
         }
     }
 

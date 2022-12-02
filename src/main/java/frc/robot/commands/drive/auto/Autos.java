@@ -25,7 +25,7 @@ public class Autos {
         addPPAuto("FigureEightsWithRotation");
         addPPAuto("FUN");
         addPPAuto("NoRotation");
-        addPPAuto("Stop Point Test");
+        addPPAuto("StopPointTest");
         addPPAuto("StraightNoRotation");
         addPPAuto("StraightWithRotation");
         addPPAuto("WithRotation");

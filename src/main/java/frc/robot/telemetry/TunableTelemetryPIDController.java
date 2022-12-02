@@ -2,18 +2,21 @@ package frc.robot.telemetry;
 
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
+import frc.robot.utils.TunablePIDGains;
 
-public class TelemetryPIDController extends PIDController {
+public class TunableTelemetryPIDController extends PIDController {
     private final DoubleTelemetryEntry currentMeasurementEntry;
     private final DoubleTelemetryEntry setpointEntry;
     private final DoubleTelemetryEntry outputEntry;
+    private final TunablePIDGains gains;
 
-    public TelemetryPIDController(String logTable, double kp, double ki, double kd) {
-        this(logTable, kp, ki, kd, 0.02);
+    public TunableTelemetryPIDController(String logTable, TunablePIDGains gains) {
+        this(logTable, gains, 0.02);
     }
 
-    public TelemetryPIDController(String logTable, double kp, double ki, double kd, double period) {
-        super(kp, ki, kd, period);
+    public TunableTelemetryPIDController(String logTable, TunablePIDGains gains, double period) {
+        super(gains.p.get(), gains.i.get(), gains.d.get(), period);
+        this.gains = gains;
 
         logTable += "/";
         currentMeasurementEntry = new DoubleTelemetryEntry(logTable + "currentMeasurement", true);
@@ -22,14 +25,13 @@ public class TelemetryPIDController extends PIDController {
     }
 
     @Override
-    public void setSetpoint(double setpoint) {
-        setpointEntry.append(setpoint);
-        super.setSetpoint(setpoint);
-    }
-
-    @Override
     public double calculate(double measurement) {
+        if (gains.hasChanged()) {
+            setPID(gains.p.get(), gains.i.get(), gains.d.get());
+        }
+
         currentMeasurementEntry.append(measurement);
+        setpointEntry.append(getSetpoint());
 
         double output = super.calculate(measurement);
         outputEntry.append(output);
