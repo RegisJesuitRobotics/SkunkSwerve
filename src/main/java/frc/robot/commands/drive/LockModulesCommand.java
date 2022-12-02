@@ -9,7 +9,7 @@ import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
  * This command puts the swerve modules in an X pattern making it hard to be
  * moved when bumped. It does not finish
  */
-public class HoldDrivePositionCommand extends CommandBase {
+public class LockModulesCommand extends CommandBase {
     private static final Rotation2d fortyFiveDegrees = Rotation2d.fromDegrees(45);
     private static final SwerveModuleState[] states = new SwerveModuleState[] {
             new SwerveModuleState(0.0, fortyFiveDegrees), new SwerveModuleState(0.0, fortyFiveDegrees.unaryMinus()),
@@ -18,7 +18,7 @@ public class HoldDrivePositionCommand extends CommandBase {
     private final SwerveDriveSubsystem driveSubsystem;
 
 
-    public HoldDrivePositionCommand(SwerveDriveSubsystem driveSubsystem) {
+    public LockModulesCommand(SwerveDriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
 
         addRequirements(driveSubsystem);

@@ -1,5 +1,7 @@
 package frc.robot.telemetry.types;
 
+import java.util.function.BooleanSupplier;
+
 public abstract class TelemetryEntry {
     protected final boolean shouldLazyLog;
 
@@ -9,11 +11,11 @@ public abstract class TelemetryEntry {
         this.shouldLazyLog = shouldLazyLog;
     }
 
-    protected boolean shouldLog(boolean isLastEqual) {
+    protected boolean shouldLog(BooleanSupplier isLastEqual) {
         if (firstRun) {
             firstRun = false;
             return true;
         }
-        return !isLastEqual && shouldLazyLog;
+        return !shouldLazyLog || !isLastEqual.getAsBoolean();
     }
 }

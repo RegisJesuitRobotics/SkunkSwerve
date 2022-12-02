@@ -1,34 +1,43 @@
 {
   "NetworkTables": {
-    "Char": {
-      "open": true
+    "Persistent Values": {
+      "open": false
     },
-    "LiveWindow": {
-      "open": true
+    "Retained Values": {
+      "open": false
     },
-    "Shuffleboard": {
-      "AlertsRaw": {
+    "retained": {
+      "Shuffleboard": {
         "open": true
-      },
-      "DriveTrainRaw": {
-        "Back Left (2)": {
+      }
+    },
+    "transitory": {
+      "drive": {
+        "modules": {
+          "0": {
+            "driveMotor": {
+              "open": true
+            }
+          },
+          "2": {
+            "open": true
+          },
           "open": true
         },
-        "Back Right (3)": {
+        "open": true
+      },
+      "followPath": {
+        "thetaController": {
           "open": true
         },
-        "open": true
+        "xController": {
+          "open": true
+        },
+        "yController": {
+          "open": true
+        }
       },
-      "open": true
-    },
-    "followPath": {
-      "thetaController": {
-        "open": true
-      },
-      "xController": {
-        "open": true
-      },
-      "yController": {
+      "robot": {
         "open": true
       }
     },
@@ -58,55 +67,55 @@
       },
       "/Shuffleboard/DriveTrainRaw/Field": {
         "Robot": {
-          "arrowSize": 16
+          "arrowSize": 36,
+          "length": 0.7620000243186951,
+          "selectable": false,
+          "style": "Box/Image",
+          "width": 0.7620000243186951
         },
         "module 0": {
-          "arrowWeight": 1.0,
-          "color": [
-            0.0,
-            1.0,
-            1.0,
+          "arrowColor": [
+            0.20000000298023224,
+            0.30588236451148987,
+            0.7254902124404907,
             255.0
           ],
-          "length": 0.20000000298023224,
-          "weight": 1.0,
-          "width": 0.20000000298023224
+          "arrowSize": 20,
+          "arrowWeight": 2.0,
+          "style": "Hidden"
         },
         "module 1": {
-          "arrowWeight": 1.0,
-          "color": [
-            0.0,
-            1.0,
-            1.0,
+          "arrowColor": [
+            0.20000000298023224,
+            0.30588236451148987,
+            0.7254902124404907,
             255.0
           ],
-          "length": 0.20000000298023224,
-          "weight": 1.0,
-          "width": 0.20000000298023224
+          "arrowSize": 20,
+          "arrowWeight": 2.0,
+          "style": "Hidden"
         },
         "module 2": {
-          "arrowWeight": 1.0,
-          "color": [
-            0.0,
-            1.0,
-            1.0,
+          "arrowColor": [
+            0.20000000298023224,
+            0.30588236451148987,
+            0.7254902124404907,
             255.0
           ],
-          "length": 0.20000000298023224,
-          "weight": 1.0,
-          "width": 0.20000000298023224
+          "arrowSize": 20,
+          "arrowWeight": 2.0,
+          "style": "Hidden"
         },
         "module 3": {
-          "arrowWeight": 1.0,
-          "color": [
-            0.0,
-            255.0,
-            112.49998474121094,
+          "arrowColor": [
+            0.19915416836738586,
+            0.3075174391269684,
+            0.7254902124404907,
             255.0
           ],
-          "length": 0.20000000298023224,
-          "weight": 1.0,
-          "width": 0.20000000298023224
+          "arrowSize": 20,
+          "arrowWeight": 2.0,
+          "style": "Hidden"
         },
         "window": {
           "name": "Field",
@@ -117,29 +126,14 @@
   },
   "NetworkTables Settings": {
     "dsClient": false,
-    "mode": "Client",
-    "serverTeam": "3729"
+    "mode": "Client (NT4)",
+    "serverTeam": "localhost"
   },
   "Plots": {
     "Plot <0>": {
       "plots": [
         {
-          "axis": [
-            {
-              "label": "Angle",
-              "lockMax": true,
-              "lockMin": true,
-              "max": 200.0,
-              "min": -200.0
-            },
-            {
-              "label": "Motor Percent",
-              "lockMax": true,
-              "lockMin": true,
-              "min": -1.0
-            }
-          ],
-          "height": 338,
+          "height": 317,
           "series": [
             {
               "color": [
@@ -148,8 +142,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Desired Angle",
-              "name": "Desired Angle"
+              "id": "NT:followPath/thetaController/currentMeasurement",
+              "name": "Current Measurement"
             },
             {
               "color": [
@@ -158,103 +152,20 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Read Angle",
-              "name": "Read Angle"
-            },
-            {
-              "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Absolute Angle",
-              "name": "Absolute Angle"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Angle Motor Output Percent",
-              "name": "Motor Output"
-            }
-          ],
-          "yaxis2": true
-        }
-      ],
-      "window": {
-        "name": "Front Left Angle",
-        "visible": false
-      }
-    },
-    "Plot <10>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/followPath/thetaController/currentMeasurement"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/followPath/thetaController/setpoint"
-            },
-            {
-              "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
-                1.0
-              ],
-              "id": "NT:/followPath/xController/currentMeasurement"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/followPath/xController/setpoint"
+              "id": "NT:followPath/thetaController/setpoint",
+              "name": "Setpoint"
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "name": "Path Theta"
+      }
     },
     "Plot <1>": {
       "plots": [
         {
-          "axis": [
-            {
-              "label": "Angle",
-              "lockMax": true,
-              "lockMin": true,
-              "max": 180.0,
-              "min": -180.0
-            },
-            {
-              "label": "Motor Percent",
-              "lockMax": true,
-              "lockMin": true,
-              "min": -1.0
-            }
-          ],
-          "crosshairs": true,
-          "height": 670,
+          "height": 317,
           "series": [
             {
               "color": [
@@ -263,8 +174,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Desired Angle",
-              "name": "Desired Angle"
+              "id": "NT:followPath/xController/currentMeasurement",
+              "name": "Current Measurement"
             },
             {
               "color": [
@@ -273,55 +184,20 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Read Angle",
-              "name": "Read Angle"
-            },
-            {
-              "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Absolute Angle",
-              "name": "Absolute Angle"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Angle Motor Output Percent",
-              "name": "Motor Output"
+              "id": "NT:followPath/xController/setpoint",
+              "name": "Setpoint"
             }
-          ],
-          "yaxis2": true
+          ]
         }
       ],
       "window": {
-        "name": "Front Right Angle"
+        "name": "Path X"
       }
     },
     "Plot <2>": {
       "plots": [
         {
-          "axis": [
-            {
-              "label": "Angle",
-              "lockMax": true,
-              "lockMin": true,
-              "max": 180.0,
-              "min": -180.0
-            },
-            {
-              "lockMax": true,
-              "lockMin": true,
-              "min": -1.0
-            }
-          ],
-          "height": -37,
+          "height": 305,
           "series": [
             {
               "color": [
@@ -330,8 +206,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Angle",
-              "name": "Desired Angle"
+              "id": "NT:followPath/yController/currentMeasurement",
+              "name": "Current Measurement"
             },
             {
               "color": [
@@ -340,35 +216,14 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Read Angle",
-              "name": "Read Angle"
-            },
-            {
-              "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Absolute Angle",
-              "name": "Absolute Angle"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Angle Motor Output Percent",
-              "name": "Motor Output"
+              "id": "NT:followPath/yController/setpoint",
+              "name": "Setpoint"
             }
-          ],
-          "yaxis2": true
+          ]
         }
       ],
       "window": {
-        "name": "Back Left Angle"
+        "name": "Path Y"
       }
     },
     "Plot <3>": {
@@ -376,20 +231,13 @@
         {
           "axis": [
             {
-              "label": "Angle",
+              "label": "CAN Use (Percent)",
               "lockMax": true,
-              "lockMin": true,
-              "max": 180.0,
-              "min": -180.0
-            },
-            {
-              "label": "Motor Percent",
-              "lockMax": true,
-              "lockMin": true,
-              "min": -1.0
+              "lockMin": true
             }
           ],
           "height": -37,
+          "legendHorizontal": true,
           "series": [
             {
               "color": [
@@ -398,8 +246,36 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Desired Angle",
-              "name": "Desired Angle"
+              "id": "NT:/robot/canUse",
+              "name": "CAN Use"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "name": "CAN Use"
+      }
+    },
+    "Plot <4>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "max": 200.0,
+              "min": -200.0
+            }
+          ],
+          "height": 350,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/actualHeading",
+              "name": "Actual"
             },
             {
               "color": [
@@ -408,8 +284,8 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Read Angle",
-              "name": "Read Angle"
+              "id": "NT:/drive/modules/0/desiredHeading",
+              "name": "Desired"
             },
             {
               "color": [
@@ -418,70 +294,14 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Absolute Angle",
-              "name": "Absolute Angle"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Angle Motor Output Percent",
-              "name": "Motor Output"
-            }
-          ],
-          "yaxis2": true
-        }
-      ],
-      "window": {
-        "name": "Back Right Angle"
-      }
-    },
-    "Plot <4>": {
-      "plots": [
-        {
-          "axis": [
-            {
-              "autoFit": true,
-              "max": 180.0,
-              "min": -180.0
-            },
-            {
-              "label": "Motor Percent",
-              "lockMax": true,
-              "lockMin": true,
-              "min": -1.0
-            }
-          ],
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Desired Drive Velocity",
-              "name": "Desired Velocity"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Left (0)/Drive Velocity",
-              "name": "Actual Velocity"
+              "id": "NT:/drive/modules/0/absoluteHeading",
+              "name": "Absolute"
             }
           ]
         }
       ],
       "window": {
-        "name": "Front Left Velocity"
+        "name": "M0 Steer"
       }
     },
     "Plot <5>": {
@@ -489,10 +309,11 @@
         {
           "axis": [
             {
-              "autoFit": true
+              "max": 200.0,
+              "min": -200.0
             }
           ],
-          "height": 338,
+          "height": 350,
           "series": [
             {
               "color": [
@@ -501,8 +322,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Desired Drive Velocity",
-              "name": "Desired Velocity"
+              "id": "NT:/drive/modules/1/actualHeading",
+              "name": "Actual"
             },
             {
               "color": [
@@ -511,20 +332,36 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Front Right (1)/Drive Velocity",
-              "name": "Actual Velocity"
+              "id": "NT:/drive/modules/1/desiredHeading",
+              "name": "Desired"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/drive/modules/1/absoluteHeading",
+              "name": "Absolute"
             }
           ]
         }
       ],
       "window": {
-        "name": "Front Right Velocity"
+        "name": "M1 Steer"
       }
     },
     "Plot <6>": {
       "plots": [
         {
-          "height": 390,
+          "axis": [
+            {
+              "max": 200.0,
+              "min": -200.0
+            }
+          ],
+          "height": 350,
           "series": [
             {
               "color": [
@@ -533,7 +370,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Drive Velocity"
+              "id": "NT:/drive/modules/2/actualHeading",
+              "name": "Actual"
             },
             {
               "color": [
@@ -542,13 +380,24 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Drive Velocity"
+              "id": "NT:/drive/modules/2/desiredHeading",
+              "name": "Desired"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/drive/modules/2/absoluteHeading",
+              "name": "Absolute"
             }
           ]
         }
       ],
       "window": {
-        "name": "Back Left Velocity"
+        "name": "M2 Steer"
       }
     },
     "Plot <7>": {
@@ -556,50 +405,6 @@
         {
           "axis": [
             {
-              "lockMax": true,
-              "lockMin": true
-            }
-          ],
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Drive Velocity"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Right (3)/Desired Drive Velocity"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "name": "Back Right Velocity"
-      }
-    },
-    "Plot <8>": {
-      "plots": [
-        {
-          "axis": [
-            {
-              "lockMax": true,
-              "lockMin": true,
-              "max": 380.0,
-              "min": -20.0
-            },
-            {
-              "lockMax": true,
-              "lockMin": true,
               "max": 200.0,
               "min": -200.0
             }
@@ -608,48 +413,13 @@
           "series": [
             {
               "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Read Angle Degrees",
-              "yAxis": 1
-            },
-            {
-              "color": [
                 0.2980392277240753,
                 0.44705885648727417,
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DriveTrainRaw/Back Left (2)/Desired Angle Degrees",
-              "yAxis": 1
-            }
-          ],
-          "yaxis2": true
-        }
-      ]
-    },
-    "Plot <9>": {
-      "plots": [
-        {
-          "axis": [
-            {},
-            {
-              "autoFit": true
-            }
-          ],
-          "height": 587,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/followPath/xController/currentMeasurement"
+              "id": "NT:/drive/modules/3/actualHeading",
+              "name": "Actual"
             },
             {
               "color": [
@@ -658,7 +428,9 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/followPath/xController/setpoint"
+              "id": "NT:/drive/modules/3/desiredHeading",
+              "marker": "None",
+              "name": "Desired"
             },
             {
               "color": [
@@ -667,41 +439,90 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/followPath/thetaController/currentMeasurement"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/followPath/thetaController/setpoint"
-            },
-            {
-              "color": [
-                0.5058823823928833,
-                0.44705885648727417,
-                0.7019608020782471,
-                1.0
-              ],
-              "id": "NT:/followPath/yController/currentMeasurement"
-            },
-            {
-              "color": [
-                0.5764706134796143,
-                0.4705882668495178,
-                0.3764706254005432,
-                1.0
-              ],
-              "id": "NT:/followPath/yController/setpoint"
+              "id": "NT:/drive/modules/3/absoluteHeading",
+              "name": "Absolute"
             }
-          ],
-          "yaxis2": true
+          ]
         }
       ],
       "window": {
-        "visible": false
+        "name": "M3 Steer"
+      }
+    },
+    "Plot <8>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "max": 5.0,
+              "min": -5.0
+            }
+          ],
+          "height": 350,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/actualVelocity",
+              "name": "Actual"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/desiredVelocity",
+              "name": "Desired"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "name": "M0 Drive"
+      }
+    },
+    "Plot <9>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "max": 5.0,
+              "min": -5.0
+            }
+          ],
+          "height": 338,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/drive/modules/1/actualVelocity",
+              "name": "Actual"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/drive/modules/1/desiredHeading",
+              "name": "Desired"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "name": "M1 Drive"
       }
     }
   }

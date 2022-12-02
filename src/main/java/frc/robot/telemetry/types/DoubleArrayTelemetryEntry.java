@@ -22,13 +22,14 @@ public class DoubleArrayTelemetryEntry extends TelemetryEntry {
         logEntry = new DoubleArrayLogEntry(DataLogManager.getLog(), path);
         if (shouldNT) {
             networkPublisher = NetworkTableInstance.getDefault().getDoubleArrayTopic(path).publish();
+            networkPublisher.setDefault(new double[0]);
         } else {
             networkPublisher = null;
         }
     }
 
     public void append(double[] value) {
-        if (shouldLog(Arrays.equals(lastValue, value))) {
+        if (shouldLog(() -> Arrays.equals(lastValue, value))) {
             logEntry.append(value);
 
             if (networkPublisher != null) {

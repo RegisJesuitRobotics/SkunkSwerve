@@ -14,4 +14,9 @@ public class DynamicCharacterizeDriveCommand extends CharacterizeDriveCommand {
     protected double getVoltage() {
         return voltage;
     }
+
+    @Override
+    protected String getTestName() {
+        return "fast-forward";
+    }
 }

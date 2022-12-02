@@ -1,6 +1,5 @@
-package frc.robot.commands.drive;
+package frc.robot.commands.drive.auto;
 
-import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -12,7 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants.DriveTrainConstants;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 
@@ -22,55 +21,36 @@ public class FollowPathCommand extends CommandBase {
     private final SwerveDriveSubsystem driveSubsystem;
     private final Supplier<PathPlannerTrajectory> pathSupplier;
     private PathPlannerTrajectory currentPath;
-    private final boolean shouldResetOdometry;
 
     private final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
-            DriveTrainConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/xController"),
-            DriveTrainConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/yController"),
-            DriveTrainConstants.PATH_ANGULAR_POSITION_GAINS.createLoggablePIDController("followPath/thetaController")
+            AutoConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/xController"),
+            AutoConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/yController"),
+            AutoConstants.PATH_ANGULAR_POSITION_GAINS.createLoggablePIDController("followPath/thetaController")
     );
 
     private final PPHolonomicDriveController nextDriveController = new PPHolonomicDriveController(
-            DriveTrainConstants.PATH_TRANSLATION_POSITION_GAINS.createPIDController(),
-            DriveTrainConstants.PATH_TRANSLATION_POSITION_GAINS.createPIDController(),
-            DriveTrainConstants.PATH_ANGULAR_POSITION_GAINS.createPIDController()
+            AutoConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/nextXController"),
+            AutoConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/nextYController"),
+            AutoConstants.PATH_ANGULAR_POSITION_GAINS.createLoggablePIDController("followPath/nextThetaController")
     );
 
     private final Timer timer = new Timer();
 
-    /**
-     * A follow path command made with the path name
-     *
-     * @param pathName            the name of the path in path planner
-     * @param shouldResetOdometry if odometry should be reset to the position at the
-     *                            beginning of the path
-     * @param driveSubsystem      the swerve drive subsystem
-     */
-    public FollowPathCommand(String pathName, boolean shouldResetOdometry, SwerveDriveSubsystem driveSubsystem) {
-        this(PathPlanner.loadPath(pathName, DriveTrainConstants.PATH_CONSTRAINTS), shouldResetOdometry, driveSubsystem);
-    }
-
-    public FollowPathCommand(
-            PathPlannerTrajectory path, boolean shouldResetOdometry, SwerveDriveSubsystem driveSubsystem
-    ) {
-        this(() -> path, shouldResetOdometry, driveSubsystem);
+    public FollowPathCommand(PathPlannerTrajectory path, SwerveDriveSubsystem driveSubsystem) {
+        this(() -> path, driveSubsystem);
     }
 
     /**
      * A follow path command made with the trajectory
      *
-     * @param pathSupplier        the trajectory
-     * @param shouldResetOdometry if odometry should be reset to the position at the
-     *                            beginning of the path
-     * @param driveSubsystem      the swerve drive subsystem
+     * @param pathSupplier   the trajectory
+     * @param driveSubsystem the swerve drive subsystem
      */
-    public FollowPathCommand(
-            Supplier<PathPlannerTrajectory> pathSupplier, boolean shouldResetOdometry,
-            SwerveDriveSubsystem driveSubsystem
-    ) {
+    public FollowPathCommand(Supplier<PathPlannerTrajectory> pathSupplier, SwerveDriveSubsystem driveSubsystem) {
         this.pathSupplier = pathSupplier;
-        this.shouldResetOdometry = shouldResetOdometry;
         this.driveSubsystem = driveSubsystem;
+
+        driveController.setTolerance(new Pose2d(0.05, 0.05, Rotation2d.fromRotations(5.0)));
 
         addRequirements(driveSubsystem);
     }
@@ -78,9 +58,6 @@ public class FollowPathCommand extends CommandBase {
     @Override
     public void initialize() {
         currentPath = pathSupplier.get();
-        if (shouldResetOdometry) {
-            driveSubsystem.resetOdometry(currentPath.getInitialHolonomicPose());
-        }
         if (MiscConstants.enablePathPlannerServer) {
             PathPlannerServer.sendActivePath(currentPath.getStates());
         }

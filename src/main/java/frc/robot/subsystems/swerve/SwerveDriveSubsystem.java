@@ -3,6 +3,7 @@ package frc.robot.subsystems.swerve;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -11,10 +12,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.telemetry.types.StringTelemetryEntry;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
+import frc.robot.telemetry.types.EventTelemetryEntry;
 import frc.robot.telemetry.types.DoubleArrayTelemetryEntry;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
@@ -37,9 +38,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     private final AHRS gyro = new AHRS();
 
-//    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
-//            getGyroRotation(), new Pose2d(), KINEMATICS, STATE_STD_DEVS, LOCAL_MEASUREMENT_STD_DEVS, VISION_STD_DEVS
-//    );
     private final SwerveDriveOdometry odometry;
 
     private final Alert navXNotConnectedFaultAlert = new Alert(
@@ -50,12 +48,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final DoubleArrayTelemetryEntry odometryEntry = new DoubleArrayTelemetryEntry(
             "/drive/estimatedPose", false
     );
-    private final StringTelemetryEntry driveEventLogger = new StringTelemetryEntry("/drive/events", false, false);
+    private final EventTelemetryEntry driveEventLogger = new EventTelemetryEntry("/drive/events");
 
     private final Field2d field2d = new Field2d();
 
-    private SwerveModuleState[] desiredStates = new SwerveModuleState[4];
-    private SwerveModuleState[] nextStates = new SwerveModuleState[4];
+    private SwerveModuleState[] desiredStates = new SwerveModuleState[NUM_MODULES];
+    private SwerveModuleState[] nextStates = new SwerveModuleState[NUM_MODULES];
     private boolean activeSteer = true;
     private DriveMode driveMode = DriveMode.OPEN_LOOP;
     private double characterizationVoltage = 0.0;
@@ -75,7 +73,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         driveTab.add("Field", field2d);
         driveTab.add(
                 "Reset to Absolute",
-                new InstantCommand(this::setAllModulesToAbsolute).ignoringDisable(true).withName("Reset")
+                Commands.runOnce(this::setAllModulesToAbsolute).ignoringDisable(true).withName("Reset")
         );
         driveTab.addBoolean("All have been set to absolute", this::allModulesAtAbsolute);
         driveTab.add("Kill Front Left (0)", modules[0].getToggleDeadModeCommand());
@@ -88,16 +86,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     /**
      * @return the value from the gyro. This does not get reset when resetOdometry
-     *         is called. Use <code>getPose().getRotation2d()</code> to get the
-     *         field centric value. Counterclockwise is positive.
+     *         is called. Use <code>getPose().getRotation2d()</code> for reset
+     *         value. Counterclockwise is positive.
      */
     private Rotation2d getGyroRotation() {
-        // We prefer to use this as it hypothetically has zero drift
-        if (gyro.isMagnetometerCalibrated()) {
-            return Rotation2d.fromDegrees(gyro.getFusedHeading());
-        }
         // It is mounted upside-down so no invert
-        return Rotation2d.fromDegrees(gyro.getYaw());
+        return Rotation2d.fromDegrees(gyro.getYaw() * (INVERT_GYRO ? -1 : 1));
     }
 
     /**
@@ -130,7 +124,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param pose2d the provided pose
      */
     public void resetOdometry(Pose2d pose2d) {
-//        poseEstimator.resetPosition(pose2d, getGyroRotation());
         odometry.resetPosition(getGyroRotation(), getModulePositions(), pose2d);
 
         driveEventLogger.append("Odometry reset");
@@ -140,7 +133,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @return the estimated position of the robot
      */
     public Pose2d getPose() {
-//        return poseEstimator.getEstimatedPosition();
         return odometry.getPoseMeters();
     }
 
@@ -185,7 +177,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * Sets the desired swerve drive states for the modules. This method also takes
      * a copy of the states, so they will not be changed. Assumes zero acceleration.
      *
-     * @param activeSteer if false will not actively power the steering motor
+     * @param activeSteer if false will not actively power the steer motor
      * @param openLoop    if true then velocity will be handled exclusivity with
      *                    feedforward (for teleop mostly). If false a PIDF will be
      *                    used (for auto)
@@ -200,7 +192,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * Sets the desired swerve drive states for the modules. This method also takes
      * a copy of the states, so they will not be changed
      *
-     * @param activeSteer if false will not actively power the steering motor
+     * @param activeSteer if false will not actively power the steer motor
      * @param openLoop    if true then velocity will be handled exclusivity with
      *                    feedforward (for teleop mostly). If false a PIDF will be
      *                    used (for auto)
@@ -248,6 +240,22 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return sum / actualStates.length;
     }
 
+    public double getAverageDrivePositionMeters() {
+        SwerveModulePosition[] positions = getModulePositions();
+        double sum = 0.0;
+        for (SwerveModulePosition position : positions) {
+            sum += position.distanceMeters;
+        }
+
+        return sum / positions.length;
+    }
+
+    public void resetModuleEncoderPositions() {
+        for (SwerveModule module : modules) {
+            module.resetDriveMotorPosition();
+        }
+    }
+
     /**
      * @return true if all modules are at the set desired states within the
      *         threshold in {@link frc.robot.Constants}
@@ -277,7 +285,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public void setAllModulesToAbsolute() {
         for (SwerveModule module : modules) {
-            module.resetSteeringToAbsolute();
+            module.resetSteerToAbsolute();
         }
     }
 
@@ -347,7 +355,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         field2d.setRobotPose(estimatedPose);
         for (int i = 0; i < modules.length; i++) {
             field2d.getObject("module " + i).setPose(
-                    new Pose2d(MODULE_TRANSLATIONS[i], modules[i].getActualState().angle).relativeTo(estimatedPose)
+                    estimatedPose.plus(new Transform2d(MODULE_TRANSLATIONS[i], modules[i].getActualState().angle))
             );
         }
 

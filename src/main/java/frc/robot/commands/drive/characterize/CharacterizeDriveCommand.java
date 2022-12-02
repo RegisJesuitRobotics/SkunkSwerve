@@ -1,8 +1,7 @@
 package frc.robot.commands.drive.characterize;
 
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 
@@ -13,11 +12,10 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
     private final SwerveDriveSubsystem driveSubsystem;
     protected final Timer timer = new Timer();
 
-    protected double lastVoltage = 0.0;
-
     protected final List<Double> timeList = new ArrayList<>();
     protected final List<Double> voltageList = new ArrayList<>();
     protected final List<Double> velocityList = new ArrayList<>();
+    protected final List<Double> positionList = new ArrayList<>();
 
     public CharacterizeDriveCommand(SwerveDriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
@@ -27,17 +25,16 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
 
     protected abstract double getVoltage();
 
-    private void logValues() {
-        timeList.add(timer.get());
-        voltageList.add(lastVoltage);
-        velocityList.add(driveSubsystem.getAverageDriveVelocityMetersSecond());
-    }
+    protected abstract String getTestName();
 
     @Override
     public void initialize() {
+        timeList.clear();
         voltageList.clear();
         velocityList.clear();
-        timeList.clear();
+        positionList.clear();
+
+        driveSubsystem.resetModuleEncoderPositions();
 
         timer.reset();
         timer.start();
@@ -45,23 +42,29 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        logValues();
+        double voltage = getVoltage();
 
-        lastVoltage = getVoltage();
-        driveSubsystem.setCharacterizationVoltage(lastVoltage);
+        timeList.add(timer.get());
+        voltageList.add(voltage);
+        velocityList.add(driveSubsystem.getAverageDriveVelocityMetersSecond());
+        positionList.add(driveSubsystem.getAverageDrivePositionMeters());
+
+        driveSubsystem.setCharacterizationVoltage(voltage);
     }
 
     @Override
     public void end(boolean interrupted) {
-        NetworkTableEntry voltageListEntry = NetworkTableInstance.getDefault().getTable("Characterize")
-                .getEntry("voltageList");
-        NetworkTableEntry velocityListEntry = NetworkTableInstance.getDefault().getTable("Characterize")
-                .getEntry("velocityList");
-        NetworkTableEntry timeListEntry = NetworkTableInstance.getDefault().getTable("Characterize")
-                .getEntry("timeList");
-        voltageListEntry.setDoubleArray(voltageList.stream().mapToDouble(Double::doubleValue).toArray());
-        velocityListEntry.setDoubleArray(velocityList.stream().mapToDouble(Double::doubleValue).toArray());
-        timeListEntry.setDoubleArray(timeList.stream().mapToDouble(Double::doubleValue).toArray());
+        List<Double> data = new ArrayList<>();
+        for (int i = 0; i < velocityList.size(); i++) {
+            data.add(timeList.get(i));
+            data.add(voltageList.get(i));
+            data.add(positionList.get(i));
+            data.add(velocityList.get(i));
+        }
+        SmartDashboard.putString(
+                "SysIdTelemetry", getTestName() + ";" + data.toString().substring(1, data.toString().length() - 1)
+        );
+        SmartDashboard.putNumber("SysIdAckNumber", 1);
 
         driveSubsystem.stopMovement();
     }

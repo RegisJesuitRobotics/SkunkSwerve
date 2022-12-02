@@ -20,13 +20,14 @@ public class BooleanTelemetryEntry extends TelemetryEntry {
         logEntry = new BooleanLogEntry(DataLogManager.getLog(), path);
         if (shouldNT) {
             networkPublisher = NetworkTableInstance.getDefault().getBooleanTopic(path).publish();
+            networkPublisher.setDefault(false);
         } else {
             networkPublisher = null;
         }
     }
 
     public void append(boolean value) {
-        if (shouldLog(lastValue == value)) {
+        if (shouldLog(() -> lastValue == value)) {
             logEntry.append(value);
 
             if (networkPublisher != null) {
