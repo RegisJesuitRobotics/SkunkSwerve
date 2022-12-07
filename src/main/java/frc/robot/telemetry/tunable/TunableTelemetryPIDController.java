@@ -1,8 +1,7 @@
-package frc.robot.telemetry;
+package frc.robot.telemetry.tunable;
 
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
-import frc.robot.utils.TunablePIDGains;
 
 public class TunableTelemetryPIDController extends PIDController {
     private final DoubleTelemetryEntry currentMeasurementEntry;

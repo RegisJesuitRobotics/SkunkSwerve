@@ -1,0 +1,303 @@
+{
+  "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
+    "Retained Values": {
+      "open": false
+    },
+    "Shuffleboard": {
+      "DriveTrainRaw": {
+        "Field": {
+          "open": false
+        },
+        "Front Left (0)": {
+          "open": false
+        },
+        "open": false
+      },
+      "open": false
+    },
+    "retained": {
+      "Shuffleboard": {
+        "DriveTrainRaw": {
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "transitory": {
+      "Characterize": {
+        "open": false
+      },
+      "Shuffleboard": {
+        "DriveTrainRaw": {
+          "Drive Style": {
+            "open": true
+          }
+        }
+      },
+      "drive": {
+        "modules": {
+          "open": true
+        },
+        "open": true
+      },
+      "followPath": {
+        "thetaController": {
+          "open": true
+        },
+        "xController": {
+          "open": false
+        },
+        "yController": {
+          "open": false
+        }
+      },
+      "gains": {
+        "open": true,
+        "steer": {
+          "open": true
+        }
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/DriveTrainRaw/Auto Chooser": "String Chooser",
+      "/Shuffleboard/DriveTrainRaw/Drive Style": "String Chooser",
+      "/Shuffleboard/DriveTrainRaw/Field": "Field2d",
+      "/Shuffleboard/DriveTrainRaw/Kill Back Left (2)": "Command",
+      "/Shuffleboard/DriveTrainRaw/Kill Back Right (3)": "Command",
+      "/Shuffleboard/DriveTrainRaw/Kill Front Left (0)": "Command",
+      "/Shuffleboard/DriveTrainRaw/Kill Front Right (1)": "Command",
+      "/Shuffleboard/DriveTrainRaw/Reset to Absolute": "Command"
+    },
+    "windows": {
+      "/Shuffleboard/Auto/Field": {
+        "Robot": {
+          "length": 0.0,
+          "weight": 0.0,
+          "width": 0.0
+        },
+        "traj": {
+          "arrows": false,
+          "length": 0.0,
+          "selectable": false,
+          "weight": 0.0,
+          "width": 0.0
+        },
+        "units": ""
+      },
+      "/Shuffleboard/DriveTrainRaw/Auto Chooser": {
+        "window": {
+          "name": "Auto Chooser",
+          "visible": true
+        }
+      },
+      "/Shuffleboard/DriveTrainRaw/Drive Style": {
+        "window": {
+          "name": "Drive Style",
+          "visible": true
+        }
+      },
+      "/Shuffleboard/DriveTrainRaw/Field": {
+        "Robot": {
+          "length": 0.0,
+          "width": 0.0
+        },
+        "window": {
+          "name": "Field",
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Log": {
+    "visible": true
+  },
+  "NetworkTables Settings": {
+    "clientName": "glassh",
+    "dsClient": false,
+    "mode": "Client (NT4)",
+    "serverTeam": "3729"
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "height": 376,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/actualSteerPosition",
+              "name": "Actual Position"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/steerPositionGoal",
+              "name": "Position Goal"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/steerPositionSetpoint",
+              "name": "Position Setpoint"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/actualSteerVelocity",
+              "name": "Actual Velocity"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/steerVelocitySetpoint",
+              "name": "Velocity Setpoint"
+            }
+          ],
+          "yaxis2": true
+        }
+      ],
+      "window": {
+        "name": "Module 0 Heading"
+      }
+    },
+    "Plot <1>": {
+      "plots": [
+        {
+          "height": 359,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/actualDriveVelocity",
+              "name": "Actual Velocity"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/driveVelocitySetpoint",
+              "name": "Velocity Setpoint"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/drive/modules/0/nextDriveVelocitySetpoint",
+              "name": "Next Velocity Setpoint"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "name": "Module 0 Velocity"
+      }
+    },
+    "Plot <2>": {
+      "plots": [
+        {
+          "height": 444,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:followPath/xController/currentMeasurement",
+              "name": "X Actual"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:followPath/xController/setpoint",
+              "name": "X Setpoint"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:followPath/yController/currentMeasurement",
+              "name": "Y Actual"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:followPath/yController/setpoint",
+              "name": "Y Setpoint"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:followPath/thetaController/currentMeasurement",
+              "name": "Theta Actual"
+            },
+            {
+              "color": [
+                0.5764706134796143,
+                0.4705882668495178,
+                0.3764706254005432,
+                1.0
+              ],
+              "id": "NT:followPath/thetaController/setpoint",
+              "name": "Theta Setpoint"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "name": "Path Following"
+      }
+    }
+  }
+}

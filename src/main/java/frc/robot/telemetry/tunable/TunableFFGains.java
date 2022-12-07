@@ -1,38 +1,34 @@
-package frc.robot.utils;
+package frc.robot.telemetry.tunable;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
-public class TunablePIDFFFGains extends TunablePIDGains {
+public class TunableFFGains {
     public final TunableDouble arbFF;
     public final TunableDouble vFF;
     public final TunableDouble aFF;
 
     /**
      * @param networkName the name to use for network tables
-     * @param p           the p gain
-     * @param i           the i gain
-     * @param d           the d gain
      * @param arbFF       the arbitrary/static feedforward (also known as kS) (in
      *                    volts per meter/second)
      * @param vFF         the velocity feedforward (also known as kV) (in volts per
      *                    meter/second)
      * @param aFF         the acceleration feedforward (also known as kA) (in volts
      *                    meter/second^2)
+     * @param tuningMode  if false, the gains will be not be changeable
      */
-    public TunablePIDFFFGains(String networkName, double p, double i, double d, double arbFF, double vFF, double aFF) {
-        super(networkName, p, i, d);
+    public TunableFFGains(String networkName, double arbFF, double vFF, double aFF, boolean tuningMode) {
         networkName += "/";
-        this.arbFF = new TunableDouble(networkName + "arbFF", arbFF);
-        this.vFF = new TunableDouble(networkName + "vFF", vFF);
-        this.aFF = new TunableDouble(networkName + "aFF", aFF);
+        this.arbFF = new TunableDouble(networkName + "arbFF", arbFF, tuningMode);
+        this.vFF = new TunableDouble(networkName + "vFF", vFF, tuningMode);
+        this.aFF = new TunableDouble(networkName + "aFF", aFF, tuningMode);
     }
 
-    @Override
     public boolean hasChanged() {
-        return super.hasChanged() || arbFF.hasChanged() || vFF.hasChanged() || aFF.hasChanged();
+        return arbFF.hasChanged() || vFF.hasChanged() || aFF.hasChanged();
     }
 
-    public SimpleMotorFeedforward getFeedforward() {
+    public SimpleMotorFeedforward createFeedforward() {
         return new SimpleMotorFeedforward(arbFF.get(), vFF.get(), aFF.get());
     }
 }

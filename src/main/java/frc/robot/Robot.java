@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.telemetry.CommandSchedulerLogger;
 import frc.robot.telemetry.MiscRobotTelemetryAndAlerts;
 import frc.robot.telemetry.TelemetryPowerDistribution;
+import frc.robot.utils.TreeTracer;
 
 
 
@@ -21,6 +22,8 @@ public class Robot extends TimedRobot {
     private Command autonomousCommand;
 
     private RobotContainer robotContainer;
+
+    public static final TreeTracer tracer = new TreeTracer();
 
     private TelemetryPowerDistribution telemetryPowerDistribution;
     private MiscRobotTelemetryAndAlerts miscRobotTelemetryAndAlerts;
@@ -58,10 +61,25 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotPeriodic() {
-        CommandScheduler.getInstance().run();
+        tracer.resetEpochs();
+        tracer.addNode("robotPeriodic");
 
+        tracer.addNode("CommandScheduler");
+        CommandScheduler.getInstance().run();
+        tracer.endCurrentNode();
+
+        tracer.addNode("miscRobotTelemetryAndAlerts");
         miscRobotTelemetryAndAlerts.logValues();
+        tracer.endCurrentNode();
+
+        tracer.addNode("telemetryPowerDistribution");
         telemetryPowerDistribution.logValues();
+        tracer.endCurrentNode();
+
+        tracer.endCurrentNode();
+        if (tracer.getSinceStartSeconds() > 0.02) {
+            tracer.printEpochs(System.out::println);
+        }
     }
 
 
