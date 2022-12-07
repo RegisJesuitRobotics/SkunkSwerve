@@ -22,16 +22,18 @@ public class FollowPathCommand extends CommandBase {
     private final Supplier<PathPlannerTrajectory> pathSupplier;
     private PathPlannerTrajectory currentPath;
 
+    // We don't use a profiled PID controller for the angle because the path should
+    // already profile it for us
     private final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
             AutoConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/xController"),
             AutoConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/yController"),
-            AutoConstants.PATH_ANGULAR_POSITION_GAINS.createLoggablePIDController("followPath/thetaController")
+            AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS.createLoggablePIDController("followPath/thetaController")
     );
 
     private final PPHolonomicDriveController nextDriveController = new PPHolonomicDriveController(
             AutoConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/nextXController"),
             AutoConstants.PATH_TRANSLATION_POSITION_GAINS.createLoggablePIDController("followPath/nextYController"),
-            AutoConstants.PATH_ANGULAR_POSITION_GAINS.createLoggablePIDController("followPath/nextThetaController")
+            AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS.createLoggablePIDController("followPath/nextThetaController")
     );
 
     private final Timer timer = new Timer();
@@ -82,6 +84,8 @@ public class FollowPathCommand extends CommandBase {
                                 new Rotation2d(chassisSpeeds.omegaRadiansPerSecond).times(0.02)
                         )
                 );
+        driveSubsystem.getField2d().getObject("followPathNext").setPose(assumedNextPose);
+
         ChassisSpeeds nextChassisSpeeds = nextDriveController.calculate(assumedNextPose, nextDesiredState);
 
         driveSubsystem.setChassisSpeeds(chassisSpeeds, nextChassisSpeeds, false);

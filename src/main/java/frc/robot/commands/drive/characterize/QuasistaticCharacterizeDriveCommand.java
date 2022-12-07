@@ -17,6 +17,6 @@ public class QuasistaticCharacterizeDriveCommand extends CharacterizeDriveComman
 
     @Override
     protected String getTestName() {
-        return "slow-forward";
+        return "slow-" + (rampRateVoltsSecond > 0 ? "forward" : "backward");
     }
 }

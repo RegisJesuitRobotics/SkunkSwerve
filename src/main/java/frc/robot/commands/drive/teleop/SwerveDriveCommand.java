@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.SwerveUtils;
+import frc.robot.utils.VectorRateLimiter;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -22,11 +23,8 @@ public class SwerveDriveCommand extends CommandBase {
     private final BooleanSupplier shouldFieldRelative;
     private final SwerveDriveSubsystem driveSubsystem;
 
-    private final SlewRateLimiter xRateLimiter;
-    private final SlewRateLimiter yRateLimiter;
+    private final VectorRateLimiter translationLimiter;
     private final SlewRateLimiter rotationLimiter;
-
-    private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
     public SwerveDriveCommand(
             DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier, DoubleSupplier rotationSupplier,
@@ -40,8 +38,7 @@ public class SwerveDriveCommand extends CommandBase {
         this.translationalMaxSpeedSupplier = translationalMaxSpeedSupplier;
         this.angularMaxSpeedSupplier = angularMaxSpeedSupplier;
 
-        this.xRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
-        this.yRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
+        this.translationLimiter = new VectorRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
         this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND);
 
         this.driveSubsystem = driveSubsystem;
@@ -50,29 +47,27 @@ public class SwerveDriveCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        xRateLimiter.reset(0);
-        yRateLimiter.reset(0);
+        translationLimiter.reset();
         rotationLimiter.reset(0);
     }
 
     @Override
     public void execute() {
         double[] inputs = getNormalizedScaledRateLimitedXYTheta();
-        ChassisSpeeds nextChassisSpeeds;
+        ChassisSpeeds chassisSpeeds;
         if (shouldFieldRelative.getAsBoolean()) {
-            nextChassisSpeeds = ChassisSpeeds
+            chassisSpeeds = ChassisSpeeds
                     .fromFieldRelativeSpeeds(inputs[0], inputs[1], inputs[2], driveSubsystem.getPose().getRotation());
         } else {
-            nextChassisSpeeds = new ChassisSpeeds(inputs[0], inputs[1], inputs[2]);
+            chassisSpeeds = new ChassisSpeeds(inputs[0], inputs[1], inputs[2]);
         }
 
         if (SwerveUtils
                 .inEpoch(chassisSpeeds, zeroMovement, DriveTrainConstants.TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND)) {
             driveSubsystem.stopMovement();
         } else {
-            driveSubsystem.setChassisSpeeds(chassisSpeeds, nextChassisSpeeds, true);
+            driveSubsystem.setChassisSpeeds(chassisSpeeds, true);
         }
-        chassisSpeeds = nextChassisSpeeds;
     }
 
     @Override
@@ -89,10 +84,22 @@ public class SwerveDriveCommand extends CommandBase {
         Translation2d normalized = SwerveUtils
                 .applyCircleDeadZone(new Translation2d(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble()), 1.0);
         double[] scaled = new double[3];
-        scaled[0] = xRateLimiter.calculate(scaleValue(normalized.getX(), translationalMaxSpeedSupplier.getAsDouble()));
-        scaled[1] = yRateLimiter.calculate(scaleValue(normalized.getY(), translationalMaxSpeedSupplier.getAsDouble()));
+//        Translation2d translation = translationLimiter.calculate(
+//                new Translation2d(
+//                        scaleValue(normalized.getX(), translationalMaxSpeedSupplier.getAsDouble()),
+//                        scaleValue(normalized.getY(), translationalMaxSpeedSupplier.getAsDouble())
+//                )
+//        );
+        Translation2d translation =
+                new Translation2d(
+                        scaleValue(normalized.getX(), translationalMaxSpeedSupplier.getAsDouble()),
+                        scaleValue(normalized.getY(), translationalMaxSpeedSupplier.getAsDouble())
+                );
+        scaled[0] = translation.getX();
+        scaled[1] = translation.getY();
         scaled[2] = rotationLimiter
                 .calculate(scaleValue(rotationSupplier.getAsDouble(), angularMaxSpeedSupplier.getAsDouble()));
+
         return scaled;
     }
 

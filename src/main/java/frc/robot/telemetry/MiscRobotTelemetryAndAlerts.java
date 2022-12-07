@@ -5,6 +5,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.Constants;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.utils.Alert;
@@ -31,6 +32,12 @@ public class MiscRobotTelemetryAndAlerts {
             controllerAlerts[i] = new Alert(
                     "Controller " + MiscConstants.usedControllerPorts[i] + " is disconnected.", AlertType.WARNING
             );
+        }
+
+
+        if (Constants.TUNING_MODE) {
+            Alert tuningModeAlert = new Alert("Tuning Mode is Enabled", AlertType.INFO);
+            tuningModeAlert.set(true);
         }
 
         loadAndSetBuildTimeAlert();

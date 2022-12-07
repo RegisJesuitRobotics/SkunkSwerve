@@ -17,6 +17,6 @@ public class DynamicCharacterizeDriveCommand extends CharacterizeDriveCommand {
 
     @Override
     protected String getTestName() {
-        return "fast-forward";
+        return "fast-" + (voltage > 0 ? "forward" : "backward");
     }
 }

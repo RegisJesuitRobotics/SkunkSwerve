@@ -3,7 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.server.PathPlannerServer;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -18,17 +18,19 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.MiscConstants;
+import frc.robot.commands.drive.LockModulesCommand;
 import frc.robot.commands.drive.auto.Autos;
 import frc.robot.commands.drive.auto.FollowPathCommand;
-import frc.robot.commands.drive.LockModulesCommand;
 import frc.robot.commands.drive.teleop.SwerveDriveCommand;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
+import frc.robot.telemetry.tunable.TunableTelemetryProfiledPIDController;
 import frc.robot.utils.Alert;
-import frc.robot.utils.ListenableSendableChooser;
 import frc.robot.utils.Alert.AlertType;
+import frc.robot.utils.ListenableSendableChooser;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.DoubleSupplier;
 
 
@@ -44,6 +46,7 @@ public class RobotContainer {
     private final SwerveDriveSubsystem driveSubsystem = new SwerveDriveSubsystem();
 
     private final CommandXboxController driverController = new CommandXboxController(0);
+    private final TeleopControlsStateManager teleopControlsStateManager = new TeleopControlsStateManager();
 
     private final ListenableSendableChooser<Command> driveCommandChooser = new ListenableSendableChooser<>();
     private final ListenableSendableChooser<Command> autoCommandChooser = new ListenableSendableChooser<>();
@@ -67,7 +70,7 @@ public class RobotContainer {
 
         new Trigger(autoCommandChooser::hasNewValue).onTrue(
                 Commands.runOnce(() -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null))
-                        .withName("Auto Alert Checker").ignoringDisable(true)
+                        .ignoringDisable(true).withName("Auto Alert Checker")
         );
 
         Shuffleboard.getTab("DriveTrainRaw").add("Auto Chooser", autoCommandChooser);
@@ -75,7 +78,7 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         GenericEntry maxTranslationSpeedEntry = Shuffleboard.getTab("DriveTrainRaw")
-                .add("Max Translational Speed (Percent)", 1.0).withWidget(BuiltInWidgets.kNumberSlider)
+                .add("Max Translational Speed (Percent)", 0.9).withWidget(BuiltInWidgets.kNumberSlider)
                 .withProperties(Map.of("min", 0, "max", 1.0)).getEntry();
         GenericEntry maxAngularSpeedEntry = Shuffleboard.getTab("DriveTrainRaw").add("Max Angular Speed (Percent)", 1.0)
                 .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0, "max", 1.0)).getEntry();
@@ -85,20 +88,26 @@ public class RobotContainer {
         DoubleSupplier angularMaxSpeedSupplier = () -> maxAngularSpeedEntry.getDouble(1.0)
                 * DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 
+        ProfiledPIDController snapController = new TunableTelemetryProfiledPIDController(
+                "drive/snapController", AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
+                AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS
+        );
+        AtomicBoolean isSnapControllerEnabled = new AtomicBoolean(false);
+
         driveCommandChooser.setDefaultOption(
                 "Hybrid (Default to Field Relative but use robot centric when holding button)",
-                new SwerveDriveCommand(
-                        () -> -driverController.getLeftY(), () -> -driverController.getLeftX(),
-                        () -> -driverController.getRightX(), driverController.rightBumper().negate(),
-                        translationalMaxSpeedSuppler, angularMaxSpeedSupplier, driveSubsystem
-                )
-        );
-        driveCommandChooser.addOption(
-                "Field Orientated",
-                new SwerveDriveCommand(
-                        () -> -driverController.getLeftY(), () -> -driverController.getLeftX(),
-                        () -> -driverController.getRightX(), () -> true, translationalMaxSpeedSuppler,
-                        angularMaxSpeedSupplier, driveSubsystem
+                new SwerveDriveCommand(() -> -driverController.getLeftY(), () -> -driverController.getLeftX(), () -> {
+                    if (driverController.leftBumper().getAsBoolean()) {
+                        if (isSnapControllerEnabled.getAndSet(true)) {
+                            snapController.reset(driveSubsystem.getPose().getRotation().getRadians());
+                        }
+                        return snapController.calculate(driveSubsystem.getPose().getRotation().getRadians(), 0);
+                    } else {
+                        isSnapControllerEnabled.set(false);
+                        return -driverController.getRightX();
+                    }
+                }, driverController.rightBumper().negate(), translationalMaxSpeedSuppler, angularMaxSpeedSupplier,
+                        driveSubsystem
                 )
         );
         driveCommandChooser.addOption(
@@ -109,12 +118,15 @@ public class RobotContainer {
                         angularMaxSpeedSupplier, driveSubsystem
                 )
         );
-        PIDController alwaysFacingAngularController = AutoConstants.PATH_ANGULAR_POSITION_GAINS
-                .createLoggablePIDController("AlwaysFacingController");
+
+        ProfiledPIDController alwaysFacingAngularController = new TunableTelemetryProfiledPIDController(
+                "drive/alwaysFacingController", AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
+                AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS
+        );
         driveCommandChooser.addOption(
                 "Always Facing (0, 0)",
                 // This isn't optimal so if we were to actually use this in season we would have
-                // some FF with where we predict we will be
+                // some FF with where we predict we will be and use a ProfiledPIDController
                 new SwerveDriveCommand(() -> -driverController.getLeftX(), () -> -driverController.getLeftY(), () -> {
                     Pose2d robotPose = driveSubsystem.getPose();
                     Translation2d subtracted = robotPose.getTranslation().minus(new Translation2d());
@@ -132,11 +144,11 @@ public class RobotContainer {
 
         new Trigger(driveCommandChooser::hasNewValue).onTrue(
                 Commands.runOnce(() -> evaluateDriveStyle(driveCommandChooser.getSelected()))
-                        .withName("Drive Style Checker").ignoringDisable(true)
+                        .ignoringDisable(true).withName("Drive Style Checker")
         );
 
         driverController.b().onTrue(
-                Commands.runOnce(driveSubsystem::resetOdometry).withName("Reset Odometry").ignoringDisable(true)
+                Commands.runOnce(driveSubsystem::resetOdometry).ignoringDisable(true).withName("Reset Odometry")
         );
         driverController.leftBumper().whileTrue(new LockModulesCommand(driveSubsystem).repeatedly());
 

@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.telemetry.types.EventTelemetryEntry;
 import frc.robot.telemetry.types.DoubleArrayTelemetryEntry;
@@ -59,10 +61,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private double characterizationVoltage = 0.0;
 
     public SwerveDriveSubsystem() {
-        modules[0] = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION);
-        modules[1] = new SwerveModule(FRONT_RIGHT_MODULE_CONFIGURATION);
-        modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION);
-        modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION);
+        modules[0] = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION, Constants.TUNING_MODE);
+        modules[1] = new SwerveModule(FRONT_RIGHT_MODULE_CONFIGURATION, Constants.TUNING_MODE);
+        modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION, Constants.TUNING_MODE);
+        modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION, Constants.TUNING_MODE);
 
         driveEventLogger.append("Swerve modules initialized");
 
@@ -289,6 +291,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         }
     }
 
+    public Field2d getField2d() {
+        return field2d;
+    }
+
     private boolean allModulesAtAbsolute() {
         boolean allSet = true;
         for (SwerveModule module : modules) {
@@ -320,28 +326,33 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        Robot.tracer.addNode("SwerveDriveSubsystem#periodic");
+        Robot.tracer.addNode("SetDesiredStates");
         switch (driveMode) {
-            case OPEN_LOOP:
-            case CLOSE_LOOP:
+            case OPEN_LOOP, CLOSE_LOOP -> {
                 SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
-
                 for (int i = 0; i < modules.length; i++) {
                     modules[i].setDesiredState(
                             desiredStates[i], nextStates[i], activeSteer, driveMode == DriveMode.OPEN_LOOP
                     );
                 }
-                break;
-            case CHARACTERIZATION:
+            }
+            case CHARACTERIZATION -> {
                 for (SwerveModule module : modules) {
                     module.setCharacterizationVoltage(characterizationVoltage);
                 }
-                break;
+            }
         }
+        Robot.tracer.endCurrentNode();
 
-//        poseEstimator.update(getGyroRotation(), getModulePositions());
+        Robot.tracer.addNode("Odometry");
         odometry.update(getGyroRotation(), getModulePositions());
+        Robot.tracer.endCurrentNode();
 
+        Robot.tracer.addNode("Logging");
         logValues();
+        Robot.tracer.endCurrentNode();
+        Robot.tracer.endCurrentNode();
     }
 
     private void logValues() {

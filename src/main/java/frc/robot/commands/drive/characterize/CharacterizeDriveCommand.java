@@ -1,7 +1,9 @@
 package frc.robot.commands.drive.characterize;
 
+import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 
@@ -16,6 +18,17 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
     protected final List<Double> voltageList = new ArrayList<>();
     protected final List<Double> velocityList = new ArrayList<>();
     protected final List<Double> positionList = new ArrayList<>();
+
+    private final StringPublisher testNamePublisher = NetworkTableInstance.getDefault().getStringTopic("char/testName")
+            .publish();
+    private final DoubleArrayPublisher timePublisher = NetworkTableInstance.getDefault()
+            .getDoubleArrayTopic("char/time").publish();
+    private final DoubleArrayPublisher voltagePublisher = NetworkTableInstance.getDefault()
+            .getDoubleArrayTopic("char/voltage").publish();
+    private final DoubleArrayPublisher velocityPublisher = NetworkTableInstance.getDefault()
+            .getDoubleArrayTopic("char/velocity").publish();
+    private final DoubleArrayPublisher positionPublisher = NetworkTableInstance.getDefault()
+            .getDoubleArrayTopic("char/position").publish();
 
     public CharacterizeDriveCommand(SwerveDriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
@@ -54,17 +67,11 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        List<Double> data = new ArrayList<>();
-        for (int i = 0; i < velocityList.size(); i++) {
-            data.add(timeList.get(i));
-            data.add(voltageList.get(i));
-            data.add(positionList.get(i));
-            data.add(velocityList.get(i));
-        }
-        SmartDashboard.putString(
-                "SysIdTelemetry", getTestName() + ";" + data.toString().substring(1, data.toString().length() - 1)
-        );
-        SmartDashboard.putNumber("SysIdAckNumber", 1);
+        testNamePublisher.set(getTestName());
+        timePublisher.set(timeList.stream().mapToDouble(Double::doubleValue).toArray());
+        voltagePublisher.set(voltageList.stream().mapToDouble(Double::doubleValue).toArray());
+        velocityPublisher.set(velocityList.stream().mapToDouble(Double::doubleValue).toArray());
+        positionPublisher.set(positionList.stream().mapToDouble(Double::doubleValue).toArray());
 
         driveSubsystem.stopMovement();
     }

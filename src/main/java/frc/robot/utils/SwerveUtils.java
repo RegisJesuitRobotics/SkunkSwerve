@@ -16,8 +16,6 @@ public class SwerveUtils {
     public static double calculateContinuousInputSetpoint(
             double currentAngleRadians, double targetAngleSetpointRadians
     ) {
-        targetAngleSetpointRadians = Math.IEEEremainder(targetAngleSetpointRadians, Math.PI * 2);
-
         double remainder = currentAngleRadians % (Math.PI * 2);
         double adjustedAngleSetpoint = targetAngleSetpointRadians + (currentAngleRadians - remainder);
 

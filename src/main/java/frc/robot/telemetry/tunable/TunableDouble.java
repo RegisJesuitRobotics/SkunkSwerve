@@ -1,4 +1,4 @@
-package frc.robot.utils;
+package frc.robot.telemetry.tunable;
 // Modified from 6328 Mechanical Advantage
 
 import edu.wpi.first.networktables.DoubleEntry;
@@ -12,6 +12,8 @@ import frc.robot.telemetry.types.DoubleTelemetryEntry;
 public class TunableDouble {
     private final DoubleEntry networkEntry;
     private final DoubleTelemetryEntry telemetryEntry;
+    private final boolean tuningMode;
+    private final double defaultValue;
     private double lastHasChangedValue;
 
     /**
@@ -19,11 +21,14 @@ public class TunableDouble {
      *
      * @param networkName  Name for network tables
      * @param defaultValue Default value
+     * @param tuningMode   If true, will get value from dashboard
      */
-    public TunableDouble(String networkName, double defaultValue) {
+    public TunableDouble(String networkName, double defaultValue, boolean tuningMode) {
         this.networkEntry = NetworkTableInstance.getDefault().getDoubleTopic(networkName).getEntry(defaultValue);
         networkEntry.set(networkEntry.get());
         this.telemetryEntry = new DoubleTelemetryEntry(networkName, false);
+        this.defaultValue = defaultValue;
+        this.tuningMode = tuningMode;
 
         this.lastHasChangedValue = defaultValue;
     }
@@ -34,6 +39,9 @@ public class TunableDouble {
      * @return The current value
      */
     public double get() {
+        if (!tuningMode) {
+            return defaultValue;
+        }
         double value = networkEntry.get();
         telemetryEntry.append(value);
         return value;
@@ -49,7 +57,6 @@ public class TunableDouble {
         double currentValue = get();
         if (currentValue != lastHasChangedValue) {
             lastHasChangedValue = currentValue;
-            System.out.println("IT CHANGED");
             return true;
         }
 
