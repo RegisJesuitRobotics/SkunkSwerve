@@ -33,7 +33,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     enum DriveMode {
         OPEN_LOOP,
         CLOSE_LOOP,
-        CHARACTERIZATION
+        CHARACTERIZATION,
+        RAW_VOLTAGE
     }
 
     private final SwerveModule[] modules = new SwerveModule[NUM_MODULES];
@@ -58,7 +59,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private SwerveModuleState[] nextStates = new SwerveModuleState[NUM_MODULES];
     private boolean activeSteer = true;
     private DriveMode driveMode = DriveMode.OPEN_LOOP;
-    private double characterizationVoltage = 0.0;
+    private double rawDriveVolts = 0.0;
+    private double rawSteerVolts = 0.0;
 
     public SwerveDriveSubsystem() {
         modules[0] = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION, Constants.TUNING_MODE);
@@ -216,6 +218,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         this.nextStates = SwerveUtils.copySwerveStateArray(nextStates);
     }
 
+    public void setRawVolts(double driveVolts, double steerVolts) {
+        driveMode = DriveMode.RAW_VOLTAGE;
+
+        this.rawDriveVolts = driveVolts;
+        this.rawSteerVolts = steerVolts;
+    }
+
     /**
      * Sets each module velocity to zero and desired angle to what it currently is
      */
@@ -229,7 +238,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public void setCharacterizationVoltage(double voltage) {
         driveMode = DriveMode.CHARACTERIZATION;
-        characterizationVoltage = voltage;
+        rawDriveVolts = voltage;
     }
 
     public double getAverageDriveVelocityMetersSecond() {
@@ -258,33 +267,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         }
     }
 
-    /**
-     * @return true if all modules are at the set desired states within the
-     *         threshold in {@link frc.robot.Constants}
-     */
-    public boolean atDesiredStates() {
-        boolean atStates = true;
-        for (int i = 0; i < modules.length; i++) {
-            atStates &= moduleAtDesiredState(i);
-        }
-        return atStates;
-    }
-
-    private boolean moduleAtDesiredState(int index) {
-        SwerveModule module = modules[index];
-        SwerveModuleState desiredState = desiredStates[index];
-        SwerveModuleState actualState = module.getActualState();
-
-        boolean atState = inTolerance(
-                actualState.speedMetersPerSecond, desiredState.speedMetersPerSecond,
-                VELOCITY_TOLERANCE_METERS_PER_SECOND
-        );
-        atState &= inTolerance(
-                actualState.angle.getDegrees(), desiredState.angle.getDegrees(), ANGLE_TOLERANCE_RADIANS
-        );
-        return atState;
-    }
-
     public void setAllModulesToAbsolute() {
         for (SwerveModule module : modules) {
             module.resetSteerToAbsolute();
@@ -311,10 +293,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return actualStates;
     }
 
-    private static boolean inTolerance(double val, double target, double tolerance) {
-        return Math.abs(target - val) <= tolerance;
-    }
-
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] actualPositions = new SwerveModulePosition[modules.length];
         for (int i = 0; i < modules.length; i++) {
@@ -337,9 +315,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                     );
                 }
             }
+            case RAW_VOLTAGE -> {
+                for (SwerveModule module : modules) {
+                    module.setRawVoltage(rawDriveVolts, rawSteerVolts);
+                }
+            }
             case CHARACTERIZATION -> {
                 for (SwerveModule module : modules) {
-                    module.setCharacterizationVoltage(characterizationVoltage);
+                    module.setCharacterizationVoltage(rawDriveVolts);
                 }
             }
         }

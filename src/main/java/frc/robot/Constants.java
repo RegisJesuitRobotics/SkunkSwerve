@@ -39,7 +39,6 @@ public final class Constants {
         public static final double NOMINAL_VOLTAGE = 12.0;
 
         // For talons PID full output is 1023 except for all FF gains
-        // TODO: TUNE
         public static final TunablePIDGains DRIVE_VELOCITY_PID_GAINS = new TunablePIDGains(
                 "gains/drive", 0.02, 0.0, 0.0, TUNING_MODE
         );
@@ -49,8 +48,10 @@ public final class Constants {
         );
 
         public static final TunablePIDGains STEER_POSITION_PID_GAINS = new TunablePIDGains(
-                "gains/steer", 0.1, 0.0, 0.2, TUNING_MODE
+                "gains/steer", 0.3, 0.0, 0.0, TUNING_MODE
         );
+
+        public static final double ACCEPTABLE_STEER_ERROR_RADIANS = Units.degreesToRadians(0.20);
 
         // Left right distance between center of wheels
         public static final double TRACKWIDTH_METERS = Units.inchesToMeters(24.75);
@@ -76,34 +77,31 @@ public final class Constants {
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 2;
         public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 
-        public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND = 10.0;
-        public static final double ANGULAR_RATE_LIMIT_RADIANS_SECOND = 5.0 * Math.PI;
-        public static final double TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND = 0.25;
-
-        public static final double VELOCITY_TOLERANCE_METERS_PER_SECOND = 0.05;
+        public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND_SQUARED = 10.0;
+        public static final double ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED = 10.0 * Math.PI;
+        public static final double TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND = 0.15;
 
         private static final SharedSwerveModuleConfiguration SHARED_SWERVE_MODULE_CONFIGURATION = new SharedSwerveModuleConfiguration(
                 DRIVE_GEAR_REDUCTION, STEER_GEAR_REDUCTION, DRIVE_PEAK_CURRENT_LIMIT, DRIVE_CONTINUOUS_CURRENT_LIMIT,
                 DRIVE_CONTINUOUS_CURRENT_LIMIT_TIME_SECONDS, STEER_PEAK_CURRENT_LIMIT, STEER_CONTINUOUS_CURRENT_LIMIT,
                 STEER_CONTINUOUS_CURRENT_LIMIT_TIME_SECONDS, NOMINAL_VOLTAGE, WHEEL_DIAMETER_METERS,
                 MAX_VELOCITY_METERS_PER_SECOND, DRIVE_VELOCITY_PID_GAINS, DRIVE_VELOCITY_FF_GAINS,
-                STEER_POSITION_PID_GAINS
-        );
+                STEER_POSITION_PID_GAINS, ACCEPTABLE_STEER_ERROR_RADIANS);
 
         public static final SwerveModuleConfiguration FRONT_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                1, 5, 9, true, true, -67.8, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                1, 5, 9, true, true, Units.radiansToDegrees(-1.22565065), false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration FRONT_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                2, 6, 10, true, true, 75.05, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                2, 6, 10, true, true, Units.radiansToDegrees(1.30388367), false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration BACK_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                3, 7, 11, true, true, 78.84, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                3, 7, 11, true, true, Units.radiansToDegrees(1.37751475), false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                4, 8, 12, true, true, -156.8, false, SHARED_SWERVE_MODULE_CONFIGURATION
+                4, 8, 12, true, true, Units.radiansToDegrees(-2.73662173), false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
     }
 

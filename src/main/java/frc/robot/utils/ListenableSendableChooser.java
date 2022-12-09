@@ -76,11 +76,9 @@ public class ListenableSendableChooser<V> implements NTSendable, AutoCloseable {
     }
 
     public boolean hasNewValue() {
-        try {
-            return hasNewValue;
-        } finally {
-            hasNewValue = !hasNewValue;
-        }
+        boolean previousValue = hasNewValue;
+        hasNewValue = !hasNewValue;
+        return previousValue;
     }
 
     /**
@@ -163,11 +161,13 @@ public class ListenableSendableChooser<V> implements NTSendable, AutoCloseable {
         builder.addStringProperty(SELECTED, null, val -> {
             m_mutex.lock();
             try {
+                if (!val.equals(m_selected)) {
+                    hasNewValue = true;
+                }
                 m_selected = val;
                 for (StringPublisher pub : m_activePubs) {
                     pub.set(val);
                 }
-                hasNewValue = true;
             } finally {
                 m_mutex.unlock();
             }

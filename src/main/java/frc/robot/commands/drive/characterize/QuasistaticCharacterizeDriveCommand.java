@@ -14,9 +14,4 @@ public class QuasistaticCharacterizeDriveCommand extends CharacterizeDriveComman
     protected double getVoltage() {
         return timer.get() * rampRateVoltsSecond;
     }
-
-    @Override
-    protected String getTestName() {
-        return "slow-" + (rampRateVoltsSecond > 0 ? "forward" : "backward");
-    }
 }

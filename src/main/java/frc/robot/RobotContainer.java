@@ -11,7 +11,9 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -119,6 +121,7 @@ public class RobotContainer {
                 )
         );
 
+        SmartDashboard.putData(CommandScheduler.getInstance());
         ProfiledPIDController alwaysFacingAngularController = new TunableTelemetryProfiledPIDController(
                 "drive/alwaysFacingController", AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
                 AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS
@@ -135,7 +138,7 @@ public class RobotContainer {
                     return alwaysFacingAngularController
                             .calculate(robotPose.getRotation().getRadians(), desiredHeading.getRadians());
                 }, driverController.rightBumper().negate(), translationalMaxSpeedSuppler,
-                        () -> DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND, driveSubsystem
+                        () -> DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED, driveSubsystem
                 )
         );
 
@@ -150,7 +153,7 @@ public class RobotContainer {
         driverController.b().onTrue(
                 Commands.runOnce(driveSubsystem::resetOdometry).ignoringDisable(true).withName("Reset Odometry")
         );
-        driverController.leftBumper().whileTrue(new LockModulesCommand(driveSubsystem).repeatedly());
+        driverController.leftBumper().whileTrue(new LockModulesCommand(driveSubsystem).repeatedly().withName("Lock Modules"));
 
         driverController.x().debounce(0.5).onTrue(new FollowPathCommand(() -> {
             Pose2d currentPose = driveSubsystem.getPose();
@@ -168,7 +171,7 @@ public class RobotContainer {
                             new Rotation2d(0)
                     )
             );
-        }, driveSubsystem).until(driverController.rightBumper()));
+        }, driveSubsystem).until(driverController.rightBumper()).withName("To (0, 0) Follow Path"));
     }
 
     private void evaluateDriveStyle(Command newCommand) {

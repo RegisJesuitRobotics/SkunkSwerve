@@ -20,7 +20,7 @@ public class VectorRateLimiter {
         Translation2d delta = vector.minus(lastVector);
 
         if (delta.getNorm() > limit * elapsedTime) {
-            delta = new Translation2d(limit, delta.getAngle());
+            delta = new Translation2d(limit * elapsedTime, delta.getAngle());
         }
 
         lastTime = currentTime;

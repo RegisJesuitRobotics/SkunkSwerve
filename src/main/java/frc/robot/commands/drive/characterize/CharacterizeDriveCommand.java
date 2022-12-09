@@ -19,8 +19,6 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
     protected final List<Double> velocityList = new ArrayList<>();
     protected final List<Double> positionList = new ArrayList<>();
 
-    private final StringPublisher testNamePublisher = NetworkTableInstance.getDefault().getStringTopic("char/testName")
-            .publish();
     private final DoubleArrayPublisher timePublisher = NetworkTableInstance.getDefault()
             .getDoubleArrayTopic("char/time").publish();
     private final DoubleArrayPublisher voltagePublisher = NetworkTableInstance.getDefault()
@@ -37,8 +35,6 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
     }
 
     protected abstract double getVoltage();
-
-    protected abstract String getTestName();
 
     @Override
     public void initialize() {
@@ -67,7 +63,6 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        testNamePublisher.set(getTestName());
         timePublisher.set(timeList.stream().mapToDouble(Double::doubleValue).toArray());
         voltagePublisher.set(voltageList.stream().mapToDouble(Double::doubleValue).toArray());
         velocityPublisher.set(velocityList.stream().mapToDouble(Double::doubleValue).toArray());

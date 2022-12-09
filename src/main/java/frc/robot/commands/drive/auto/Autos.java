@@ -4,9 +4,7 @@ import com.pathplanner.lib.PathPlanner;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.commands.drive.LockModulesCommand;
-import frc.robot.commands.drive.SteerTestingCommand;
-import frc.robot.commands.drive.characterize.DynamicCharacterizeDriveCommand;
-import frc.robot.commands.drive.characterize.QuasistaticCharacterizeDriveCommand;
+import frc.robot.commands.drive.characterize.*;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 
 import java.util.HashMap;
@@ -22,6 +20,7 @@ public class Autos {
         );
 
         autoBuilder = new RaiderSwerveAutoBuilder(eventMap, driveSubsystem);
+
         addPPAuto("FigureEights");
         addPPAuto("FigureEightsWithRotation");
         addPPAuto("FUN");
@@ -35,6 +34,8 @@ public class Autos {
         addAuto("QuasistaticCharacterizationBackward", new QuasistaticCharacterizeDriveCommand(-0.4, driveSubsystem));
         addAuto("DynamicCharacterizationBackward", new DynamicCharacterizeDriveCommand(-8.0, driveSubsystem));
         addAuto("SteerTesting", new SteerTestingCommand(driveSubsystem));
+        addAuto("DriveTestingCommand", new DriveTestingCommand(1.0, false, driveSubsystem));
+        addAuto("GreaseGears", new GreaseGearsCommand(driveSubsystem));
     }
 
     private void addPPAuto(String name) {

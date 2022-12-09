@@ -38,8 +38,8 @@ public class SwerveDriveCommand extends CommandBase {
         this.translationalMaxSpeedSupplier = translationalMaxSpeedSupplier;
         this.angularMaxSpeedSupplier = angularMaxSpeedSupplier;
 
-        this.translationLimiter = new VectorRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
-        this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND);
+        this.translationLimiter = new VectorRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND_SQUARED);
+        this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED);
 
         this.driveSubsystem = driveSubsystem;
         addRequirements(driveSubsystem);
@@ -84,17 +84,12 @@ public class SwerveDriveCommand extends CommandBase {
         Translation2d normalized = SwerveUtils
                 .applyCircleDeadZone(new Translation2d(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble()), 1.0);
         double[] scaled = new double[3];
-//        Translation2d translation = translationLimiter.calculate(
-//                new Translation2d(
-//                        scaleValue(normalized.getX(), translationalMaxSpeedSupplier.getAsDouble()),
-//                        scaleValue(normalized.getY(), translationalMaxSpeedSupplier.getAsDouble())
-//                )
-//        );
-        Translation2d translation =
+        Translation2d translation = translationLimiter.calculate(
                 new Translation2d(
                         scaleValue(normalized.getX(), translationalMaxSpeedSupplier.getAsDouble()),
                         scaleValue(normalized.getY(), translationalMaxSpeedSupplier.getAsDouble())
-                );
+                )
+        );
         scaled[0] = translation.getX();
         scaled[1] = translation.getY();
         scaled[2] = rotationLimiter

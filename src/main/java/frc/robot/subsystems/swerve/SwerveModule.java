@@ -9,7 +9,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -19,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Robot;
 import frc.robot.telemetry.TelemetryTalonFX;
 import frc.robot.telemetry.tunable.TunablePIDGains;
-import frc.robot.telemetry.tunable.TunableTrapezoidalProfileGains;
 import frc.robot.telemetry.types.BooleanTelemetryEntry;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.telemetry.types.EventTelemetryEntry;
@@ -65,7 +63,7 @@ public class SwerveModule {
     private final double steerMotorConversionFactorPosition;
     private final double steerMotorConversionFactorVelocity;
     private final double nominalVoltage;
-    private final double steerEncoderOffset;
+    private final double steerEncoderOffsetRadians;
 
     private final TunablePIDGains driveVelocityPIDGains;
     private final TunableFFGains driveVelocityFFGains;
@@ -128,7 +126,7 @@ public class SwerveModule {
         configSteerMotor(config);
 
         this.nominalVoltage = config.sharedConfiguration.nominalVoltage;
-        this.steerEncoderOffset = config.offsetDegrees;
+        this.steerEncoderOffsetRadians = config.offsetRadians;
 
         this.driveMotorFF = driveVelocityFFGains.createFeedforward();
 
@@ -186,6 +184,7 @@ public class SwerveModule {
         motorConfiguration.supplyCurrLimit.triggerThresholdTime = config.sharedConfiguration.steerPeakCurrentDurationSeconds;
 
         config.sharedConfiguration.steerPositionPIDGains.setSlot(motorConfiguration.slot0);
+        motorConfiguration.slot0.allowableClosedloopError = config.sharedConfiguration.allowableSteerErrorRadians / steerMotorConversionFactorPosition;
         // Max control effort of 7 volts
         motorConfiguration.slot0.closedLoopPeakOutput = 7.0 / config.sharedConfiguration.nominalVoltage;
 
@@ -332,9 +331,7 @@ public class SwerveModule {
     }
 
     private double getAbsoluteRadians() {
-        return Units.degreesToRadians(
-                Math.IEEEremainder(absoluteSteerEncoder.getAbsolutePosition() + steerEncoderOffset, 360)
-        );
+        return Math.IEEEremainder(Units.degreesToRadians(absoluteSteerEncoder.getAbsolutePosition()) + steerEncoderOffsetRadians, Math.PI * 2);
     }
 
     private double getSteerAngleRadiansNoWrap() {
@@ -401,8 +398,10 @@ public class SwerveModule {
             SwerveModuleState state, SwerveModuleState nextState, boolean activeSteer, boolean openLoop
     ) {
         Robot.tracer.addNode("SwerveModule[" + instanceId + "]#setDesiredState");
+        Robot.tracer.addNode("CheckForResetAndGains");
         checkForSteerMotorReset();
         checkAndUpdateGains();
+        Robot.tracer.endCurrentNode();
         if (isDeadMode) {
             return;
         }
@@ -415,8 +414,10 @@ public class SwerveModule {
         state = SwerveModuleState.optimize(state, getSteerAngle());
         nextState = SwerveModuleState.optimize(nextState, getSteerAngle());
 
+        Robot.tracer.addNode("setState");
         setDriveReference(state.speedMetersPerSecond, nextState.speedMetersPerSecond, openLoop);
         setSteerReference(state.angle.getRadians(), activeSteer);
+        Robot.tracer.endCurrentNode();
 
         // If we have not reset in 5 seconds, been still for 1.5 seconds and our steer
         // velocity is less than half a degree per second (could happen if we are being
@@ -439,9 +440,14 @@ public class SwerveModule {
         driveMotor.set(TalonFXControlMode.PercentOutput, voltage / nominalVoltage);
     }
 
+    public void setRawVoltage(double driveVolts, double steerVolts) {
+        driveMotor.set(TalonFXControlMode.PercentOutput, driveVolts / nominalVoltage);
+        steerMotor.set(TalonFXControlMode.PercentOutput, steerVolts / nominalVoltage);
+    }
+
     private void setSteerReference(double targetAngleRadians, boolean activeSteer) {
         activeSteerEntry.append(activeSteer);
-        steerPositionGoalEntry.append(targetAngleRadians);
+        steerPositionGoalEntry.append(Units.radiansToDegrees(targetAngleRadians));
 
         if (activeSteer) {
             steerMotor.set(
@@ -504,25 +510,26 @@ public class SwerveModule {
     public void logValues() {
         driveMotor.logValues();
         steerMotor.logValues();
-        actualSteerPositionEntry.append(getSteerAngle().getRadians());
-        actualSteerVelocityEntry.append(getSteerVelocityRadiansPerSecond());
+        actualSteerPositionEntry.append(getSteerAngle().getDegrees());
+        actualSteerVelocityEntry.append(Units.radiansToDegrees(getSteerVelocityRadiansPerSecond()));
         actualDriveVelocityEntry.append(getDriveVelocityMetersPerSecond());
-        absoluteHeadingEntry.append(getAbsoluteRadians());
+        absoluteHeadingEntry.append(Units.radiansToDegrees(getAbsoluteRadians()));
         setToAbsoluteEntry.append(setToAbsolute);
     }
 
 
     public record SwerveModuleConfiguration(int driveMotorPort, int steerMotorPort, int steerEncoderPort,
-            boolean driveMotorInverted, boolean steerMotorInverted, double offsetDegrees, boolean steerEncoderInverted,
-            SharedSwerveModuleConfiguration sharedConfiguration) {}
+                                            boolean driveMotorInverted, boolean steerMotorInverted, double offsetRadians, boolean steerEncoderInverted,
+                                            SharedSwerveModuleConfiguration sharedConfiguration) {}
 
     /**
      * This is all the options that are not module specific
      */
     public record SharedSwerveModuleConfiguration(double driveGearRatio, double steerGearRatio,
-            double drivePeakCurrentLimit, double driveContinuousCurrentLimit, double drivePeakCurrentDurationSeconds,
-            double steerPeakCurrentLimit, double steerContinuousCurrentLimit, double steerPeakCurrentDurationSeconds,
-            double nominalVoltage, double wheelDiameterMeters, double openLoopMaxSpeed,
-            TunablePIDGains driveVelocityPIDGains, TunableFFGains driveVelocityFFGains,
-            TunablePIDGains steerPositionPIDGains) {}
+                                                  double drivePeakCurrentLimit, double driveContinuousCurrentLimit, double drivePeakCurrentDurationSeconds,
+                                                  double steerPeakCurrentLimit, double steerContinuousCurrentLimit, double steerPeakCurrentDurationSeconds,
+                                                  double nominalVoltage, double wheelDiameterMeters, double openLoopMaxSpeed,
+                                                  TunablePIDGains driveVelocityPIDGains, TunableFFGains driveVelocityFFGains,
+                                                  TunablePIDGains steerPositionPIDGains,
+                                                  double allowableSteerErrorRadians) {}
 }

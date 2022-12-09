@@ -1,14 +1,15 @@
-package frc.robot.commands.drive;
+package frc.robot.commands.drive.characterize;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
+import frc.robot.telemetry.tunable.TunableDouble;
 
 public class SteerTestingCommand extends CommandBase {
     private final SwerveDriveSubsystem driveSubsystem;
+    private final TunableDouble desiredSteer = new TunableDouble("char/desiredSteerTesting", 0.0, true);
 
     public SteerTestingCommand(SwerveDriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
@@ -18,12 +19,11 @@ public class SteerTestingCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        driveSubsystem.getField2d().getObject("SteerTesting").setPose(new Pose2d(15.980 / 2.0, 8.210 / 2, Rotation2d.fromDegrees(0.0)));
     }
 
     @Override
     public void execute() {
-        Rotation2d angle = driveSubsystem.getField2d().getObject("SteerTesting").getPose().getRotation();
+        Rotation2d angle = Rotation2d.fromDegrees(desiredSteer.get());
 
         SwerveModuleState[] states = new SwerveModuleState[DriveTrainConstants.NUM_MODULES];
 
@@ -37,7 +37,6 @@ public class SteerTestingCommand extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         driveSubsystem.stopMovement();
-//        driveSubsystem.getField2d().getObject("SteerTesting").close();
     }
 
     @Override
