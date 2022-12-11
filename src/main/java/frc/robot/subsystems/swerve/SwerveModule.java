@@ -416,7 +416,8 @@ public class SwerveModule {
         }
 
         state = SwerveModuleState.optimize(state, getSteerAngle());
-        // Assume perfect following, that we will reach our desired state by the time we have to use our next one
+        // Assume perfect following, that we will reach our desired state by the time we
+        // have to use our next one
         nextState = SwerveModuleState.optimize(nextState, state.angle);
 
         Robot.tracer.addNode("setDriveState");
@@ -515,7 +516,7 @@ public class SwerveModule {
         return currentTime - lastAbsoluteResetTime > 5.0 && currentTime - lastMoveTime > 1.5
                 && Math.abs(absoluteSteerEncoder.getVelocity()) < 0.5
                 && Math.abs(steerMotor.getSelectedSensorVelocity() * steerMotorConversionFactorVelocity) < Units
-                .degreesToRadians(0.5);
+                        .degreesToRadians(0.5);
     }
 
     /**

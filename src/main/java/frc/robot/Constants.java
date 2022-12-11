@@ -16,8 +16,6 @@ import frc.robot.telemetry.tunable.TunableTrapezoidalProfileGains;
 public final class Constants {
     private Constants() {}
 
-    public static final boolean TUNING_MODE = true;
-
     public static class DriveTrainConstants {
         private DriveTrainConstants() {}
 
@@ -40,15 +38,15 @@ public final class Constants {
 
         // For talons PID full output is 1023 except for all FF gains
         public static final TunablePIDGains DRIVE_VELOCITY_PID_GAINS = new TunablePIDGains(
-                "gains/drive", 0.02, 0.0, 0.0, TUNING_MODE
+                "gains/drive", 0.02, 0.0, 0.0, MiscConstants.TUNING_MODE
         );
 
         public static final TunableFFGains DRIVE_VELOCITY_FF_GAINS = new TunableFFGains(
-                "gains/drive", 0.6712106209979143, 2.019606167307655, 0.089374, TUNING_MODE
+                "gains/drive", 0.6712106209979143, 2.019606167307655, 0.089374, MiscConstants.TUNING_MODE
         );
 
         public static final TunablePIDGains STEER_POSITION_PID_GAINS = new TunablePIDGains(
-                "gains/steer", 0.3, 0.0, 0.0, TUNING_MODE
+                "gains/steer", 0.0026596, 0.0, 0.20345, MiscConstants.TUNING_MODE
         );
 
         public static final double ACCEPTABLE_STEER_ERROR_RADIANS = Units.degreesToRadians(0.20);
@@ -70,9 +68,6 @@ public final class Constants {
         public static final double MOTOR_FREE_SPEED_RPM = 6380.0;
         public static final double MAX_VELOCITY_METERS_PER_SECOND = (MOTOR_FREE_SPEED_RPM * WHEEL_DIAMETER_METERS
                 * Math.PI) / (60.0 * DRIVE_GEAR_REDUCTION);
-
-        public static final double MAX_PATH_ACCELERATION_METERS_PER_SECOND_SQUARED = MAX_VELOCITY_METERS_PER_SECOND
-                / 4.0;
 
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI * 2;
         public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
@@ -109,25 +104,26 @@ public final class Constants {
     public static class AutoConstants {
         // TODO: tune
         public static final TunablePIDGains PATH_TRANSLATION_POSITION_GAINS = new TunablePIDGains(
-                "gains/pathXY", 0.5, 0.0, 0.0, TUNING_MODE
+                "gains/pathXY", 0.5, 0.0, 0.0, MiscConstants.TUNING_MODE
         );
         public static final TunablePIDGains PATH_ANGULAR_POSITION_PID_GAINS = new TunablePIDGains(
-                "gains/pathAngular", 1.0, 0.0, 0.0, TUNING_MODE
+                "gains/pathAngular", 0.5, 0.0, 0.0, MiscConstants.TUNING_MODE
         );
         public static final TunableTrapezoidalProfileGains PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS = new TunableTrapezoidalProfileGains(
                 "gains/pathAngular", DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                DriveTrainConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED, TUNING_MODE
+                DriveTrainConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED, MiscConstants.TUNING_MODE
         );
+        public static final double MAX_PATH_ACCELERATION_METERS_PER_SECOND_SQUARED = DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND
+                / 4.0;
         public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(
-                DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-                DriveTrainConstants.MAX_PATH_ACCELERATION_METERS_PER_SECOND_SQUARED
+                DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND, MAX_PATH_ACCELERATION_METERS_PER_SECOND_SQUARED
         );
     }
 
     public static class MiscConstants {
         private MiscConstants() {}
 
-        public static final int[] usedControllerPorts = { 0 };
-        public static final boolean enablePathPlannerServer = true;
+        public static final int[] USED_CONTROLLER_PORTS = { 0 };
+        public static final boolean TUNING_MODE = true;
     }
 }
