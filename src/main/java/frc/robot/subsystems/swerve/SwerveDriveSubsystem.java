@@ -1,12 +1,12 @@
 package frc.robot.subsystems.swerve;
 
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -41,7 +41,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     private final AHRS gyro = new AHRS();
 
-    private final SwerveDriveOdometry odometry;
+    private final SwerveDrivePoseEstimator poseEstimator;
 
     private final Alert navXNotConnectedFaultAlert = new Alert(
             "navX is not connected. Field-centric drive and odometry will be negatively effected!", AlertType.ERROR
@@ -70,7 +70,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         driveEventLogger.append("Swerve modules initialized");
 
-        odometry = new SwerveDriveOdometry(KINEMATICS, getGyroRotation(), getModulePositions());
+        poseEstimator = new SwerveDrivePoseEstimator(
+                KINEMATICS, getGyroRotation(), getModulePositions(), new Pose2d()
+        );
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
 
@@ -128,7 +130,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param pose2d the provided pose
      */
     public void resetOdometry(Pose2d pose2d) {
-        odometry.resetPosition(getGyroRotation(), getModulePositions(), pose2d);
+        poseEstimator.resetPosition(getGyroRotation(), getModulePositions(), pose2d);
 
         driveEventLogger.append("Odometry reset");
     }
@@ -137,7 +139,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @return the estimated position of the robot
      */
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     public ChassisSpeeds getCurrentChassisSpeeds() {
@@ -218,6 +220,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         this.nextStates = SwerveUtils.copySwerveStateArray(nextStates);
     }
 
+    /**
+     * Set the voltage directly for the motors.
+     * @param driveVolts the desired drive voltage
+     * @param steerVolts the desired steer voltage
+     */
     public void setRawVolts(double driveVolts, double steerVolts) {
         driveMode = DriveMode.RAW_VOLTAGE;
 
@@ -236,6 +243,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         setRawStates(false, true, newStates);
     }
 
+    /**
+     * Set the module to characterization mode with the provided voltage
+     * @param voltage the voltage to apply to the drive motor
+     */
     public void setCharacterizationVoltage(double voltage) {
         driveMode = DriveMode.CHARACTERIZATION;
         rawDriveVolts = voltage;
@@ -305,7 +316,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         Robot.tracer.addNode("SwerveDriveSubsystem#periodic");
-        Robot.tracer.addNode("SetDesiredStates");
+        Robot.tracer.addNode("setDesiredStates");
         switch (driveMode) {
             case OPEN_LOOP, CLOSE_LOOP -> {
                 SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
@@ -328,11 +339,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         }
         Robot.tracer.endCurrentNode();
 
-        Robot.tracer.addNode("Odometry");
-        odometry.update(getGyroRotation(), getModulePositions());
+        Robot.tracer.addNode("odometry");
+        poseEstimator.update(getGyroRotation(), getModulePositions());
         Robot.tracer.endCurrentNode();
 
-        Robot.tracer.addNode("Logging");
+        Robot.tracer.addNode("logging");
         logValues();
         Robot.tracer.endCurrentNode();
         Robot.tracer.endCurrentNode();

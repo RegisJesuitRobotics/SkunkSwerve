@@ -62,12 +62,12 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
+        driveSubsystem.stopMovement();
+
         timePublisher.set(timeList.stream().mapToDouble(Double::doubleValue).toArray());
         voltagePublisher.set(voltageList.stream().mapToDouble(Double::doubleValue).toArray());
         velocityPublisher.set(velocityList.stream().mapToDouble(Double::doubleValue).toArray());
         positionPublisher.set(positionList.stream().mapToDouble(Double::doubleValue).toArray());
-
-        driveSubsystem.stopMovement();
     }
 
     @Override

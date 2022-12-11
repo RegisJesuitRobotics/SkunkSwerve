@@ -402,7 +402,7 @@ public class SwerveModule {
             SwerveModuleState state, SwerveModuleState nextState, boolean activeSteer, boolean openLoop
     ) {
         Robot.tracer.addNode("SwerveModule[" + instanceId + "]#setDesiredState");
-        Robot.tracer.addNode("CheckForResetAndGains");
+        Robot.tracer.addNode("checkForResetAndGains");
         checkForSteerMotorReset();
         checkAndUpdateGains();
         Robot.tracer.endCurrentNode();
@@ -416,20 +416,18 @@ public class SwerveModule {
         }
 
         state = SwerveModuleState.optimize(state, getSteerAngle());
-        nextState = SwerveModuleState.optimize(nextState, getSteerAngle());
+        // Assume perfect following, that we will reach our desired state by the time we have to use our next one
+        nextState = SwerveModuleState.optimize(nextState, state.angle);
 
-        Robot.tracer.addNode("setState");
+        Robot.tracer.addNode("setDriveState");
         setDriveReference(state.speedMetersPerSecond, nextState.speedMetersPerSecond, openLoop);
+        Robot.tracer.endCurrentNode();
+
+        Robot.tracer.addNode("setSteerState");
         setSteerReference(state.angle.getRadians(), activeSteer);
         Robot.tracer.endCurrentNode();
 
-        // If we have not reset in 5 seconds, been still for 1.5 seconds and our steer
-        // velocity is less than half a degree per second (could happen if we are being
-        // pushed), reset to absolute
-        if (currentTime - lastAbsoluteResetTime > 5.0 && currentTime - lastMoveTime > 1.5
-                && Math.abs(absoluteSteerEncoder.getVelocity()) < 0.5
-                && Math.abs(steerMotor.getSelectedSensorVelocity() * steerMotorConversionFactorVelocity) < Units
-                        .degreesToRadians(0.5)) {
+        if (shouldResetToAbsolute()) {
             Robot.tracer.addNode("resetSteerToAbsolute");
             resetSteerToAbsolute();
             Robot.tracer.endCurrentNode();
@@ -507,6 +505,17 @@ public class SwerveModule {
 
             moduleEventEntry.append("Updated steer gains due to value change");
         }
+    }
+
+    private boolean shouldResetToAbsolute() {
+        double currentTime = Timer.getFPGATimestamp();
+        // If we have not reset in 5 seconds, been still for 1.5 seconds and our steer
+        // velocity is less than half a degree per second (could happen if we are being
+        // pushed), reset to absolute
+        return currentTime - lastAbsoluteResetTime > 5.0 && currentTime - lastMoveTime > 1.5
+                && Math.abs(absoluteSteerEncoder.getVelocity()) < 0.5
+                && Math.abs(steerMotor.getSelectedSensorVelocity() * steerMotorConversionFactorVelocity) < Units
+                .degreesToRadians(0.5);
     }
 
     /**

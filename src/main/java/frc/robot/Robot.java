@@ -65,20 +65,17 @@ public class Robot extends TimedRobot {
         tracer.resetEpochs();
         tracer.addNode("robotPeriodic");
 
-        tracer.addNode("CommandScheduler");
+        tracer.addNode("commandScheduler");
         CommandScheduler.getInstance().run();
         tracer.endCurrentNode();
 
-        tracer.addNode("miscRobotTelemetryAndAlerts");
+        tracer.addNode("otherTelemetry");
         miscRobotTelemetryAndAlerts.logValues();
-        tracer.endCurrentNode();
-
-        tracer.addNode("telemetryPowerDistribution");
         telemetryPowerDistribution.logValues();
         tracer.endCurrentNode();
 
         if (Constants.TUNING_MODE) {
-            tracer.addNode("NetworkTablesFlush");
+            tracer.addNode("networkTablesFlush");
             NetworkTableInstance.getDefault().flush();
             tracer.endCurrentNode();
         }
