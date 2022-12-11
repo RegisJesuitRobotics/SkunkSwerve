@@ -9,6 +9,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Robot;
 import frc.robot.telemetry.TelemetryTalonFX;
 import frc.robot.telemetry.tunable.TunablePIDGains;
+import frc.robot.telemetry.tunable.TunableTrapezoidalProfileGains;
 import frc.robot.telemetry.types.BooleanTelemetryEntry;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.telemetry.types.EventTelemetryEntry;
@@ -40,6 +42,8 @@ public class SwerveModule {
     private final DoubleTelemetryEntry nextDriveVelocitySetpointEntry;
     private final BooleanTelemetryEntry openLoopEntry;
     private final DoubleTelemetryEntry steerPositionGoalEntry;
+    private final DoubleTelemetryEntry steerPositionSetpointEntry;
+    private final DoubleTelemetryEntry steerVelocitySetpointEntry;
     private final BooleanTelemetryEntry activeSteerEntry;
     private final DoubleTelemetryEntry actualDriveVelocityEntry;
     private final DoubleTelemetryEntry actualSteerPositionEntry;
@@ -68,8 +72,13 @@ public class SwerveModule {
     private final TunablePIDGains driveVelocityPIDGains;
     private final TunableFFGains driveVelocityFFGains;
     private final TunablePIDGains steerPositionPIDGains;
-    private SimpleMotorFeedforward driveMotorFF;
+    private final TunableFFGains steerVelocityFFGains;
+    private final TunableTrapezoidalProfileGains steerTrapezoidalGains;
+    private SimpleMotorFeedforward driveVelocityFF;
+    private SimpleMotorFeedforward steerVelocityFF;
+    private TrapezoidProfile.Constraints steerConstraints;
 
+    private TrapezoidProfile.State steerSetpoint = new TrapezoidProfile.State();
     private boolean setToAbsolute = false;
     private boolean isDeadMode = false;
     private double lastMoveTime = 0.0;
@@ -87,6 +96,8 @@ public class SwerveModule {
         nextDriveVelocitySetpointEntry = new DoubleTelemetryEntry(tableName + "nextDriveVelocitySetpoint", tuningMode);
         openLoopEntry = new BooleanTelemetryEntry(tableName + "openLoop", tuningMode);
         steerPositionGoalEntry = new DoubleTelemetryEntry(tableName + "steerPositionGoal", true);
+        steerPositionSetpointEntry = new DoubleTelemetryEntry(tableName + "steerPositionSetpoint", tuningMode);
+        steerVelocitySetpointEntry = new DoubleTelemetryEntry(tableName + "steerVelocitySetpoint", tuningMode);
         activeSteerEntry = new BooleanTelemetryEntry(tableName + "activeSteer", tuningMode);
         actualDriveVelocityEntry = new DoubleTelemetryEntry(tableName + "actualDriveVelocity", true);
         actualSteerPositionEntry = new DoubleTelemetryEntry(tableName + "actualSteerPosition", true);
@@ -112,6 +123,8 @@ public class SwerveModule {
         this.driveVelocityFFGains = config.sharedConfiguration.driveVelocityFFGains;
 
         this.steerPositionPIDGains = config.sharedConfiguration.steerPositionPIDGains;
+        this.steerVelocityFFGains = config.sharedConfiguration.steerVelocityFFGains;
+        this.steerTrapezoidalGains = config.sharedConfiguration.steerTrapezoidalGains;
 
         // Drive motor
         this.driveMotor = new TelemetryTalonFX(config.driveMotorPort, tableName + "driveMotor");
@@ -128,7 +141,9 @@ public class SwerveModule {
         this.nominalVoltage = config.sharedConfiguration.nominalVoltage;
         this.steerEncoderOffsetRadians = config.offsetRadians;
 
-        this.driveMotorFF = driveVelocityFFGains.createFeedforward();
+        this.driveVelocityFF = driveVelocityFFGains.createFeedforward();
+        this.steerVelocityFF = steerVelocityFFGains.createFeedforward();
+        this.steerConstraints = steerTrapezoidalGains.createConstraints();
 
         resetSteerToAbsolute(CANCODER_INITIAL_TIMEOUT_SECONDS);
     }
@@ -416,7 +431,8 @@ public class SwerveModule {
         }
 
         state = SwerveModuleState.optimize(state, getSteerAngle());
-        // Assume perfect following, that we will reach our desired state by the time we have to use our next one
+        // Assume perfect following, that we will reach our desired state by the time we
+        // have to use our next one
         nextState = SwerveModuleState.optimize(nextState, state.angle);
 
         Robot.tracer.addNode("setDriveState");
@@ -452,15 +468,23 @@ public class SwerveModule {
         steerPositionGoalEntry.append(Units.radiansToDegrees(targetAngleRadians));
 
         if (activeSteer) {
+            double continuousInputSetpoint = SwerveUtils
+                    .calculateContinuousInputSetpoint(getSteerAngleRadiansNoWrap(), targetAngleRadians);
+            TrapezoidProfile profile = new TrapezoidProfile(
+                    steerConstraints, new TrapezoidProfile.State(continuousInputSetpoint, 0.0), steerSetpoint
+            );
+            steerSetpoint = profile.calculate(0.02);
+
             steerMotor.set(
-                    TalonFXControlMode.Position,
-                    SwerveUtils.calculateContinuousInputSetpoint(getSteerAngleRadiansNoWrap(), targetAngleRadians)
-                            / steerMotorConversionFactorPosition
+                    TalonFXControlMode.Position, steerSetpoint.position / steerMotorConversionFactorPosition,
+                    DemandType.ArbitraryFeedForward, steerVelocityFF.calculate(steerSetpoint.velocity) / 12
             );
         } else {
+            steerSetpoint = new TrapezoidProfile.State();
             steerMotor.neutralOutput();
         }
-
+        steerPositionSetpointEntry.append(steerSetpoint.position);
+        steerVelocitySetpointEntry.append(steerSetpoint.velocity);
     }
 
     private void setDriveReference(
@@ -472,9 +496,9 @@ public class SwerveModule {
 
         double feedforwardValuePercent;
         if (targetVelocityMetersPerSecond == nextTargetVelocityMetersPerSecond) {
-            feedforwardValuePercent = driveMotorFF.calculate(targetVelocityMetersPerSecond) / nominalVoltage;
+            feedforwardValuePercent = driveVelocityFF.calculate(targetVelocityMetersPerSecond) / nominalVoltage;
         } else {
-            feedforwardValuePercent = driveMotorFF
+            feedforwardValuePercent = driveVelocityFF
                     .calculate(targetVelocityMetersPerSecond, nextTargetVelocityMetersPerSecond, 0.02) / nominalVoltage;
         }
 
@@ -493,15 +517,19 @@ public class SwerveModule {
             SlotConfiguration newSlotConfig = new SlotConfiguration();
             driveVelocityPIDGains.setSlot(newSlotConfig);
             driveMotor.configureSlot(newSlotConfig);
-            driveMotorFF = driveVelocityFFGains.createFeedforward();
+            driveVelocityFF = driveVelocityFFGains.createFeedforward();
 
             moduleEventEntry.append("Updated drive gains due to value change");
         }
 
-        if (steerPositionPIDGains.hasChanged()) {
+        if (steerPositionPIDGains.hasChanged() || steerVelocityFFGains.hasChanged()
+                || steerTrapezoidalGains.hasChanged()) {
             SlotConfiguration newSlotConfig = new SlotConfiguration();
             steerPositionPIDGains.setSlot(newSlotConfig);
             steerMotor.configureSlot(newSlotConfig);
+
+            steerVelocityFF = steerVelocityFFGains.createFeedforward();
+            steerConstraints = steerTrapezoidalGains.createConstraints();
 
             moduleEventEntry.append("Updated steer gains due to value change");
         }
@@ -515,7 +543,7 @@ public class SwerveModule {
         return currentTime - lastAbsoluteResetTime > 5.0 && currentTime - lastMoveTime > 1.5
                 && Math.abs(absoluteSteerEncoder.getVelocity()) < 0.5
                 && Math.abs(steerMotor.getSelectedSensorVelocity() * steerMotorConversionFactorVelocity) < Units
-                .degreesToRadians(0.5);
+                        .degreesToRadians(0.5);
     }
 
     /**
@@ -544,5 +572,6 @@ public class SwerveModule {
             double steerPeakCurrentLimit, double steerContinuousCurrentLimit, double steerPeakCurrentDurationSeconds,
             double nominalVoltage, double wheelDiameterMeters, double openLoopMaxSpeed,
             TunablePIDGains driveVelocityPIDGains, TunableFFGains driveVelocityFFGains,
-            TunablePIDGains steerPositionPIDGains, double allowableSteerErrorRadians) {}
+            TunablePIDGains steerPositionPIDGains, TunableFFGains steerVelocityFFGains,
+            TunableTrapezoidalProfileGains steerTrapezoidalGains, double allowableSteerErrorRadians) {}
 }
