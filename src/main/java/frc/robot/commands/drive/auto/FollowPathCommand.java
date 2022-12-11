@@ -60,7 +60,7 @@ public class FollowPathCommand extends CommandBase {
     @Override
     public void initialize() {
         currentPath = pathSupplier.get();
-        if (MiscConstants.enablePathPlannerServer) {
+        if (MiscConstants.TUNING_MODE) {
             PathPlannerServer.sendActivePath(currentPath.getStates());
         }
         timer.reset();
@@ -90,7 +90,7 @@ public class FollowPathCommand extends CommandBase {
 
         driveSubsystem.setChassisSpeeds(chassisSpeeds, nextChassisSpeeds, false);
 
-        if (MiscConstants.enablePathPlannerServer) {
+        if (MiscConstants.TUNING_MODE) {
             PathPlannerServer.sendPathFollowingData(
                     new Pose2d(desiredState.poseMeters.getTranslation(), desiredState.holonomicRotation), currentPose
             );

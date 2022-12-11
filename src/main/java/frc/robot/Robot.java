@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.MiscConstants;
 import frc.robot.telemetry.CommandSchedulerLogger;
 import frc.robot.telemetry.MiscRobotTelemetryAndAlerts;
 import frc.robot.telemetry.TelemetryPowerDistribution;
@@ -74,7 +75,7 @@ public class Robot extends TimedRobot {
         telemetryPowerDistribution.logValues();
         tracer.endCurrentNode();
 
-        if (Constants.TUNING_MODE) {
+        if (MiscConstants.TUNING_MODE) {
             tracer.addNode("networkTablesFlush");
             NetworkTableInstance.getDefault().flush();
             tracer.endCurrentNode();

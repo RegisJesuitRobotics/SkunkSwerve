@@ -5,7 +5,6 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
-import frc.robot.Constants;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.utils.Alert;
@@ -22,7 +21,7 @@ public class MiscRobotTelemetryAndAlerts {
     private final Alert highCanUsageAlert = new Alert("High CAN Usage", AlertType.WARNING);
     private final LinearFilter highCanUsageFilter = LinearFilter.movingAverage(50);
 
-    private final Alert[] controllerAlerts = new Alert[MiscConstants.usedControllerPorts.length];
+    private final Alert[] controllerAlerts = new Alert[MiscConstants.USED_CONTROLLER_PORTS.length];
 
     private final DoubleTelemetryEntry voltageEntry = new DoubleTelemetryEntry(tableName + "voltage", false);
     private final DoubleTelemetryEntry canUtilizationEntry = new DoubleTelemetryEntry(tableName + "canUse", true);
@@ -30,12 +29,12 @@ public class MiscRobotTelemetryAndAlerts {
     public MiscRobotTelemetryAndAlerts() {
         for (int i = 0; i < controllerAlerts.length; i++) {
             controllerAlerts[i] = new Alert(
-                    "Controller " + MiscConstants.usedControllerPorts[i] + " is disconnected.", AlertType.WARNING
+                    "Controller " + MiscConstants.USED_CONTROLLER_PORTS[i] + " is disconnected.", AlertType.WARNING
             );
         }
 
 
-        if (Constants.TUNING_MODE) {
+        if (MiscConstants.TUNING_MODE) {
             Alert tuningModeAlert = new Alert("Tuning Mode is Enabled", AlertType.INFO);
             tuningModeAlert.set(true);
         }
@@ -77,7 +76,7 @@ public class MiscRobotTelemetryAndAlerts {
 
         // Joysticks
         for (int i = 0; i < controllerAlerts.length; i++) {
-            controllerAlerts[i].set(!DriverStation.isJoystickConnected(MiscConstants.usedControllerPorts[i]));
+            controllerAlerts[i].set(!DriverStation.isJoystickConnected(MiscConstants.USED_CONTROLLER_PORTS[i]));
         }
     }
 }

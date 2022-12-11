@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.Constants.MiscConstants;
 import frc.robot.Robot;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.telemetry.types.EventTelemetryEntry;
@@ -47,7 +47,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             "navX is not connected. Field-centric drive and odometry will be negatively effected!", AlertType.ERROR
     );
     private final Alert navXCalibratingAlert = new Alert("navX is calibrating. Keep the robot still!", AlertType.INFO);
-    private final DoubleTelemetryEntry gyroEntry = new DoubleTelemetryEntry("/drive/gyroRadians", true);
+    private final DoubleTelemetryEntry gyroEntry = new DoubleTelemetryEntry("/drive/gyroDegrees", true);
     private final DoubleArrayTelemetryEntry odometryEntry = new DoubleArrayTelemetryEntry(
             "/drive/estimatedPose", false
     );
@@ -63,16 +63,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private double rawSteerVolts = 0.0;
 
     public SwerveDriveSubsystem() {
-        modules[0] = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION, Constants.TUNING_MODE);
-        modules[1] = new SwerveModule(FRONT_RIGHT_MODULE_CONFIGURATION, Constants.TUNING_MODE);
-        modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION, Constants.TUNING_MODE);
-        modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION, Constants.TUNING_MODE);
+        modules[0] = new SwerveModule(FRONT_LEFT_MODULE_CONFIGURATION, MiscConstants.TUNING_MODE);
+        modules[1] = new SwerveModule(FRONT_RIGHT_MODULE_CONFIGURATION, MiscConstants.TUNING_MODE);
+        modules[2] = new SwerveModule(BACK_LEFT_MODULE_CONFIGURATION, MiscConstants.TUNING_MODE);
+        modules[3] = new SwerveModule(BACK_RIGHT_MODULE_CONFIGURATION, MiscConstants.TUNING_MODE);
 
         driveEventLogger.append("Swerve modules initialized");
 
-        poseEstimator = new SwerveDrivePoseEstimator(
-                KINEMATICS, getGyroRotation(), getModulePositions(), new Pose2d()
-        );
+        poseEstimator = new SwerveDrivePoseEstimator(KINEMATICS, getGyroRotation(), getModulePositions(), new Pose2d());
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
 
@@ -132,7 +130,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public void resetOdometry(Pose2d pose2d) {
         poseEstimator.resetPosition(getGyroRotation(), getModulePositions(), pose2d);
 
-        driveEventLogger.append("Odometry reset");
+        driveEventLogger.append("Estimator reset");
     }
 
     /**
@@ -222,6 +220,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     /**
      * Set the voltage directly for the motors.
+     *
      * @param driveVolts the desired drive voltage
      * @param steerVolts the desired steer voltage
      */
@@ -245,6 +244,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     /**
      * Set the module to characterization mode with the provided voltage
+     *
      * @param voltage the voltage to apply to the drive motor
      */
     public void setCharacterizationVoltage(double voltage) {
@@ -349,13 +349,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         Robot.tracer.endCurrentNode();
     }
 
+    double[] estimatedPoseLoggingArray = new double[3];
+
     private void logValues() {
-        gyroEntry.append(getGyroRotation().getRadians());
+        gyroEntry.append(getGyroRotation().getDegrees());
 
         Pose2d estimatedPose = getPose();
-        odometryEntry.append(
-                new double[] { estimatedPose.getX(), estimatedPose.getY(), estimatedPose.getRotation().getRadians() }
-        );
+        estimatedPoseLoggingArray[0] = estimatedPose.getX();
+        estimatedPoseLoggingArray[1] = estimatedPose.getY();
+        estimatedPoseLoggingArray[2] = estimatedPose.getRotation().getRadians();
+        odometryEntry.append(estimatedPoseLoggingArray);
 
         field2d.setRobotPose(estimatedPose);
         for (int i = 0; i < modules.length; i++) {

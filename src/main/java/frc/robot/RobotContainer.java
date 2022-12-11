@@ -60,7 +60,7 @@ public class RobotContainer {
     }
 
     private void configureAutos() {
-        if (MiscConstants.enablePathPlannerServer) {
+        if (MiscConstants.TUNING_MODE) {
             PathPlannerServer.startServer(5810);
         }
 
@@ -126,17 +126,17 @@ public class RobotContainer {
                 "drive/alwaysFacingController", AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
                 AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS
         );
+        alwaysFacingAngularController.enableContinuousInput(-Math.PI, Math.PI);
         driveCommandChooser.addOption(
                 "Always Facing (0, 0)",
                 // This isn't optimal so if we were to actually use this in season we would have
                 // some FF with where we predict we will be and use a ProfiledPIDController
                 new SwerveDriveCommand(() -> -driverController.getLeftX(), () -> -driverController.getLeftY(), () -> {
                     Pose2d robotPose = driveSubsystem.getPose();
-                    Translation2d subtracted = robotPose.getTranslation().minus(new Translation2d());
-                    Rotation2d desiredHeading = new Rotation2d(subtracted.getX(), subtracted.getY());
+                    Translation2d targetToCurrent = new Translation2d().minus(robotPose.getTranslation());
 
                     return alwaysFacingAngularController
-                            .calculate(robotPose.getRotation().getRadians(), desiredHeading.getRadians());
+                            .calculate(robotPose.getRotation().getRadians(), targetToCurrent.getAngle().getRadians());
                 }, driverController.rightBumper().negate(), translationalMaxSpeedSuppler,
                         () -> DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED, driveSubsystem
                 )
