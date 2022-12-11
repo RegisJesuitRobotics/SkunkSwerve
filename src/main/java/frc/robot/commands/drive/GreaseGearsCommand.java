@@ -1,4 +1,4 @@
-package frc.robot.commands.drive.characterize;
+package frc.robot.commands.drive;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
@@ -19,7 +19,8 @@ public class GreaseGearsCommand extends CommandBase {
 
     }
 
-    @Override public void execute() {
+    @Override
+    public void execute() {
         driveSubsystem.setRawVolts(VOLTS, VOLTS);
     }
 

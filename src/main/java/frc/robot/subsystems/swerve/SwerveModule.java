@@ -184,7 +184,8 @@ public class SwerveModule {
         motorConfiguration.supplyCurrLimit.triggerThresholdTime = config.sharedConfiguration.steerPeakCurrentDurationSeconds;
 
         config.sharedConfiguration.steerPositionPIDGains.setSlot(motorConfiguration.slot0);
-        motorConfiguration.slot0.allowableClosedloopError = config.sharedConfiguration.allowableSteerErrorRadians / steerMotorConversionFactorPosition;
+        motorConfiguration.slot0.allowableClosedloopError = config.sharedConfiguration.allowableSteerErrorRadians
+                / steerMotorConversionFactorPosition;
         // Max control effort of 7 volts
         motorConfiguration.slot0.closedLoopPeakOutput = 7.0 / config.sharedConfiguration.nominalVoltage;
 
@@ -331,7 +332,10 @@ public class SwerveModule {
     }
 
     private double getAbsoluteRadians() {
-        return Math.IEEEremainder(Units.degreesToRadians(absoluteSteerEncoder.getAbsolutePosition()) + steerEncoderOffsetRadians, Math.PI * 2);
+        return Math.IEEEremainder(
+                Units.degreesToRadians(absoluteSteerEncoder.getAbsolutePosition()) + steerEncoderOffsetRadians,
+                Math.PI * 2
+        );
     }
 
     private double getSteerAngleRadiansNoWrap() {
@@ -452,7 +456,8 @@ public class SwerveModule {
         if (activeSteer) {
             steerMotor.set(
                     TalonFXControlMode.Position,
-                    SwerveUtils.calculateContinuousInputSetpoint(getSteerAngleRadiansNoWrap(), targetAngleRadians) / steerMotorConversionFactorPosition
+                    SwerveUtils.calculateContinuousInputSetpoint(getSteerAngleRadiansNoWrap(), targetAngleRadians)
+                            / steerMotorConversionFactorPosition
             );
         } else {
             steerMotor.neutralOutput();
@@ -519,17 +524,16 @@ public class SwerveModule {
 
 
     public record SwerveModuleConfiguration(int driveMotorPort, int steerMotorPort, int steerEncoderPort,
-                                            boolean driveMotorInverted, boolean steerMotorInverted, double offsetRadians, boolean steerEncoderInverted,
-                                            SharedSwerveModuleConfiguration sharedConfiguration) {}
+            boolean driveMotorInverted, boolean steerMotorInverted, double offsetRadians, boolean steerEncoderInverted,
+            SharedSwerveModuleConfiguration sharedConfiguration) {}
 
     /**
      * This is all the options that are not module specific
      */
     public record SharedSwerveModuleConfiguration(double driveGearRatio, double steerGearRatio,
-                                                  double drivePeakCurrentLimit, double driveContinuousCurrentLimit, double drivePeakCurrentDurationSeconds,
-                                                  double steerPeakCurrentLimit, double steerContinuousCurrentLimit, double steerPeakCurrentDurationSeconds,
-                                                  double nominalVoltage, double wheelDiameterMeters, double openLoopMaxSpeed,
-                                                  TunablePIDGains driveVelocityPIDGains, TunableFFGains driveVelocityFFGains,
-                                                  TunablePIDGains steerPositionPIDGains,
-                                                  double allowableSteerErrorRadians) {}
+            double drivePeakCurrentLimit, double driveContinuousCurrentLimit, double drivePeakCurrentDurationSeconds,
+            double steerPeakCurrentLimit, double steerContinuousCurrentLimit, double steerPeakCurrentDurationSeconds,
+            double nominalVoltage, double wheelDiameterMeters, double openLoopMaxSpeed,
+            TunablePIDGains driveVelocityPIDGains, TunableFFGains driveVelocityFFGains,
+            TunablePIDGains steerPositionPIDGains, double allowableSteerErrorRadians) {}
 }

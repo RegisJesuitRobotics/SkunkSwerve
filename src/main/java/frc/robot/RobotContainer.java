@@ -146,14 +146,15 @@ public class RobotContainer {
         driveTab.add("Drive Style", driveCommandChooser);
 
         new Trigger(driveCommandChooser::hasNewValue).onTrue(
-                Commands.runOnce(() -> evaluateDriveStyle(driveCommandChooser.getSelected()))
-                        .ignoringDisable(true).withName("Drive Style Checker")
+                Commands.runOnce(() -> evaluateDriveStyle(driveCommandChooser.getSelected())).ignoringDisable(true)
+                        .withName("Drive Style Checker")
         );
 
         driverController.b().onTrue(
                 Commands.runOnce(driveSubsystem::resetOdometry).ignoringDisable(true).withName("Reset Odometry")
         );
-        driverController.leftBumper().whileTrue(new LockModulesCommand(driveSubsystem).repeatedly().withName("Lock Modules"));
+        driverController.leftBumper()
+                .whileTrue(new LockModulesCommand(driveSubsystem).repeatedly().withName("Lock Modules"));
 
         driverController.x().debounce(0.5).onTrue(new FollowPathCommand(() -> {
             Pose2d currentPose = driveSubsystem.getPose();

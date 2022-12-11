@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -76,9 +77,14 @@ public class Robot extends TimedRobot {
         telemetryPowerDistribution.logValues();
         tracer.endCurrentNode();
 
+        if (Constants.TUNING_MODE) {
+            tracer.addNode("NetworkTablesFlush");
+            NetworkTableInstance.getDefault().flush();
+            tracer.endCurrentNode();
+        }
         tracer.endCurrentNode();
         if (tracer.getSinceStartSeconds() > 0.02) {
-            tracer.printEpochs(System.out::println);
+            tracer.printEpochs();
         }
     }
 

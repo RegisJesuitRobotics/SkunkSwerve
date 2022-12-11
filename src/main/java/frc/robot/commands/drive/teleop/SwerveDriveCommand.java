@@ -38,7 +38,9 @@ public class SwerveDriveCommand extends CommandBase {
         this.translationalMaxSpeedSupplier = translationalMaxSpeedSupplier;
         this.angularMaxSpeedSupplier = angularMaxSpeedSupplier;
 
-        this.translationLimiter = new VectorRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND_SQUARED);
+        this.translationLimiter = new VectorRateLimiter(
+                DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND_SQUARED
+        );
         this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED);
 
         this.driveSubsystem = driveSubsystem;

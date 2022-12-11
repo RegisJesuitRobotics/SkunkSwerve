@@ -47,7 +47,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             "navX is not connected. Field-centric drive and odometry will be negatively effected!", AlertType.ERROR
     );
     private final Alert navXCalibratingAlert = new Alert("navX is calibrating. Keep the robot still!", AlertType.INFO);
-    private final DoubleTelemetryEntry gyroEntry = new DoubleTelemetryEntry("/drive/gyroDegrees", true);
+    private final DoubleTelemetryEntry gyroEntry = new DoubleTelemetryEntry("/drive/gyroRadians", true);
     private final DoubleArrayTelemetryEntry odometryEntry = new DoubleArrayTelemetryEntry(
             "/drive/estimatedPose", false
     );

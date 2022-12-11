@@ -3,6 +3,7 @@ package frc.robot.commands.drive.auto;
 import com.pathplanner.lib.PathPlanner;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.commands.drive.GreaseGearsCommand;
 import frc.robot.commands.drive.LockModulesCommand;
 import frc.robot.commands.drive.characterize.*;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
