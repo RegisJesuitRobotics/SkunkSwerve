@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 /** Class for managing persistent alerts to be sent over NetworkTables. */
 public class Alert {
@@ -42,7 +41,8 @@ public class Alert {
     public Alert(String group, String text, AlertType type) {
         if (!groups.containsKey(group)) {
             groups.put(group, new SendableAlerts());
-            Shuffleboard.getTab("AlertsRaw").add(group, groups.get(group));
+            // FIXME
+            // Shuffleboard.getTab("AlertsRaw").add(group, groups.get(group));
         }
 
         this.text = text;

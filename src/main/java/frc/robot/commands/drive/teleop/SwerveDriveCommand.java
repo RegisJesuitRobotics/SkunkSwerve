@@ -8,41 +8,68 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.utils.SwerveUtils;
+import frc.robot.utils.VectorRateLimiter;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-public abstract class SwerveDriveCommand extends CommandBase {
+public class SwerveDriveCommand extends CommandBase {
     protected static final ChassisSpeeds zeroMovement = new ChassisSpeeds(0.0, 0.0, 0.0);
-    protected final DoubleSupplier xAxisSupplier;
-    protected final DoubleSupplier yAxisSupplier;
-    protected final DoubleSupplier rotationSupplier;
-    protected final SwerveDriveSubsystem driveSubsystem;
+    private final DoubleSupplier xAxisSupplier;
+    private final DoubleSupplier yAxisSupplier;
+    private final DoubleSupplier rotationSupplier;
+    private final DoubleSupplier translationalMaxSpeedSupplier;
+    private final DoubleSupplier angularMaxSpeedSupplier;
+    private final BooleanSupplier shouldFieldRelative;
+    private final SwerveDriveSubsystem driveSubsystem;
 
-    protected final SlewRateLimiter xRateLimiter;
-    protected final SlewRateLimiter yRateLimiter;
-    protected final SlewRateLimiter rotationLimiter;
+    private final VectorRateLimiter translationLimiter;
+    private final SlewRateLimiter rotationLimiter;
 
-    protected SwerveDriveCommand(
+    public SwerveDriveCommand(
             DoubleSupplier xAxisSupplier, DoubleSupplier yAxisSupplier, DoubleSupplier rotationSupplier,
-            SwerveDriveSubsystem driveSubsystem
+            BooleanSupplier shouldFieldRelative, DoubleSupplier translationalMaxSpeedSupplier,
+            DoubleSupplier angularMaxSpeedSupplier, SwerveDriveSubsystem driveSubsystem
     ) {
         this.xAxisSupplier = xAxisSupplier;
         this.yAxisSupplier = yAxisSupplier;
         this.rotationSupplier = rotationSupplier;
+        this.shouldFieldRelative = shouldFieldRelative;
+        this.translationalMaxSpeedSupplier = translationalMaxSpeedSupplier;
+        this.angularMaxSpeedSupplier = angularMaxSpeedSupplier;
+
+        this.translationLimiter = new VectorRateLimiter(
+                DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND_SQUARED
+        );
+        this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED);
+
         this.driveSubsystem = driveSubsystem;
-
-        this.xRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
-        this.yRateLimiter = new SlewRateLimiter(DriveTrainConstants.TRANSLATION_RATE_LIMIT_METERS_SECOND);
-        this.rotationLimiter = new SlewRateLimiter(DriveTrainConstants.ROTATION_RATE_LIMIT_RADIANS_SECOND);
-
         addRequirements(driveSubsystem);
     }
 
     @Override
     public void initialize() {
-        xRateLimiter.reset(0);
-        yRateLimiter.reset(0);
+        translationLimiter.reset();
         rotationLimiter.reset(0);
+    }
+
+    @Override
+    public void execute() {
+        double[] inputs = getNormalizedScaledRateLimitedXYTheta();
+        ChassisSpeeds chassisSpeeds;
+        if (shouldFieldRelative.getAsBoolean()) {
+            chassisSpeeds = ChassisSpeeds
+                    .fromFieldRelativeSpeeds(inputs[0], inputs[1], inputs[2], driveSubsystem.getPose().getRotation());
+        } else {
+            chassisSpeeds = new ChassisSpeeds(inputs[0], inputs[1], inputs[2]);
+        }
+
+        if (SwerveUtils
+                .inEpoch(chassisSpeeds, zeroMovement, DriveTrainConstants.TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND)) {
+            driveSubsystem.stopMovement();
+        } else {
+            driveSubsystem.setChassisSpeeds(chassisSpeeds, true);
+        }
     }
 
     @Override
@@ -55,33 +82,25 @@ public abstract class SwerveDriveCommand extends CommandBase {
         return false;
     }
 
-
-    protected double[] getNormalizedScaledRateLimitedXYTheta() {
+    private double[] getNormalizedScaledRateLimitedXYTheta() {
         Translation2d normalized = SwerveUtils
                 .applyCircleDeadZone(new Translation2d(xAxisSupplier.getAsDouble(), yAxisSupplier.getAsDouble()), 1.0);
         double[] scaled = new double[3];
-        scaled[0] = xRateLimiter.calculate(scaleXY(normalized.getX()));
-        scaled[1] = yRateLimiter.calculate(scaleXY(normalized.getY()));
-        scaled[2] = rotationLimiter.calculate(scaleRotation(rotationSupplier.getAsDouble()));
+        Translation2d translation = translationLimiter.calculate(
+                new Translation2d(
+                        scaleValue(normalized.getX(), translationalMaxSpeedSupplier.getAsDouble()),
+                        scaleValue(normalized.getY(), translationalMaxSpeedSupplier.getAsDouble())
+                )
+        );
+        scaled[0] = translation.getX();
+        scaled[1] = translation.getY();
+        scaled[2] = rotationLimiter
+                .calculate(scaleValue(rotationSupplier.getAsDouble(), angularMaxSpeedSupplier.getAsDouble()));
+
         return scaled;
     }
 
-    protected void setDriveChassisSpeedsWithDeadZone(ChassisSpeeds chassisSpeeds) {
-        if (SwerveUtils
-                .inEpoch(chassisSpeeds, zeroMovement, DriveTrainConstants.TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND)) {
-            driveSubsystem.stopMovement();
-        } else {
-            driveSubsystem.setChassisSpeeds(chassisSpeeds, true);
-        }
-    }
-
-    protected static double scaleXY(double value) {
-        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2.0) * Math.signum(value)
-                * DriveTrainConstants.MAX_TELEOP_VELOCITY_METERS_PER_SECOND;
-    }
-
-    protected static double scaleRotation(double value) {
-        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2) * Math.signum(value)
-                * DriveTrainConstants.MAX_TELEOP_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+    private static double scaleValue(double value, double maxSpeed) {
+        return Math.pow(MathUtil.applyDeadband(Math.abs(value), 0.05), 2.0) * Math.signum(value) * maxSpeed;
     }
 }

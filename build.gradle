@@ -1,17 +1,13 @@
-import edu.wpi.first.gradlerio.GradleRIOPlugin
-import edu.wpi.first.gradlerio.deploy.roborio.RoboRIO
-
 import java.text.SimpleDateFormat
 
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2022.4.1"
+    id "edu.wpi.first.GradleRIO" version "2023.1.1-beta-4"
     id 'com.diffplug.spotless' version '6.11.0'
 }
 
-def javaVersion = JavaVersion.VERSION_11
-sourceCompatibility = javaVersion
-targetCompatibility = javaVersion
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
@@ -52,11 +48,8 @@ wpi.java.debugJni = false
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
 
-
-test {
-    useJUnitPlatform()
-}
-
+// Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
+// Also defines JUnit 4.
 dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
@@ -75,8 +68,7 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
-
-    implementation platform("org.junit:junit-bom:5.8.2")
+    implementation platform('org.junit:junit-bom:5.9.0')
     testImplementation "org.junit.jupiter:junit-jupiter-api"
     testImplementation "org.junit.jupiter:junit-jupiter-params"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
@@ -91,7 +83,7 @@ wpi.sim.addDriverstation()
 // knows where to look for our Robot Class.
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    manifest GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
+    manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
@@ -99,6 +91,11 @@ jar {
 deployArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
 wpi.java.configureTestTasks(test)
+
+// Configure string concat to always inline compile
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add '-XDstringConcat=inline'
+}
 
 spotless {
     enforceCheck false
@@ -115,10 +112,14 @@ spotless {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 tasks.register("writeBuildTime") {
-    Date date = new Date();
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    new File(projectDir.toString() + "/src/main/deploy", "buildTime.txt").text = dateFormatter.format(date);
+    Date date = new Date()
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    new File(projectDir.toString() + "/src/main/deploy", "buildTime.txt").text = dateFormatter.format(date)
 }
 
 jar.dependsOn tasks.named("writeBuildTime")

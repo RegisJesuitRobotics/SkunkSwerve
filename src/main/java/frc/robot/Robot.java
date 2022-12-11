@@ -1,13 +1,15 @@
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.logging.CommandSchedulerLogger;
-import frc.robot.logging.MiscRobotLoggerAndAlerts;
-import frc.robot.logging.PowerDistributionLogger;
+import frc.robot.telemetry.CommandSchedulerLogger;
+import frc.robot.telemetry.MiscRobotTelemetryAndAlerts;
+import frc.robot.telemetry.TelemetryPowerDistribution;
+import frc.robot.utils.TreeTracer;
 
 
 
@@ -22,8 +24,10 @@ public class Robot extends TimedRobot {
 
     private RobotContainer robotContainer;
 
-    private PowerDistributionLogger powerDistributionLogger;
-    private MiscRobotLoggerAndAlerts miscRobotLoggerAndAlerts;
+    public static final TreeTracer tracer = new TreeTracer();
+
+    private TelemetryPowerDistribution telemetryPowerDistribution;
+    private MiscRobotTelemetryAndAlerts miscRobotTelemetryAndAlerts;
 
     /**
      * This method is run when the robot is first started up and should be used for
@@ -40,8 +44,8 @@ public class Robot extends TimedRobot {
 
         CommandSchedulerLogger.getInstance().start();
 
-        powerDistributionLogger = new PowerDistributionLogger(new PowerDistribution(0, ModuleType.kCTRE));
-        miscRobotLoggerAndAlerts = new MiscRobotLoggerAndAlerts();
+        telemetryPowerDistribution = new TelemetryPowerDistribution(0, ModuleType.kCTRE);
+        miscRobotTelemetryAndAlerts = new MiscRobotTelemetryAndAlerts();
 
         robotContainer = new RobotContainer();
     }
@@ -58,10 +62,30 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotPeriodic() {
-        CommandScheduler.getInstance().run();
+        tracer.resetEpochs();
+        tracer.addNode("robotPeriodic");
 
-        miscRobotLoggerAndAlerts.logValues();
-        powerDistributionLogger.logValues();
+        tracer.addNode("CommandScheduler");
+        CommandScheduler.getInstance().run();
+        tracer.endCurrentNode();
+
+        tracer.addNode("miscRobotTelemetryAndAlerts");
+        miscRobotTelemetryAndAlerts.logValues();
+        tracer.endCurrentNode();
+
+        tracer.addNode("telemetryPowerDistribution");
+        telemetryPowerDistribution.logValues();
+        tracer.endCurrentNode();
+
+        if (Constants.TUNING_MODE) {
+            tracer.addNode("NetworkTablesFlush");
+            NetworkTableInstance.getDefault().flush();
+            tracer.endCurrentNode();
+        }
+        tracer.endCurrentNode();
+        if (tracer.getSinceStartSeconds() > 0.02) {
+            tracer.printEpochs();
+        }
     }
 
 

@@ -8,21 +8,22 @@ public class SwerveUtils {
     private SwerveUtils() {}
 
     /**
-     * @param currentAngle        what the controller currently reads (radians)
-     * @param targetAngleSetpoint the desired angle [-pi, pi)
+     * @param currentAngleRadians        what the controller currently reads
+     *                                   (radians)
+     * @param targetAngleSetpointRadians the desired angle [-pi, pi)
      * @return the target angle in controller's scope
      */
-    public static double calculateContinuousInputSetpoint(double currentAngle, double targetAngleSetpoint) {
-        targetAngleSetpoint = Math.IEEEremainder(targetAngleSetpoint, Math.PI * 2);
-
-        double remainder = currentAngle % (Math.PI * 2);
-        double adjustedAngleSetpoint = targetAngleSetpoint + (currentAngle - remainder);
+    public static double calculateContinuousInputSetpoint(
+            double currentAngleRadians, double targetAngleSetpointRadians
+    ) {
+        double remainder = currentAngleRadians % (Math.PI * 2);
+        double adjustedAngleSetpoint = targetAngleSetpointRadians + (currentAngleRadians - remainder);
 
         // We don't want to rotate over 180 degrees, so just rotate the other way (add a
         // full rotation)
-        if (adjustedAngleSetpoint - currentAngle > Math.PI) {
+        if (adjustedAngleSetpoint - currentAngleRadians > Math.PI) {
             adjustedAngleSetpoint -= Math.PI * 2;
-        } else if (adjustedAngleSetpoint - currentAngle < -Math.PI) {
+        } else if (adjustedAngleSetpoint - currentAngleRadians < -Math.PI) {
             adjustedAngleSetpoint += Math.PI * 2;
         }
 
@@ -58,5 +59,13 @@ public class SwerveUtils {
      */
     public static SwerveModuleState copySwerveState(SwerveModuleState swerveModuleState) {
         return new SwerveModuleState(swerveModuleState.speedMetersPerSecond, swerveModuleState.angle);
+    }
+
+    public static SwerveModuleState[] copySwerveStateArray(SwerveModuleState[] swerveModuleStates) {
+        SwerveModuleState[] copied = new SwerveModuleState[swerveModuleStates.length];
+        for (int i = 0; i < swerveModuleStates.length; i++) {
+            copied[i] = copySwerveState(swerveModuleStates[i]);
+        }
+        return copied;
     }
 }
