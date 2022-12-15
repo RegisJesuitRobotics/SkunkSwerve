@@ -9,9 +9,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.telemetry.CommandSchedulerLogger;
 import frc.robot.telemetry.MiscRobotTelemetryAndAlerts;
-import frc.robot.telemetry.TelemetryPowerDistribution;
+import frc.robot.telemetry.wrappers.TelemetryPowerDistribution;
 import frc.robot.utils.wpilib.TreeTimedRobot;
-import frc.robot.utils.wpilib.TreeWatchdog;
 
 
 

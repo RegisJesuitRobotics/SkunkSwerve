@@ -1,4 +1,4 @@
-package frc.robot.telemetry;
+package frc.robot.telemetry.wrappers;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
 import frc.robot.telemetry.types.DoubleArrayTelemetryEntry;

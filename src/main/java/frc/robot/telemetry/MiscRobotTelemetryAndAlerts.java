@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
+import frc.robot.telemetry.types.rich.CANBusDataEntry;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 
@@ -24,7 +25,7 @@ public class MiscRobotTelemetryAndAlerts {
     private final Alert[] controllerAlerts = new Alert[MiscConstants.USED_CONTROLLER_PORTS.length];
 
     private final DoubleTelemetryEntry voltageEntry = new DoubleTelemetryEntry(tableName + "voltage", false);
-    private final DoubleTelemetryEntry canUtilizationEntry = new DoubleTelemetryEntry(tableName + "canUse", true);
+    private final CANBusDataEntry canBusDataEntry = new CANBusDataEntry(tableName + "can");
 
     public MiscRobotTelemetryAndAlerts() {
         for (int i = 0; i < controllerAlerts.length; i++) {
@@ -67,11 +68,11 @@ public class MiscRobotTelemetryAndAlerts {
         lowBatteryVoltageAlert.set(batteryVoltage < 11.0);
 
         CANStatus canStatus = RobotController.getCANStatus();
+        canBusDataEntry.append(canStatus);
 
         // CAN Usage
         double percentBusUsage = canStatus.percentBusUtilization;
         double filtered = highCanUsageFilter.calculate(percentBusUsage);
-        canUtilizationEntry.append(filtered);
         highCanUsageAlert.set(filtered >= 0.9);
 
         // Joysticks

@@ -1,4 +1,4 @@
-package frc.robot.telemetry;
+package frc.robot.telemetry.wrappers;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
