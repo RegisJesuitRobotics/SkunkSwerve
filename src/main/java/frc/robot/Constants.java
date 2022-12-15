@@ -36,17 +36,19 @@ public final class Constants {
 
         public static final double NOMINAL_VOLTAGE = 12.0;
 
+        // FIXME: For FF only run, so need to be put back to PIDF after
         // For talons PID full output is 1023 except for all FF gains
         public static final TunablePIDGains DRIVE_VELOCITY_PID_GAINS = new TunablePIDGains(
-                "gains/drive", 0.02, 0.0, 0.0, MiscConstants.TUNING_MODE
+                // "gains/drive", 0.06, 0.0, 0.0, MiscConstants.TUNING_MODE
+                "gains/drive", 0.0, 0.0, 0.0, MiscConstants.TUNING_MODE
         );
 
         public static final TunableFFGains DRIVE_VELOCITY_FF_GAINS = new TunableFFGains(
-                "gains/drive", 0.6712106209979143, 2.019606167307655, 0.089374, MiscConstants.TUNING_MODE
+                "gains/drive", 0.62419, 2.1982, 0.08943, MiscConstants.TUNING_MODE
         );
 
         public static final TunablePIDGains STEER_POSITION_PID_GAINS = new TunablePIDGains(
-                "gains/steer", 0.0026596, 0.0, 0.20345, MiscConstants.TUNING_MODE
+                "gains/steer", 0.3, 0.0, 0.1, MiscConstants.TUNING_MODE
         );
 
         public static final double ACCEPTABLE_STEER_ERROR_RADIANS = Units.degreesToRadians(0.20);
@@ -76,28 +78,29 @@ public final class Constants {
         public static final double ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED = 10.0 * Math.PI;
         public static final double TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND = 0.15;
 
+        public static final String DRIVE_CAN_BUS = "rio";
         private static final SharedSwerveModuleConfiguration SHARED_SWERVE_MODULE_CONFIGURATION = new SharedSwerveModuleConfiguration(
-                DRIVE_GEAR_REDUCTION, STEER_GEAR_REDUCTION, DRIVE_PEAK_CURRENT_LIMIT, DRIVE_CONTINUOUS_CURRENT_LIMIT,
-                DRIVE_CONTINUOUS_CURRENT_LIMIT_TIME_SECONDS, STEER_PEAK_CURRENT_LIMIT, STEER_CONTINUOUS_CURRENT_LIMIT,
-                STEER_CONTINUOUS_CURRENT_LIMIT_TIME_SECONDS, NOMINAL_VOLTAGE, WHEEL_DIAMETER_METERS,
-                MAX_VELOCITY_METERS_PER_SECOND, DRIVE_VELOCITY_PID_GAINS, DRIVE_VELOCITY_FF_GAINS,
-                STEER_POSITION_PID_GAINS, ACCEPTABLE_STEER_ERROR_RADIANS
+                DRIVE_CAN_BUS, DRIVE_GEAR_REDUCTION, STEER_GEAR_REDUCTION, DRIVE_PEAK_CURRENT_LIMIT,
+                DRIVE_CONTINUOUS_CURRENT_LIMIT, DRIVE_CONTINUOUS_CURRENT_LIMIT_TIME_SECONDS, STEER_PEAK_CURRENT_LIMIT,
+                STEER_CONTINUOUS_CURRENT_LIMIT, STEER_CONTINUOUS_CURRENT_LIMIT_TIME_SECONDS, NOMINAL_VOLTAGE,
+                WHEEL_DIAMETER_METERS, MAX_VELOCITY_METERS_PER_SECOND, DRIVE_VELOCITY_PID_GAINS,
+                DRIVE_VELOCITY_FF_GAINS, STEER_POSITION_PID_GAINS, ACCEPTABLE_STEER_ERROR_RADIANS
         );
 
         public static final SwerveModuleConfiguration FRONT_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                1, 5, 9, true, true, Units.radiansToDegrees(-1.22565065), false, SHARED_SWERVE_MODULE_CONFIGURATION
+                1, 5, 9, true, true, -1.22565065, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration FRONT_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                2, 6, 10, true, true, Units.radiansToDegrees(1.30388367), false, SHARED_SWERVE_MODULE_CONFIGURATION
+                2, 6, 10, true, true, 1.30388367, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration BACK_LEFT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                3, 7, 11, true, true, Units.radiansToDegrees(1.37751475), false, SHARED_SWERVE_MODULE_CONFIGURATION
+                3, 7, 11, true, true, 1.37751475, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
 
         public static final SwerveModuleConfiguration BACK_RIGHT_MODULE_CONFIGURATION = new SwerveModuleConfiguration(
-                4, 8, 12, true, true, Units.radiansToDegrees(-2.73662173), false, SHARED_SWERVE_MODULE_CONFIGURATION
+                4, 8, 12, true, true, -2.73662173, false, SHARED_SWERVE_MODULE_CONFIGURATION
         );
     }
 

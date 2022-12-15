@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.*;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -21,6 +22,7 @@ import frc.robot.telemetry.tunable.TunablePIDGains;
 import frc.robot.telemetry.types.BooleanTelemetryEntry;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.telemetry.types.EventTelemetryEntry;
+import frc.robot.telemetry.types.IntegerTelemetryEntry;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.telemetry.tunable.TunableFFGains;
@@ -28,6 +30,19 @@ import frc.robot.utils.SwerveUtils;
 
 
 public class SwerveModule {
+    private enum SwerveModuleControlMode {
+        NORMAL(1),
+        CHARACTERIZATION(2),
+        RAW_VOLTAGE(3),
+        DEAD_MODE(4);
+
+        final int logValue;
+
+        SwerveModuleControlMode(int logValue) {
+            this.logValue = logValue;
+        }
+    }
+
     private static final int CAN_TIMEOUT_MS = 250;
     private static final double CANCODER_INITIAL_TIMEOUT_SECONDS = 5.0;
 
@@ -46,6 +61,8 @@ public class SwerveModule {
     private final DoubleTelemetryEntry actualSteerVelocityEntry;
     private final DoubleTelemetryEntry absoluteHeadingEntry;
     private final BooleanTelemetryEntry setToAbsoluteEntry;
+    // 1 is regular, 2 is characterization, 3 is raw voltage, 4 is dead mode
+    private final IntegerTelemetryEntry controlModeEntry;
     private final EventTelemetryEntry moduleEventEntry;
 
     private final Alert notSetToAbsoluteAlert;
@@ -93,6 +110,7 @@ public class SwerveModule {
         actualSteerVelocityEntry = new DoubleTelemetryEntry(tableName + "actualSteerVelocity", tuningMode);
         absoluteHeadingEntry = new DoubleTelemetryEntry(tableName + "absoluteHeading", tuningMode);
         setToAbsoluteEntry = new BooleanTelemetryEntry(tableName + "setToAbsolute", true);
+        controlModeEntry = new IntegerTelemetryEntry(tableName + "controlMode", false);
         moduleEventEntry = new EventTelemetryEntry(tableName + "events");
 
         String alertPrefix = "Module " + instanceId + ": ";
@@ -114,15 +132,19 @@ public class SwerveModule {
         this.steerPositionPIDGains = config.sharedConfiguration.steerPositionPIDGains;
 
         // Drive motor
-        this.driveMotor = new TelemetryTalonFX(config.driveMotorPort, tableName + "driveMotor");
+        this.driveMotor = new TelemetryTalonFX(
+                config.driveMotorPort, tableName + "driveMotor", config.sharedConfiguration.canBus
+        );
         configDriveMotor(config);
 
         // Steer encoder
-        this.absoluteSteerEncoder = new CANCoder(config.steerEncoderPort);
+        this.absoluteSteerEncoder = new CANCoder(config.steerEncoderPort, config.sharedConfiguration.canBus);
         configSteerEncoder(config);
 
         // Steer motor
-        this.steerMotor = new TelemetryTalonFX(config.steerMotorPort, tableName + "steerMotor");
+        this.steerMotor = new TelemetryTalonFX(
+                config.steerMotorPort, tableName + "steerMotor", config.sharedConfiguration.canBus
+        );
         configSteerMotor(config);
 
         this.nominalVoltage = config.sharedConfiguration.nominalVoltage;
@@ -332,9 +354,8 @@ public class SwerveModule {
     }
 
     private double getAbsoluteRadians() {
-        return Math.IEEEremainder(
-                Units.degreesToRadians(absoluteSteerEncoder.getAbsolutePosition()) + steerEncoderOffsetRadians,
-                Math.PI * 2
+        return MathUtil.angleModulus(
+                Units.degreesToRadians(absoluteSteerEncoder.getAbsolutePosition()) + steerEncoderOffsetRadians
         );
     }
 
@@ -346,7 +367,7 @@ public class SwerveModule {
      * @return the rotation of the wheel
      */
     private Rotation2d getSteerAngle() {
-        return new Rotation2d(getSteerAngleRadiansNoWrap());
+        return new Rotation2d(MathUtil.angleModulus(getSteerAngleRadiansNoWrap()));
     }
 
     private double getSteerVelocityRadiansPerSecond() {
@@ -407,8 +428,11 @@ public class SwerveModule {
         checkAndUpdateGains();
         Robot.tracer.endCurrentNode();
         if (isDeadMode) {
+            controlModeEntry.append(SwerveModuleControlMode.DEAD_MODE.logValue);
             return;
         }
+        controlModeEntry.append(SwerveModuleControlMode.NORMAL.logValue);
+
         double currentTime = Timer.getFPGATimestamp();
 
         if (state.speedMetersPerSecond != 0.0 || activeSteer) {
@@ -437,6 +461,8 @@ public class SwerveModule {
     }
 
     public void setCharacterizationVoltage(double voltage) {
+        controlModeEntry.append(SwerveModuleControlMode.CHARACTERIZATION.logValue);
+
         setSteerReference(0.0, true);
 
         // Divide by the value our voltage compensation is set as
@@ -444,6 +470,8 @@ public class SwerveModule {
     }
 
     public void setRawVoltage(double driveVolts, double steerVolts) {
+        controlModeEntry.append(SwerveModuleControlMode.RAW_VOLTAGE.logValue);
+
         driveMotor.set(TalonFXControlMode.PercentOutput, driveVolts / nominalVoltage);
         steerMotor.set(TalonFXControlMode.PercentOutput, steerVolts / nominalVoltage);
     }
@@ -540,7 +568,7 @@ public class SwerveModule {
     /**
      * This is all the options that are not module specific
      */
-    public record SharedSwerveModuleConfiguration(double driveGearRatio, double steerGearRatio,
+    public record SharedSwerveModuleConfiguration(String canBus, double driveGearRatio, double steerGearRatio,
             double drivePeakCurrentLimit, double driveContinuousCurrentLimit, double drivePeakCurrentDurationSeconds,
             double steerPeakCurrentLimit, double steerContinuousCurrentLimit, double steerPeakCurrentDurationSeconds,
             double nominalVoltage, double wheelDiameterMeters, double openLoopMaxSpeed,
