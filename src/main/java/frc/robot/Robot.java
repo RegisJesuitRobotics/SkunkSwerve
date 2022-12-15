@@ -10,7 +10,8 @@ import frc.robot.Constants.MiscConstants;
 import frc.robot.telemetry.CommandSchedulerLogger;
 import frc.robot.telemetry.MiscRobotTelemetryAndAlerts;
 import frc.robot.telemetry.TelemetryPowerDistribution;
-import frc.robot.utils.TreeTracer;
+import frc.robot.utils.wpilib.TreeTimedRobot;
+import frc.robot.utils.wpilib.TreeWatchdog;
 
 
 
@@ -20,15 +21,27 @@ import frc.robot.utils.TreeTracer;
  * you change the name of this class or the package after creating this project,
  * you must also update the build.gradle file in the project.
  */
-public class Robot extends TimedRobot {
+public class Robot extends TreeTimedRobot {
+    public static void startWNode(String nodeName) {
+        instance.watchdog.addNode(nodeName);
+    }
+
+    public static void endWNode() {
+        instance.watchdog.endCurrentNode();
+    }
+
+    private static Robot instance;
+
     private Command autonomousCommand;
 
     private RobotContainer robotContainer;
 
-    public static final TreeTracer tracer = new TreeTracer();
-
     private TelemetryPowerDistribution telemetryPowerDistribution;
     private MiscRobotTelemetryAndAlerts miscRobotTelemetryAndAlerts;
+
+    public Robot() {
+        instance = this;
+    }
 
     /**
      * This method is run when the robot is first started up and should be used for
@@ -63,26 +76,19 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotPeriodic() {
-        tracer.resetEpochs();
-        tracer.addNode("robotPeriodic");
-
-        tracer.addNode("commandScheduler");
+        watchdog.addNode("commandScheduler");
         CommandScheduler.getInstance().run();
-        tracer.endCurrentNode();
+        watchdog.endCurrentNode();
 
-        tracer.addNode("otherTelemetry");
+        watchdog.addNode("otherTelemetry");
         miscRobotTelemetryAndAlerts.logValues();
         telemetryPowerDistribution.logValues();
-        tracer.endCurrentNode();
+        watchdog.endCurrentNode();
 
         if (MiscConstants.TUNING_MODE) {
-            tracer.addNode("networkTablesFlush");
+            watchdog.addNode("networkTablesFlush");
             NetworkTableInstance.getDefault().flush();
-            tracer.endCurrentNode();
-        }
-        tracer.endCurrentNode();
-        if (tracer.getSinceStartSeconds() > 0.02) {
-            tracer.printEpochs();
+            watchdog.endCurrentNode();
         }
     }
 

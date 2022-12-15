@@ -315,8 +315,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        Robot.tracer.addNode("SwerveDriveSubsystem#periodic");
-        Robot.tracer.addNode("setDesiredStates");
+        Robot.startWNode("SwerveDriveSubsystem#periodic");
+        Robot.startWNode("setDesiredStates");
         switch (driveMode) {
             case OPEN_LOOP, CLOSE_LOOP -> {
                 SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
@@ -337,16 +337,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 }
             }
         }
-        Robot.tracer.endCurrentNode();
+        Robot.endWNode();
 
-        Robot.tracer.addNode("odometry");
+        Robot.startWNode("odometry");
         poseEstimator.update(getGyroRotation(), getModulePositions());
-        Robot.tracer.endCurrentNode();
+        Robot.endWNode();
 
-        Robot.tracer.addNode("logging");
+        Robot.startWNode("logging");
         logValues();
-        Robot.tracer.endCurrentNode();
-        Robot.tracer.endCurrentNode();
+        Robot.endWNode();
+        Robot.endWNode();
     }
 
     double[] estimatedPoseLoggingArray = new double[3];

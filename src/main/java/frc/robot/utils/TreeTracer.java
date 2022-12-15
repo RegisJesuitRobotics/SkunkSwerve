@@ -15,7 +15,6 @@ public class TreeTracer {
     private static final long MIN_PRINT_PERIOD = 1000000;
 
     private long lastEpochsPrintTime;
-    private long overallStartTime;
 
     private Node currentNode;
 
@@ -27,7 +26,6 @@ public class TreeTracer {
     public void resetEpochs() {
         long currentTime = RobotController.getFPGATime();
         currentNode = new Node("Base", currentTime, null);
-        overallStartTime = currentTime;
     }
 
     public void addNode(String name) {
@@ -39,10 +37,6 @@ public class TreeTracer {
     public void endCurrentNode() {
         currentNode.endTime = RobotController.getFPGATime();
         currentNode = currentNode.parent;
-    }
-
-    public double getSinceStartSeconds() {
-        return (RobotController.getFPGATime() - overallStartTime) / 1e6;
     }
 
     private void printNode(Node node, StringBuilder out, int indent) {

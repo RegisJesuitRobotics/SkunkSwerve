@@ -205,6 +205,8 @@ public class SwerveModule {
         motorConfiguration.supplyCurrLimit.triggerThresholdCurrent = config.sharedConfiguration.steerPeakCurrentLimit;
         motorConfiguration.supplyCurrLimit.triggerThresholdTime = config.sharedConfiguration.steerPeakCurrentDurationSeconds;
 
+        motorConfiguration.neutralDeadband = 0.02;
+
         config.sharedConfiguration.steerPositionPIDGains.setSlot(motorConfiguration.slot0);
         motorConfiguration.slot0.allowableClosedloopError = config.sharedConfiguration.allowableSteerErrorRadians
                 / steerMotorConversionFactorPosition;
@@ -422,11 +424,11 @@ public class SwerveModule {
     public void setDesiredState(
             SwerveModuleState state, SwerveModuleState nextState, boolean activeSteer, boolean openLoop
     ) {
-        Robot.tracer.addNode("SwerveModule[" + instanceId + "]#setDesiredState");
-        Robot.tracer.addNode("checkForResetAndGains");
+        Robot.startWNode("SwerveModule[" + instanceId + "]#setDesiredState");
+        Robot.startWNode("checkForResetAndGains");
         checkForSteerMotorReset();
         checkAndUpdateGains();
-        Robot.tracer.endCurrentNode();
+        Robot.endWNode();
         if (isDeadMode) {
             controlModeEntry.append(SwerveModuleControlMode.DEAD_MODE.logValue);
             return;
@@ -444,20 +446,20 @@ public class SwerveModule {
         // have to use our next one
         nextState = SwerveModuleState.optimize(nextState, state.angle);
 
-        Robot.tracer.addNode("setDriveState");
+        Robot.startWNode("setDriveState");
         setDriveReference(state.speedMetersPerSecond, nextState.speedMetersPerSecond, openLoop);
-        Robot.tracer.endCurrentNode();
+        Robot.endWNode();
 
-        Robot.tracer.addNode("setSteerState");
+        Robot.startWNode("setSteerState");
         setSteerReference(state.angle.getRadians(), activeSteer);
-        Robot.tracer.endCurrentNode();
+        Robot.endWNode();
 
         if (shouldResetToAbsolute()) {
-            Robot.tracer.addNode("resetSteerToAbsolute");
+            Robot.startWNode("resetSteerToAbsolute");
             resetSteerToAbsolute();
-            Robot.tracer.endCurrentNode();
+            Robot.endWNode();
         }
-        Robot.tracer.endCurrentNode();
+        Robot.endWNode();
     }
 
     public void setCharacterizationVoltage(double voltage) {

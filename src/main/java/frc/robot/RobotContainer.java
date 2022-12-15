@@ -145,6 +145,7 @@ public class RobotContainer {
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
         driveTab.add("Drive Style", driveCommandChooser);
 
+        evaluateDriveStyle(driveCommandChooser.getSelected());
         new Trigger(driveCommandChooser::hasNewValue).onTrue(
                 Commands.runOnce(() -> evaluateDriveStyle(driveCommandChooser.getSelected())).ignoringDisable(true)
                         .withName("Drive Style Checker")
