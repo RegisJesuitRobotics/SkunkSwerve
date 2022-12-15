@@ -124,13 +124,16 @@ public class SwerveModule {
         this.driveMotorConversionFactorPosition = (config.sharedConfiguration().wheelDiameterMeters() * Math.PI)
                 / (config.sharedConfiguration().driveGearRatio() * 2048);
         this.driveMotorConversionFactorVelocity = driveMotorConversionFactorPosition * 10.0;
-        this.steerMotorConversionFactorPosition = (Math.PI * 2) / (config.sharedConfiguration().steerGearRatio() * 2048);
+        this.steerMotorConversionFactorPosition = (Math.PI * 2)
+                / (config.sharedConfiguration().steerGearRatio() * 2048);
         this.steerMotorConversionFactorVelocity = steerMotorConversionFactorPosition * 10.0;
 
         this.driveVelocityPIDGains = config.sharedConfiguration().driveVelocityPIDGains();
-        this.driveVelocityFFGains = config.sharedConfiguration().driveVelocityFFGains();;
+        this.driveVelocityFFGains = config.sharedConfiguration().driveVelocityFFGains();
+        ;
 
-        this.steerPositionPIDGains = config.sharedConfiguration().steerPositionPIDGains();;
+        this.steerPositionPIDGains = config.sharedConfiguration().steerPositionPIDGains();
+        ;
 
         // Drive motor
         this.driveMotor = new TelemetryTalonFX(
@@ -165,8 +168,10 @@ public class SwerveModule {
         applyCommonMotorConfiguration(motorConfiguration, config);
 
         motorConfiguration.supplyCurrLimit.currentLimit = config.sharedConfiguration().driveContinuousCurrentLimit();
-        motorConfiguration.supplyCurrLimit.triggerThresholdCurrent = config.sharedConfiguration().drivePeakCurrentLimit();
-        motorConfiguration.supplyCurrLimit.triggerThresholdTime = config.sharedConfiguration().drivePeakCurrentDurationSeconds();
+        motorConfiguration.supplyCurrLimit.triggerThresholdCurrent = config.sharedConfiguration()
+                .drivePeakCurrentLimit();
+        motorConfiguration.supplyCurrLimit.triggerThresholdTime = config.sharedConfiguration()
+                .drivePeakCurrentDurationSeconds();
 
         config.sharedConfiguration().driveVelocityPIDGains().setSlot(motorConfiguration.slot0);
 
@@ -203,8 +208,10 @@ public class SwerveModule {
         applyCommonMotorConfiguration(motorConfiguration, config);
 
         motorConfiguration.supplyCurrLimit.currentLimit = config.sharedConfiguration().steerContinuousCurrentLimit();
-        motorConfiguration.supplyCurrLimit.triggerThresholdCurrent = config.sharedConfiguration().steerPeakCurrentLimit();
-        motorConfiguration.supplyCurrLimit.triggerThresholdTime = config.sharedConfiguration().steerPeakCurrentDurationSeconds();
+        motorConfiguration.supplyCurrLimit.triggerThresholdCurrent = config.sharedConfiguration()
+                .steerPeakCurrentLimit();
+        motorConfiguration.supplyCurrLimit.triggerThresholdTime = config.sharedConfiguration()
+                .steerPeakCurrentDurationSeconds();
 
         motorConfiguration.neutralDeadband = 0.02;
 

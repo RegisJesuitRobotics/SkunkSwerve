@@ -11,12 +11,12 @@ import java.util.List;
 
 public abstract class CharacterizeDriveCommand extends CommandBase {
     private final SwerveDriveSubsystem driveSubsystem;
-    protected final Timer timer = new Timer();
+    private final Timer timer = new Timer();
 
-    protected final List<Double> timeList = new ArrayList<>();
-    protected final List<Double> voltageList = new ArrayList<>();
-    protected final List<Double> velocityList = new ArrayList<>();
-    protected final List<Double> positionList = new ArrayList<>();
+    private final List<Double> timeList = new ArrayList<>();
+    private final List<Double> voltageList = new ArrayList<>();
+    private final List<Double> velocityList = new ArrayList<>();
+    private final List<Double> positionList = new ArrayList<>();
 
     private final DoubleArrayPublisher timePublisher = NetworkTableInstance.getDefault()
             .getDoubleArrayTopic("char/time").publish();
@@ -33,7 +33,7 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
         addRequirements(driveSubsystem);
     }
 
-    protected abstract double getVoltage();
+    protected abstract double getVoltage(double currentTime);
 
     @Override
     public void initialize() {
@@ -50,7 +50,7 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        double voltage = getVoltage();
+        double voltage = getVoltage(timer.get());
 
         timeList.add(timer.get());
         voltageList.add(voltage);

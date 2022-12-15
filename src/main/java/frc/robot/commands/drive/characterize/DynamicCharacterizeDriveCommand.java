@@ -11,7 +11,7 @@ public class DynamicCharacterizeDriveCommand extends CharacterizeDriveCommand {
     }
 
     @Override
-    protected double getVoltage() {
+    protected double getVoltage(double currentTime) {
         return voltage;
     }
 }

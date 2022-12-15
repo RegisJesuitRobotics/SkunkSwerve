@@ -11,7 +11,7 @@ public class QuasistaticCharacterizeDriveCommand extends CharacterizeDriveComman
     }
 
     @Override
-    protected double getVoltage() {
-        return timer.get() * rampRateVoltsSecond;
+    protected double getVoltage(double currentTime) {
+        return currentTime * rampRateVoltsSecond;
     }
 }
