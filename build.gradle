@@ -2,7 +2,7 @@ import java.text.SimpleDateFormat
 
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2023.1.1-beta-6"
+    id "edu.wpi.first.GradleRIO" version "2023.1.1-beta-7"
     id 'com.diffplug.spotless' version '6.11.0'
 }
 
@@ -105,9 +105,38 @@ spotless {
             exclude '**/build/**', '**/build-*/**'
         }
         toggleOffOn()
-        eclipse().configFile('RJFormat.xml')
+        googleJavaFormat()
         removeUnusedImports()
         trimTrailingWhitespace()
+        endWithNewline()
+    }
+    groovyGradle {
+        target fileTree('.') {
+            include '**/*.gradle'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        greclipse()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format 'xml', {
+        target fileTree('.') {
+            include '**/*.xml'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        eclipseWtp('xml')
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+    format 'misc', {
+        target fileTree('.') {
+            include '**/*.md', '**/.gitignore'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
         endWithNewline()
     }
 }
