@@ -5,7 +5,7 @@ import frc.robot.telemetry.types.DoubleArrayTelemetryEntry;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 
 public class TelemetryPowerDistribution extends PowerDistribution {
-    private final static String tableName = "/power/";
+    private static final String tableName = "/power/";
 
     private final DoubleTelemetryEntry totalEnergyEntry;
     private final DoubleTelemetryEntry totalPowerEntry;

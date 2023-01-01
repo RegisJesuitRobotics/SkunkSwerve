@@ -13,7 +13,6 @@ public class TelemetryTalonFX extends TalonFX {
     private final DoubleTelemetryEntry temperatureEntry;
     private final BooleanTelemetryEntry inBrakeModeEntry;
 
-
     public TelemetryTalonFX(int deviceNumber, String logTable, String canbus) {
         super(deviceNumber, canbus);
 

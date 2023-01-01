@@ -1,9 +1,9 @@
 package frc.robot.utils;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SwerveUtilsTest {
     @Test
@@ -42,15 +42,13 @@ class SwerveUtilsTest {
     void applyCircleDeadZone_OutsideCircle_Normalized() {
         assertEquals(
                 new Translation2d(rootTwoOverTwo, rootTwoOverTwo),
-                SwerveUtils.applyCircleDeadZone(new Translation2d(1.0, 1.0), 1.0)
-        );
+                SwerveUtils.applyCircleDeadZone(new Translation2d(1.0, 1.0), 1.0));
     }
 
     @Test
     void applyCircleDeadZone_OutsideCircle_Negative_Normalized() {
         assertEquals(
                 new Translation2d(-rootTwoOverTwo, rootTwoOverTwo),
-                SwerveUtils.applyCircleDeadZone(new Translation2d(-1.0, 1.0), 1.0)
-        );
+                SwerveUtils.applyCircleDeadZone(new Translation2d(-1.0, 1.0), 1.0));
     }
 }

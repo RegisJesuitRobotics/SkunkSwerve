@@ -19,7 +19,8 @@ public class StringTelemetryEntry extends TelemetryEntry {
 
         logEntry = new StringLogEntry(DataLogManager.getLog(), path);
         if (shouldNT) {
-            networkPublisher = NetworkTableInstance.getDefault().getStringTopic(path).publish();
+            networkPublisher =
+                    NetworkTableInstance.getDefault().getStringTopic(path).publish();
             networkPublisher.setDefault("");
         } else {
             networkPublisher = null;

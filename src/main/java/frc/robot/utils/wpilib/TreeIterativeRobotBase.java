@@ -13,59 +13,48 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 import java.util.ConcurrentModificationException;
 
 /**
- * IterativeRobotBase implements a specific type of robot program framework,
- * extending the RobotBase class.
+ * IterativeRobotBase implements a specific type of robot program framework, extending the RobotBase
+ * class.
  *
- * <p>
- * The IterativeRobotBase class does not implement startCompetition(), so it
- * should not be used by teams directly.
+ * <p>The IterativeRobotBase class does not implement startCompetition(), so it should not be used
+ * by teams directly.
  *
- * <p>
- * This class provides the following functions which are called by the main
- * loop, startCompetition(), at the appropriate times:
+ * <p>This class provides the following functions which are called by the main loop,
+ * startCompetition(), at the appropriate times:
  *
- * <p>
- * robotInit() -- provide for initialization at robot power-on
+ * <p>robotInit() -- provide for initialization at robot power-on
  *
- * <p>
- * init() functions -- each of the following functions is called once when the
- * appropriate mode is entered:
+ * <p>init() functions -- each of the following functions is called once when the appropriate mode
+ * is entered:
  *
  * <ul>
- * <li>disabledInit() -- called each and every time disabled is entered from
- * another mode
- * <li>autonomousInit() -- called each and every time autonomous is entered from
- * another mode
- * <li>teleopInit() -- called each and every time teleop is entered from another
- * mode
- * <li>testInit() -- called each and every time test is entered from another
- * mode
+ *   <li>disabledInit() -- called each and every time disabled is entered from another mode
+ *   <li>autonomousInit() -- called each and every time autonomous is entered from another mode
+ *   <li>teleopInit() -- called each and every time teleop is entered from another mode
+ *   <li>testInit() -- called each and every time test is entered from another mode
  * </ul>
  *
- * <p>
- * periodic() functions -- each of these functions is called on an interval:
+ * <p>periodic() functions -- each of these functions is called on an interval:
  *
  * <ul>
- * <li>robotPeriodic()
- * <li>disabledPeriodic()
- * <li>autonomousPeriodic()
- * <li>teleopPeriodic()
- * <li>testPeriodic()
+ *   <li>robotPeriodic()
+ *   <li>disabledPeriodic()
+ *   <li>autonomousPeriodic()
+ *   <li>teleopPeriodic()
+ *   <li>testPeriodic()
  * </ul>
  *
- * <p>
- * exit() functions -- each of the following functions is called once when the
- * appropriate mode is exited:
+ * <p>exit() functions -- each of the following functions is called once when the appropriate mode
+ * is exited:
  *
  * <ul>
- * <li>disabledExit() -- called each and every time disabled is exited
- * <li>autonomousExit() -- called each and every time autonomous is exited
- * <li>teleopExit() -- called each and every time teleop is exited
- * <li>testExit() -- called each and every time test is exited
+ *   <li>disabledExit() -- called each and every time disabled is exited
+ *   <li>autonomousExit() -- called each and every time autonomous is exited
+ *   <li>teleopExit() -- called each and every time teleop is exited
+ *   <li>testExit() -- called each and every time test is exited
  * </ul>
  */
 public abstract class TreeIterativeRobotBase extends RobotBase {
@@ -103,63 +92,53 @@ public abstract class TreeIterativeRobotBase extends RobotBase {
     /**
      * Robot-wide initialization code should go here.
      *
-     * <p>
-     * Users should override this method for default Robot-wide initialization which
-     * will be called when the robot is first powered on. It will be called exactly
-     * one time.
+     * <p>Users should override this method for default Robot-wide initialization which will be called
+     * when the robot is first powered on. It will be called exactly one time.
      *
-     * <p>
-     * Warning: the Driver Station "Robot Code" light and FMS "Robot Ready"
-     * indicators will be off until RobotInit() exits. Code in RobotInit() that
-     * waits for enable will cause the robot to never indicate that the code is
-     * ready, causing the robot to be bypassed in a match.
+     * <p>Warning: the Driver Station "Robot Code" light and FMS "Robot Ready" indicators will be off
+     * until RobotInit() exits. Code in RobotInit() that waits for enable will cause the robot to
+     * never indicate that the code is ready, causing the robot to be bypassed in a match.
      */
     public void robotInit() {}
 
     /**
      * Robot-wide simulation initialization code should go here.
      *
-     * <p>
-     * Users should override this method for default Robot-wide simulation related
-     * initialization which will be called when the robot is first started. It will
-     * be called exactly one time after RobotInit is called only when the robot is
-     * in simulation.
+     * <p>Users should override this method for default Robot-wide simulation related initialization
+     * which will be called when the robot is first started. It will be called exactly one time after
+     * RobotInit is called only when the robot is in simulation.
      */
     public void simulationInit() {}
 
     /**
      * Initialization code for disabled mode should go here.
      *
-     * <p>
-     * Users should override this method for initialization code which will be
-     * called each time the robot enters disabled mode.
+     * <p>Users should override this method for initialization code which will be called each time the
+     * robot enters disabled mode.
      */
     public void disabledInit() {}
 
     /**
      * Initialization code for autonomous mode should go here.
      *
-     * <p>
-     * Users should override this method for initialization code which will be
-     * called each time the robot enters autonomous mode.
+     * <p>Users should override this method for initialization code which will be called each time the
+     * robot enters autonomous mode.
      */
     public void autonomousInit() {}
 
     /**
      * Initialization code for teleop mode should go here.
      *
-     * <p>
-     * Users should override this method for initialization code which will be
-     * called each time the robot enters teleop mode.
+     * <p>Users should override this method for initialization code which will be called each time the
+     * robot enters teleop mode.
      */
     public void teleopInit() {}
 
     /**
      * Initialization code for test mode should go here.
      *
-     * <p>
-     * Users should override this method for initialization code which will be
-     * called each time the robot enters test mode.
+     * <p>Users should override this method for initialization code which will be called each time the
+     * robot enters test mode.
      */
     public void testInit() {}
 
@@ -180,8 +159,7 @@ public abstract class TreeIterativeRobotBase extends RobotBase {
     /**
      * Periodic simulation code should go here.
      *
-     * <p>
-     * This function is called in a simulated robot after user code executes.
+     * <p>This function is called in a simulated robot after user code executes.
      */
     public void simulationPeriodic() {
         if (spFirstRun) {
@@ -233,42 +211,37 @@ public abstract class TreeIterativeRobotBase extends RobotBase {
     /**
      * Exit code for disabled mode should go here.
      *
-     * <p>
-     * Users should override this method for code which will be called each time the
-     * robot exits disabled mode.
+     * <p>Users should override this method for code which will be called each time the robot exits
+     * disabled mode.
      */
     public void disabledExit() {}
 
     /**
      * Exit code for autonomous mode should go here.
      *
-     * <p>
-     * Users should override this method for code which will be called each time the
-     * robot exits autonomous mode.
+     * <p>Users should override this method for code which will be called each time the robot exits
+     * autonomous mode.
      */
     public void autonomousExit() {}
 
     /**
      * Exit code for teleop mode should go here.
      *
-     * <p>
-     * Users should override this method for code which will be called each time the
-     * robot exits teleop mode.
+     * <p>Users should override this method for code which will be called each time the robot exits
+     * teleop mode.
      */
     public void teleopExit() {}
 
     /**
      * Exit code for test mode should go here.
      *
-     * <p>
-     * Users should override this method for code which will be called each time the
-     * robot exits test mode.
+     * <p>Users should override this method for code which will be called each time the robot exits
+     * test mode.
      */
     public void testExit() {}
 
     /**
-     * Enables or disables flushing NetworkTables every loop iteration. By default,
-     * this is enabled.
+     * Enables or disables flushing NetworkTables every loop iteration. By default, this is enabled.
      *
      * @param enabled True to enable, false to disable
      */

@@ -8,14 +8,12 @@ public class SwerveUtils {
     private SwerveUtils() {}
 
     /**
-     * @param currentAngleRadians        what the controller currently reads
-     *                                   (radians)
+     * @param currentAngleRadians what the controller currently reads (radians)
      * @param targetAngleSetpointRadians the desired angle [-pi, pi)
      * @return the target angle in controller's scope
      */
     public static double calculateContinuousInputSetpoint(
-            double currentAngleRadians, double targetAngleSetpointRadians
-    ) {
+            double currentAngleRadians, double targetAngleSetpointRadians) {
         double remainder = currentAngleRadians % (Math.PI * 2);
         double adjustedAngleSetpoint = targetAngleSetpointRadians + (currentAngleRadians - remainder);
 
@@ -31,11 +29,11 @@ public class SwerveUtils {
     }
 
     /**
-     * Some controllers are not circular, so they can return something like (1, 1)
-     * which has a magnitude of over 1 which could result in requesting too much
-     * from the system. This makes sure that nothing goes over the maxMagnitude.
+     * Some controllers are not circular, so they can return something like (1, 1) which has a
+     * magnitude of over 1 which could result in requesting too much from the system. This makes sure
+     * that nothing goes over the maxMagnitude.
      *
-     * @param translation  the translation vector
+     * @param translation the translation vector
      * @param maxMagnitude the maximum magnitude of the values
      * @return the normalized x and y value.
      */

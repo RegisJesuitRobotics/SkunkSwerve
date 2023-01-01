@@ -5,7 +5,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +17,17 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
     private final List<Double> velocityList = new ArrayList<>();
     private final List<Double> positionList = new ArrayList<>();
 
-    private final DoubleArrayPublisher timePublisher = NetworkTableInstance.getDefault()
-            .getDoubleArrayTopic("char/time").publish();
+    private final DoubleArrayPublisher timePublisher =
+            NetworkTableInstance.getDefault().getDoubleArrayTopic("char/time").publish();
     private final DoubleArrayPublisher voltagePublisher = NetworkTableInstance.getDefault()
-            .getDoubleArrayTopic("char/voltage").publish();
+            .getDoubleArrayTopic("char/voltage")
+            .publish();
     private final DoubleArrayPublisher velocityPublisher = NetworkTableInstance.getDefault()
-            .getDoubleArrayTopic("char/velocity").publish();
+            .getDoubleArrayTopic("char/velocity")
+            .publish();
     private final DoubleArrayPublisher positionPublisher = NetworkTableInstance.getDefault()
-            .getDoubleArrayTopic("char/position").publish();
+            .getDoubleArrayTopic("char/position")
+            .publish();
 
     public CharacterizeDriveCommand(SwerveDriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
@@ -65,9 +67,12 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
         driveSubsystem.stopMovement();
 
         timePublisher.set(timeList.stream().mapToDouble(Double::doubleValue).toArray());
-        voltagePublisher.set(voltageList.stream().mapToDouble(Double::doubleValue).toArray());
-        velocityPublisher.set(velocityList.stream().mapToDouble(Double::doubleValue).toArray());
-        positionPublisher.set(positionList.stream().mapToDouble(Double::doubleValue).toArray());
+        voltagePublisher.set(
+                voltageList.stream().mapToDouble(Double::doubleValue).toArray());
+        velocityPublisher.set(
+                velocityList.stream().mapToDouble(Double::doubleValue).toArray());
+        positionPublisher.set(
+                positionList.stream().mapToDouble(Double::doubleValue).toArray());
     }
 
     @Override

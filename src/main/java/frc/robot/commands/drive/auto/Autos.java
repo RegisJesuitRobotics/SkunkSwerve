@@ -7,7 +7,6 @@ import frc.robot.commands.drive.GreaseGearsCommand;
 import frc.robot.commands.drive.LockModulesCommand;
 import frc.robot.commands.drive.characterize.*;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,9 +15,8 @@ public class Autos {
     private final RaiderSwerveAutoBuilder autoBuilder;
 
     public Autos(SwerveDriveSubsystem driveSubsystem) {
-        HashMap<String, Command> eventMap = new HashMap<>(
-                Map.ofEntries(Map.entry("LockModules", new LockModulesCommand(driveSubsystem)))
-        );
+        HashMap<String, Command> eventMap =
+                new HashMap<>(Map.ofEntries(Map.entry("LockModules", new LockModulesCommand(driveSubsystem))));
 
         autoBuilder = new RaiderSwerveAutoBuilder(eventMap, driveSubsystem);
 

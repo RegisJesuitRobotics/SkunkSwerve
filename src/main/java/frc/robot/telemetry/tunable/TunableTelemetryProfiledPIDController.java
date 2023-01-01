@@ -15,18 +15,18 @@ public class TunableTelemetryProfiledPIDController extends ProfiledPIDController
     private final TunableTrapezoidalProfileGains profileGains;
 
     public TunableTelemetryProfiledPIDController(
-            String logTable, TunablePIDGains pidGains, TunableTrapezoidalProfileGains profileGains
-    ) {
+            String logTable, TunablePIDGains pidGains, TunableTrapezoidalProfileGains profileGains) {
         this(logTable, pidGains, profileGains, 0.02);
     }
 
     public TunableTelemetryProfiledPIDController(
-            String logTable, TunablePIDGains pidGains, TunableTrapezoidalProfileGains profileGains, double period
-    ) {
+            String logTable, TunablePIDGains pidGains, TunableTrapezoidalProfileGains profileGains, double period) {
         super(
-                pidGains.p.get(), pidGains.i.get(), pidGains.d.get(),
-                new Constraints(profileGains.maxVelocity.get(), profileGains.maxAcceleration.get()), period
-        );
+                pidGains.p.get(),
+                pidGains.i.get(),
+                pidGains.d.get(),
+                new Constraints(profileGains.maxVelocity.get(), profileGains.maxAcceleration.get()),
+                period);
         this.pidGains = pidGains;
         this.profileGains = profileGains;
 

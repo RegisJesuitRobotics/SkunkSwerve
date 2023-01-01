@@ -14,15 +14,13 @@ public class DriveTestingCommand extends CommandBase {
     private double startTime;
 
     public DriveTestingCommand(
-            double rampRateMetersPerSecond, boolean useNextStates, SwerveDriveSubsystem driveSubsystem
-    ) {
+            double rampRateMetersPerSecond, boolean useNextStates, SwerveDriveSubsystem driveSubsystem) {
         this.rampRateMetersPerSecond = rampRateMetersPerSecond;
         this.useNextStates = useNextStates;
         this.driveSubsystem = driveSubsystem;
 
         addRequirements(driveSubsystem);
     }
-
 
     @Override
     public void initialize() {
@@ -41,8 +39,7 @@ public class DriveTestingCommand extends CommandBase {
             SwerveModuleState[] nextStates = new SwerveModuleState[DriveTrainConstants.NUM_MODULES];
             for (int i = 0; i < states.length; i++) {
                 states[i] = new SwerveModuleState(
-                        rampRateMetersPerSecond * (elapsedTime + 0.02), Rotation2d.fromDegrees(0.0)
-                );
+                        rampRateMetersPerSecond * (elapsedTime + 0.02), Rotation2d.fromDegrees(0.0));
             }
             driveSubsystem.setRawStates(true, false, states, nextStates);
         } else {

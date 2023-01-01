@@ -6,7 +6,6 @@ package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -44,7 +43,9 @@ public class TreeTracer {
         if (indent > 0) {
             out.append(" ".repeat(indent * 4 - 2)).append("↳ ");
         }
-        out.append(node.name).append(": ").append(String.format("%.6f", (node.endTime - node.startTime) / 1000000.0))
+        out.append(node.name)
+                .append(": ")
+                .append(String.format("%.6f", (node.endTime - node.startTime) / 1000000.0))
                 .append("s");
         for (Node child : node.children) {
             printNode(child, out, indent + 1);

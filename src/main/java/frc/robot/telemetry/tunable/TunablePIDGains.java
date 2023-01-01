@@ -8,12 +8,11 @@ public class TunablePIDGains {
     public final TunableDouble d;
 
     /**
-     *
      * @param networkName the name to use for network tables
-     * @param p           the p gain
-     * @param i           the i gain
-     * @param d           the d gain
-     * @param tuningMode  if false, the gains will be not be changeable
+     * @param p the p gain
+     * @param i the i gain
+     * @param d the d gain
+     * @param tuningMode if false, the gains will be not be changeable
      */
     public TunablePIDGains(String networkName, double p, double i, double d, boolean tuningMode) {
         networkName += "/";

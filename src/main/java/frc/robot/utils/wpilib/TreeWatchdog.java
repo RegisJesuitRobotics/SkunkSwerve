@@ -8,7 +8,6 @@ import edu.wpi.first.hal.NotifierJNI;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.utils.TreeTracer;
-
 import java.io.Closeable;
 import java.util.PriorityQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -16,13 +15,10 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A class that's a wrapper around a watchdog timer.
  *
- * <p>
- * When the timer expires, a message is printed to the console and an optional
- * user-provided callback is invoked.
+ * <p>When the timer expires, a message is printed to the console and an optional user-provided
+ * callback is invoked.
  *
- * <p>
- * The watchdog is initialized disabled, so the user needs to call enable()
- * before use.
+ * <p>The watchdog is initialized disabled, so the user needs to call enable() before use.
  */
 public class TreeWatchdog implements Closeable, Comparable<TreeWatchdog> {
     // Used for timeout print rate-limiting
@@ -53,9 +49,8 @@ public class TreeWatchdog implements Closeable, Comparable<TreeWatchdog> {
     /**
      * Watchdog constructor.
      *
-     * @param timeoutSeconds The watchdog's timeout in seconds with microsecond
-     *                       resolution.
-     * @param callback       This function is called when the timeout expires.
+     * @param timeoutSeconds The watchdog's timeout in seconds with microsecond resolution.
+     * @param callback This function is called when the timeout expires.
      */
     public TreeWatchdog(double timeoutSeconds, Runnable callback) {
         this.timeoutSeconds = timeoutSeconds;
@@ -100,8 +95,7 @@ public class TreeWatchdog implements Closeable, Comparable<TreeWatchdog> {
     /**
      * Sets the watchdog's timeout.
      *
-     * @param timeoutSeconds The watchdog's timeout in seconds with microsecond
-     *                       resolution.
+     * @param timeoutSeconds The watchdog's timeout in seconds with microsecond resolution.
      */
     public void setTimeout(double timeoutSeconds) {
         startTimeSeconds = Timer.getFPGATimestamp();
@@ -175,8 +169,7 @@ public class TreeWatchdog implements Closeable, Comparable<TreeWatchdog> {
     /**
      * Resets the watchdog timer.
      *
-     * <p>
-     * This also enables the timer if it was previously disabled.
+     * <p>This also enables the timer if it was previously disabled.
      */
     public void reset() {
         enable();
@@ -214,9 +207,7 @@ public class TreeWatchdog implements Closeable, Comparable<TreeWatchdog> {
     /**
      * Enable or disable suppression of the generic timeout message.
      *
-     * <p>
-     * This may be desirable if the user-provided callback already prints a more
-     * specific message.
+     * <p>This may be desirable if the user-provided callback already prints a more specific message.
      *
      * @param suppress Whether to suppress generic timeout message.
      */
@@ -261,8 +252,7 @@ public class TreeWatchdog implements Closeable, Comparable<TreeWatchdog> {
                     watchdog.lastTimeoutPrintSeconds = now;
                     if (!watchdog.suppressTimeoutMessage) {
                         DriverStation.reportWarning(
-                                String.format("Watchdog not fed within %.6fs\n", watchdog.timeoutSeconds), false
-                        );
+                                String.format("Watchdog not fed within %.6fs\n", watchdog.timeoutSeconds), false);
                     }
                 }
 

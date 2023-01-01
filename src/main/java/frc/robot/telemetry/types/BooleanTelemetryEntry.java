@@ -19,7 +19,8 @@ public class BooleanTelemetryEntry extends TelemetryEntry {
 
         logEntry = new BooleanLogEntry(DataLogManager.getLog(), path);
         if (shouldNT) {
-            networkPublisher = NetworkTableInstance.getDefault().getBooleanTopic(path).publish();
+            networkPublisher =
+                    NetworkTableInstance.getDefault().getBooleanTopic(path).publish();
             networkPublisher.setDefault(false);
         } else {
             networkPublisher = null;

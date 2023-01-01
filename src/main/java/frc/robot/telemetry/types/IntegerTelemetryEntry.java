@@ -19,7 +19,8 @@ public class IntegerTelemetryEntry extends TelemetryEntry {
 
         logEntry = new IntegerLogEntry(DataLogManager.getLog(), path);
         if (shouldNT) {
-            networkPublisher = NetworkTableInstance.getDefault().getIntegerTopic(path).publish();
+            networkPublisher =
+                    NetworkTableInstance.getDefault().getIntegerTopic(path).publish();
             networkPublisher.setDefault(0);
         } else {
             networkPublisher = null;

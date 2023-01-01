@@ -10,7 +10,6 @@ import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.telemetry.types.rich.CANBusDataEntry;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,10 +29,8 @@ public class MiscRobotTelemetryAndAlerts {
     public MiscRobotTelemetryAndAlerts() {
         for (int i = 0; i < controllerAlerts.length; i++) {
             controllerAlerts[i] = new Alert(
-                    "Controller " + MiscConstants.USED_CONTROLLER_PORTS[i] + " is disconnected.", AlertType.WARNING
-            );
+                    "Controller " + MiscConstants.USED_CONTROLLER_PORTS[i] + " is disconnected.", AlertType.WARNING);
         }
-
 
         if (MiscConstants.TUNING_MODE) {
             Alert tuningModeAlert = new Alert("Tuning Mode is Enabled", AlertType.INFO);
@@ -52,7 +49,8 @@ public class MiscRobotTelemetryAndAlerts {
             if (read == 19) {
                 buildTimeAlert = new Alert("Robot code was built " + new String(date) + ".", AlertType.INFO);
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
         if (buildTimeAlert == null) {
             buildTimeAlert = new Alert("Build time file could not be read.", AlertType.WARNING);

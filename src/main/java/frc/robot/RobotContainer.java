@@ -29,20 +29,16 @@ import frc.robot.telemetry.tunable.TunableTelemetryProfiledPIDController;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.ListenableSendableChooser;
-
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.DoubleSupplier;
 
-
-
 /**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a "declarative" paradigm, very little robot logic should
- * actually be handled in the {@link Robot} periodic methods (other than the
- * scheduler calls). Instead, the structure of the robot (including subsystems,
- * commands, and button mappings) should be declared here.
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
     private final SwerveDriveSubsystem driveSubsystem = new SwerveDriveSubsystem();
@@ -70,110 +66,139 @@ public class RobotContainer {
             autoCommandChooser.addOption(auto.getKey(), auto.getValue());
         }
 
-        new Trigger(autoCommandChooser::hasNewValue).onTrue(
-                Commands.runOnce(() -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null))
-                        .ignoringDisable(true).withName("Auto Alert Checker")
-        );
+        new Trigger(autoCommandChooser::hasNewValue)
+                .onTrue(Commands.runOnce(() -> noAutoSelectedAlert.set(autoCommandChooser.getSelected() == null))
+                        .ignoringDisable(true)
+                        .withName("Auto Alert Checker"));
 
         Shuffleboard.getTab("DriveTrainRaw").add("Auto Chooser", autoCommandChooser);
     }
 
     private void configureButtonBindings() {
         GenericEntry maxTranslationSpeedEntry = Shuffleboard.getTab("DriveTrainRaw")
-                .add("Max Translational Speed (Percent)", 0.9).withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0, "max", 1.0)).getEntry();
-        GenericEntry maxAngularSpeedEntry = Shuffleboard.getTab("DriveTrainRaw").add("Max Angular Speed (Percent)", 1.0)
-                .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0, "max", 1.0)).getEntry();
+                .add("Max Translational Speed (Percent)", 0.9)
+                .withWidget(BuiltInWidgets.kNumberSlider)
+                .withProperties(Map.of("min", 0, "max", 1.0))
+                .getEntry();
+        GenericEntry maxAngularSpeedEntry = Shuffleboard.getTab("DriveTrainRaw")
+                .add("Max Angular Speed (Percent)", 1.0)
+                .withWidget(BuiltInWidgets.kNumberSlider)
+                .withProperties(Map.of("min", 0, "max", 1.0))
+                .getEntry();
 
-        DoubleSupplier translationalMaxSpeedSuppler = () -> maxTranslationSpeedEntry.getDouble(0.9)
-                * DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
-        DoubleSupplier angularMaxSpeedSupplier = () -> maxAngularSpeedEntry.getDouble(1.0)
-                * DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+        DoubleSupplier translationalMaxSpeedSuppler =
+                () -> maxTranslationSpeedEntry.getDouble(0.9) * DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
+        DoubleSupplier angularMaxSpeedSupplier =
+                () -> maxAngularSpeedEntry.getDouble(1.0) * DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 
         ProfiledPIDController snapController = new TunableTelemetryProfiledPIDController(
-                "drive/snapController", AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
-                AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS
-        );
+                "drive/snapController",
+                AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
+                AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS);
         AtomicBoolean isSnapControllerEnabled = new AtomicBoolean(false);
 
         driveCommandChooser.setDefaultOption(
                 "Hybrid (Default to Field Relative but use robot centric when holding button)",
-                new SwerveDriveCommand(() -> -driverController.getLeftY(), () -> -driverController.getLeftX(), () -> {
-                    if (driverController.leftBumper().getAsBoolean()) {
-                        if (isSnapControllerEnabled.getAndSet(true)) {
-                            snapController.reset(driveSubsystem.getPose().getRotation().getRadians());
-                        }
-                        return snapController.calculate(driveSubsystem.getPose().getRotation().getRadians(), 0);
-                    } else {
-                        isSnapControllerEnabled.set(false);
-                        return -driverController.getRightX();
-                    }
-                }, driverController.rightBumper().negate(), translationalMaxSpeedSuppler, angularMaxSpeedSupplier,
-                        driveSubsystem
-                )
-        );
+                new SwerveDriveCommand(
+                        () -> -driverController.getLeftY(),
+                        () -> -driverController.getLeftX(),
+                        () -> {
+                            if (driverController.leftBumper().getAsBoolean()) {
+                                if (isSnapControllerEnabled.getAndSet(true)) {
+                                    snapController.reset(driveSubsystem
+                                            .getPose()
+                                            .getRotation()
+                                            .getRadians());
+                                }
+                                return snapController.calculate(
+                                        driveSubsystem.getPose().getRotation().getRadians(), 0);
+                            } else {
+                                isSnapControllerEnabled.set(false);
+                                return -driverController.getRightX();
+                            }
+                        },
+                        driverController.rightBumper().negate(),
+                        translationalMaxSpeedSuppler,
+                        angularMaxSpeedSupplier,
+                        driveSubsystem));
         driveCommandChooser.addOption(
                 "Robot Orientated",
                 new SwerveDriveCommand(
-                        () -> -driverController.getLeftY(), () -> -driverController.getLeftX(),
-                        () -> -driverController.getRightX(), () -> false, translationalMaxSpeedSuppler,
-                        angularMaxSpeedSupplier, driveSubsystem
-                )
-        );
+                        () -> -driverController.getLeftY(),
+                        () -> -driverController.getLeftX(),
+                        () -> -driverController.getRightX(),
+                        () -> false,
+                        translationalMaxSpeedSuppler,
+                        angularMaxSpeedSupplier,
+                        driveSubsystem));
 
         SmartDashboard.putData(CommandScheduler.getInstance());
         ProfiledPIDController alwaysFacingAngularController = new TunableTelemetryProfiledPIDController(
-                "drive/alwaysFacingController", AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
-                AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS
-        );
+                "drive/alwaysFacingController",
+                AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
+                AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS);
         alwaysFacingAngularController.enableContinuousInput(-Math.PI, Math.PI);
         driveCommandChooser.addOption(
                 "Always Facing (0, 0)",
                 // This isn't optimal so if we were to actually use this in season we would have
                 // some FF with where we predict we will be and use a ProfiledPIDController
-                new SwerveDriveCommand(() -> -driverController.getLeftX(), () -> -driverController.getLeftY(), () -> {
-                    Pose2d robotPose = driveSubsystem.getPose();
-                    Translation2d targetToCurrent = new Translation2d().minus(robotPose.getTranslation());
+                new SwerveDriveCommand(
+                        () -> -driverController.getLeftX(),
+                        () -> -driverController.getLeftY(),
+                        () -> {
+                            Pose2d robotPose = driveSubsystem.getPose();
+                            Translation2d targetToCurrent = new Translation2d().minus(robotPose.getTranslation());
 
-                    return alwaysFacingAngularController
-                            .calculate(robotPose.getRotation().getRadians(), targetToCurrent.getAngle().getRadians());
-                }, driverController.rightBumper().negate(), translationalMaxSpeedSuppler,
-                        () -> DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED, driveSubsystem
-                )
-        );
+                            return alwaysFacingAngularController.calculate(
+                                    robotPose.getRotation().getRadians(),
+                                    targetToCurrent.getAngle().getRadians());
+                        },
+                        driverController.rightBumper().negate(),
+                        translationalMaxSpeedSuppler,
+                        () -> DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED,
+                        driveSubsystem));
 
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
         driveTab.add("Drive Style", driveCommandChooser);
 
         evaluateDriveStyle(driveCommandChooser.getSelected());
-        new Trigger(driveCommandChooser::hasNewValue).onTrue(
-                Commands.runOnce(() -> evaluateDriveStyle(driveCommandChooser.getSelected())).ignoringDisable(true)
-                        .withName("Drive Style Checker")
-        );
+        new Trigger(driveCommandChooser::hasNewValue)
+                .onTrue(Commands.runOnce(() -> evaluateDriveStyle(driveCommandChooser.getSelected()))
+                        .ignoringDisable(true)
+                        .withName("Drive Style Checker"));
 
-        driverController.b().onTrue(
-                Commands.runOnce(driveSubsystem::resetOdometry).ignoringDisable(true).withName("Reset Odometry")
-        );
-        driverController.leftBumper()
+        driverController
+                .b()
+                .onTrue(Commands.runOnce(driveSubsystem::resetOdometry)
+                        .ignoringDisable(true)
+                        .withName("Reset Odometry"));
+        driverController
+                .leftBumper()
                 .whileTrue(new LockModulesCommand(driveSubsystem).repeatedly().withName("Lock Modules"));
 
-        driverController.x().debounce(0.5).onTrue(new FollowPathCommand(() -> {
-            Pose2d currentPose = driveSubsystem.getPose();
-            Pose2d targetPose = new Pose2d();
-            Translation2d translation = currentPose.minus(targetPose).getTranslation();
-            return PathPlanner.generatePath(
-                    AutoConstants.PATH_CONSTRAINTS,
-                    new PathPoint(
-                            currentPose.getTranslation(),
-                            new Rotation2d(translation.getX(), translation.getY()).unaryMinus(),
-                            currentPose.getRotation()
-                    ),
-                    new PathPoint(
-                            new Translation2d(0, 0), new Rotation2d(translation.getX(), translation.getY()),
-                            new Rotation2d(0)
-                    )
-            );
-        }, driveSubsystem).until(driverController.rightBumper()).withName("To (0, 0) Follow Path"));
+        driverController
+                .x()
+                .debounce(0.5)
+                .onTrue(new FollowPathCommand(
+                                () -> {
+                                    Pose2d currentPose = driveSubsystem.getPose();
+                                    Pose2d targetPose = new Pose2d();
+                                    Translation2d translation =
+                                            currentPose.minus(targetPose).getTranslation();
+                                    return PathPlanner.generatePath(
+                                            AutoConstants.PATH_CONSTRAINTS,
+                                            new PathPoint(
+                                                    currentPose.getTranslation(),
+                                                    new Rotation2d(translation.getX(), translation.getY()).unaryMinus(),
+                                                    currentPose.getRotation()),
+                                            new PathPoint(
+                                                    new Translation2d(0, 0),
+                                                    new Rotation2d(translation.getX(), translation.getY()),
+                                                    new Rotation2d(0)));
+                                },
+                                driveSubsystem)
+                        .until(driverController.rightBumper())
+                        .withName("To (0, 0) Follow Path"));
     }
 
     private void evaluateDriveStyle(Command newCommand) {

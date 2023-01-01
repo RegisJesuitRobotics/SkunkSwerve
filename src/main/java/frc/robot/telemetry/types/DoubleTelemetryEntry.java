@@ -19,7 +19,8 @@ public class DoubleTelemetryEntry extends TelemetryEntry {
 
         logEntry = new DoubleLogEntry(DataLogManager.getLog(), path);
         if (shouldNT) {
-            networkPublisher = NetworkTableInstance.getDefault().getDoubleTopic(path).publish();
+            networkPublisher =
+                    NetworkTableInstance.getDefault().getDoubleTopic(path).publish();
             networkPublisher.setDefault(0.0);
         } else {
             networkPublisher = null;

@@ -7,15 +7,13 @@ public class TunableTrapezoidalProfileGains {
     public final TunableDouble maxAcceleration;
 
     /**
-     *
-     * @param networkName     the name to use for network tables
-     * @param maxVelocity     the maximum velocity
+     * @param networkName the name to use for network tables
+     * @param maxVelocity the maximum velocity
      * @param maxAcceleration the maximum acceleration
-     * @param tuningMode      if false, the gains will be not be changeable
+     * @param tuningMode if false, the gains will be not be changeable
      */
     public TunableTrapezoidalProfileGains(
-            String networkName, double maxVelocity, double maxAcceleration, boolean tuningMode
-    ) {
+            String networkName, double maxVelocity, double maxAcceleration, boolean tuningMode) {
         networkName += "/";
         this.maxVelocity = new TunableDouble(networkName + "maxVelocity", maxVelocity, tuningMode);
         this.maxAcceleration = new TunableDouble(networkName + "maxAcceleration", maxAcceleration, tuningMode);

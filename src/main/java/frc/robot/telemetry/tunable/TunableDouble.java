@@ -6,8 +6,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 
 /**
- * Class for a tunable number. Gets value from dashboard in tuning mode, returns
- * default if not or value not in dashboard.
+ * Class for a tunable number. Gets value from dashboard in tuning mode, returns default if not or
+ * value not in dashboard.
  */
 public class TunableDouble {
     private final DoubleEntry networkEntry;
@@ -19,12 +19,13 @@ public class TunableDouble {
     /**
      * Create a new TunableNumber with the default value
      *
-     * @param networkName  Name for network tables
+     * @param networkName Name for network tables
      * @param defaultValue Default value
-     * @param tuningMode   If true, will get value from dashboard
+     * @param tuningMode If true, will get value from dashboard
      */
     public TunableDouble(String networkName, double defaultValue, boolean tuningMode) {
-        this.networkEntry = NetworkTableInstance.getDefault().getDoubleTopic(networkName).getEntry(defaultValue);
+        this.networkEntry =
+                NetworkTableInstance.getDefault().getDoubleTopic(networkName).getEntry(defaultValue);
         networkEntry.set(networkEntry.get());
         this.telemetryEntry = new DoubleTelemetryEntry(networkName, false);
         this.defaultValue = defaultValue;
@@ -50,8 +51,8 @@ public class TunableDouble {
     /**
      * Checks whether the number has changed since our last check
      *
-     * @return True if the number has changed since the last time this method was
-     *         called, false otherwise
+     * @return True if the number has changed since the last time this method was called, false
+     *     otherwise
      */
     public boolean hasChanged() {
         double currentValue = get();
