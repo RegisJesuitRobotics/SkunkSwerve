@@ -188,7 +188,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param activeSteer if false will not actively power the steer motor
      * @param openLoop if true then velocity will be handled exclusivity with feedforward (for teleop
      *     mostly). If false a PIDF will be used (for auto)
-     * @param states the desired states... Ordered front left, front right, back left, back right
+     * @param desiredStates the desired states... Ordered front left, front right, back left, back right
      * @param nextStates the states that will be used for the acceleration ff
      */
     public void setRawStates(
