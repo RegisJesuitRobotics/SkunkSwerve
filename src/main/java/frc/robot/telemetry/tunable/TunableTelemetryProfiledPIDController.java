@@ -3,14 +3,13 @@ package frc.robot.telemetry.tunable;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
+import frc.robot.telemetry.types.rich.TrapezoidalStateEntry;
 
 public class TunableTelemetryProfiledPIDController extends ProfiledPIDController {
 
     private final DoubleTelemetryEntry currentMeasurementEntry;
-    private final DoubleTelemetryEntry goalPositionEntry;
-    private final DoubleTelemetryEntry goalVelocityEntry;
-    private final DoubleTelemetryEntry setpointPositionEntry;
-    private final DoubleTelemetryEntry setpointVelocityEntry;
+    private final TrapezoidalStateEntry goalEntry;
+    private final TrapezoidalStateEntry setpointEntry;
     private final DoubleTelemetryEntry outputEntry;
 
     private final TunablePIDGains pidGains;
@@ -34,10 +33,8 @@ public class TunableTelemetryProfiledPIDController extends ProfiledPIDController
 
         logTable += "/";
         currentMeasurementEntry = new DoubleTelemetryEntry(logTable + "currentMeasurement", true);
-        goalPositionEntry = new DoubleTelemetryEntry(logTable + "goalPosition", true);
-        goalVelocityEntry = new DoubleTelemetryEntry(logTable + "goalVelocity", true);
-        setpointPositionEntry = new DoubleTelemetryEntry(logTable + "setpointPosition", true);
-        setpointVelocityEntry = new DoubleTelemetryEntry(logTable + "setpointVelocity", true);
+        goalEntry = new TrapezoidalStateEntry(logTable + "goal", true);
+        setpointEntry = new TrapezoidalStateEntry(logTable + "setpoint", true);
         outputEntry = new DoubleTelemetryEntry(logTable + "output", true);
     }
 
@@ -49,12 +46,10 @@ public class TunableTelemetryProfiledPIDController extends ProfiledPIDController
         }
 
         currentMeasurementEntry.append(measurement);
-        goalPositionEntry.append(getGoal().position);
-        goalVelocityEntry.append(getGoal().velocity);
+        goalEntry.append(getGoal());
 
         double output = super.calculate(measurement);
-        setpointPositionEntry.append(getSetpoint().position);
-        setpointVelocityEntry.append(getSetpoint().velocity);
+        setpointEntry.append(getSetpoint());
         outputEntry.append(output);
 
         return output;
