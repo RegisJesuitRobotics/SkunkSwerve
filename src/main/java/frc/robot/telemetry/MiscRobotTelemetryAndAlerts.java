@@ -24,7 +24,7 @@ public class MiscRobotTelemetryAndAlerts {
     private final Alert[] controllerAlerts = new Alert[MiscConstants.USED_CONTROLLER_PORTS.length];
 
     private final DoubleTelemetryEntry voltageEntry = new DoubleTelemetryEntry(tableName + "voltage", false);
-    private final CANBusDataEntry canBusDataEntry = new CANBusDataEntry(tableName + "can");
+    private final CANBusDataEntry canBusDataEntry = new CANBusDataEntry(tableName + "can", false);
 
     public MiscRobotTelemetryAndAlerts() {
         for (int i = 0; i < controllerAlerts.length; i++) {

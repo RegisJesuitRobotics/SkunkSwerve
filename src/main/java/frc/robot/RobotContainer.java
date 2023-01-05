@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveTrainConstants;
@@ -21,6 +20,7 @@ import frc.robot.commands.drive.LockModulesCommand;
 import frc.robot.commands.drive.auto.Autos;
 import frc.robot.commands.drive.auto.FollowPathCommand;
 import frc.robot.commands.drive.teleop.SwerveDriveCommand;
+import frc.robot.hid.CommandXboxPlaystationController;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 import frc.robot.telemetry.tunable.TunableDouble;
 import frc.robot.telemetry.tunable.TunableTelemetryProfiledPIDController;
@@ -40,7 +40,7 @@ import java.util.function.DoubleSupplier;
 public class RobotContainer {
     private final SwerveDriveSubsystem driveSubsystem = new SwerveDriveSubsystem();
 
-    private final CommandXboxController driverController = new CommandXboxController(0);
+    private final CommandXboxPlaystationController driverController = new CommandXboxPlaystationController(0);
     private final TeleopControlsStateManager teleopControlsStateManager = new TeleopControlsStateManager();
 
     private final ListenableSendableChooser<Command> driveCommandChooser = new ListenableSendableChooser<>();
@@ -79,8 +79,9 @@ public class RobotContainer {
 
         DoubleSupplier translationalMaxSpeedSuppler =
                 () -> maxTranslationSpeed.get() * DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
-        DoubleSupplier angularMaxSpeedSupplier =
-                () -> maxMaxAngularSpeed.get() * DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+        DoubleSupplier angularMaxSpeedSupplier = () -> maxMaxAngularSpeed.get()
+                * DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+                * (driverController.getLeftTriggerAxis() > 0.5 ? 0.5 : 1.0);
 
         ProfiledPIDController snapController = new TunableTelemetryProfiledPIDController(
                 "drive/snapController",
@@ -103,8 +104,9 @@ public class RobotContainer {
                                             .getRadians());
                                     snapController.setGoal(0.0);
                                 }
-                                return snapController.calculate(
+                                snapController.calculate(
                                         driveSubsystem.getPose().getRotation().getRadians());
+                                return 0 + snapController.getSetpoint().velocity;
                             } else {
                                 isSnapControllerEnabled.set(false);
                                 return -driverController.getRightX();
@@ -135,7 +137,7 @@ public class RobotContainer {
                         .withName("Drive Style Checker"));
 
         driverController
-                .b()
+                .circle()
                 .onTrue(Commands.runOnce(driveSubsystem::resetOdometry)
                         .ignoringDisable(true)
                         .withName("Reset Odometry"));
@@ -144,7 +146,7 @@ public class RobotContainer {
                 .whileTrue(new LockModulesCommand(driveSubsystem).repeatedly().withName("Lock Modules"));
 
         driverController
-                .x()
+                .square()
                 .debounce(0.5)
                 .onTrue(new FollowPathCommand(
                                 () -> {

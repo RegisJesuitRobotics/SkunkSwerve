@@ -38,7 +38,7 @@ public final class Constants {
 
         // For talons PID full output is 1023 except for all FF gains
         public static final TunablePIDGains DRIVE_VELOCITY_PID_GAINS =
-                new TunablePIDGains("gains/drive", 0.06, 0.0, 0.0, MiscConstants.TUNING_MODE);
+                new TunablePIDGains("gains/drive", 0.1, 0.0, 0.0, MiscConstants.TUNING_MODE);
 
         public static final TunableFFGains DRIVE_VELOCITY_FF_GAINS =
                 new TunableFFGains("gains/drive", 0.3346, 2.2549, 0.5731, MiscConstants.TUNING_MODE);
@@ -73,7 +73,7 @@ public final class Constants {
 
         public static final double TRANSLATION_RATE_LIMIT_METERS_SECOND_SQUARED = 10.0;
         public static final double ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED = 10.0 * Math.PI;
-        public static final double TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND = 0.15;
+        public static final double TELEOP_MINIMUM_VELOCITY_METERS_PER_SECOND = 0.10;
 
         public static final String CAN_BUS = "rio";
         private static final SharedSwerveModuleConfiguration SHARED_SWERVE_MODULE_CONFIGURATION =
@@ -112,9 +112,9 @@ public final class Constants {
         public static final TunablePIDGains PATH_TRANSLATION_POSITION_GAINS =
                 new TunablePIDGains("gains/pathXY", 0.5, 0.0, 0.0, MiscConstants.TUNING_MODE);
         public static final TunablePIDGains PATH_ANGULAR_POSITION_PID_GAINS =
-                new TunablePIDGains("gains/pathAngular", 0.5, 0.0, 0.0, MiscConstants.TUNING_MODE);
+                new TunablePIDGains("gains/pathAngular", 1, 0.0, 0.0, MiscConstants.TUNING_MODE);
         public static final TunablePIDGains SNAP_ANGULAR_POSITION_PID_GAINS =
-                new TunablePIDGains("gains/snapAngular", 1.0, 0.0, 0.0, MiscConstants.TUNING_MODE);
+                new TunablePIDGains("gains/snapAngular", 3.0, 0.0, 0.0, MiscConstants.TUNING_MODE);
         public static final TunableTrapezoidalProfileGains SNAP_ANGULAR_POSITION_TRAPEZOIDAL_GAINS =
                 new TunableTrapezoidalProfileGains(
                         "gains/snapAngular",
@@ -122,7 +122,7 @@ public final class Constants {
                         DriveTrainConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED,
                         MiscConstants.TUNING_MODE);
         public static final double MAX_PATH_ACCELERATION_METERS_PER_SECOND_SQUARED =
-                DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND / 4.0;
+                DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND / 2.0;
         public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(
                 DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND, MAX_PATH_ACCELERATION_METERS_PER_SECOND_SQUARED);
     }

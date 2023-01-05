@@ -104,6 +104,6 @@ public class FollowPathCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(currentPath.getTotalTimeSeconds());
+        return timer.hasElapsed(currentPath.getTotalTimeSeconds()) && driveController.atReference();
     }
 }

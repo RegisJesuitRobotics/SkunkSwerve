@@ -11,13 +11,13 @@ public class CANBusDataEntry {
     private final IntegerTelemetryEntry rxErrorCountEntry;
     private final IntegerTelemetryEntry transmitFullCountEntry;
 
-    public CANBusDataEntry(String path) {
+    public CANBusDataEntry(String path, boolean shouldNT) {
         path += "/";
-        percentUtilizationEntry = new DoubleTelemetryEntry(path + "percentUtilization", false);
-        offCountEntry = new IntegerTelemetryEntry(path + "offCount", false);
-        txErrorCountEntry = new IntegerTelemetryEntry(path + "transmitErrorCount", false);
-        rxErrorCountEntry = new IntegerTelemetryEntry(path + "receiveErrorCount", false);
-        transmitFullCountEntry = new IntegerTelemetryEntry(path + "transmitFullCount", false);
+        percentUtilizationEntry = new DoubleTelemetryEntry(path + "percentUtilization", shouldNT);
+        offCountEntry = new IntegerTelemetryEntry(path + "offCount", shouldNT);
+        txErrorCountEntry = new IntegerTelemetryEntry(path + "transmitErrorCount", shouldNT);
+        rxErrorCountEntry = new IntegerTelemetryEntry(path + "receiveErrorCount", shouldNT);
+        transmitFullCountEntry = new IntegerTelemetryEntry(path + "transmitFullCount", shouldNT);
     }
 
     public void append(CANStatus data) {

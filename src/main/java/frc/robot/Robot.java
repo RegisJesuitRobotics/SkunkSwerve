@@ -46,8 +46,7 @@ public class Robot extends TreeTimedRobot {
      */
     @Override
     public void robotInit() {
-        // Hacky way to get everything initialized
-        Timer.delay(1.0);
+        System.out.println("*****START*****");
 
         LiveWindow.disableAllTelemetry();
         DriverStation.silenceJoystickConnectionWarning(true);

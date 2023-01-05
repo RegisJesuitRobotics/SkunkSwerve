@@ -21,6 +21,7 @@ import frc.robot.Robot;
 import frc.robot.telemetry.types.DoubleArrayTelemetryEntry;
 import frc.robot.telemetry.types.DoubleTelemetryEntry;
 import frc.robot.telemetry.types.EventTelemetryEntry;
+import frc.robot.telemetry.types.rich.ChassisSpeedsEntry;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.SwerveUtils;
@@ -44,6 +45,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             "navX is not connected. Field-centric drive and odometry will be negatively effected!", AlertType.ERROR);
     private final Alert navXCalibratingAlert = new Alert("navX is calibrating. Keep the robot still!", AlertType.INFO);
     private final DoubleTelemetryEntry gyroEntry = new DoubleTelemetryEntry("/drive/gyroDegrees", true);
+    private final ChassisSpeedsEntry chassisSpeedsEntry =
+            new ChassisSpeedsEntry("/drive/speeds", MiscConstants.TUNING_MODE);
     private final DoubleArrayTelemetryEntry odometryEntry =
             new DoubleArrayTelemetryEntry("/drive/estimatedPose", false);
     private final EventTelemetryEntry driveEventLogger = new EventTelemetryEntry("/drive/events");
@@ -343,6 +346,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         estimatedPoseLoggingArray[1] = estimatedPose.getY();
         estimatedPoseLoggingArray[2] = estimatedPose.getRotation().getRadians();
         odometryEntry.append(estimatedPoseLoggingArray);
+
+        chassisSpeedsEntry.append(getCurrentChassisSpeeds());
 
         field2d.setRobotPose(estimatedPose);
         for (int i = 0; i < modules.length; i++) {
