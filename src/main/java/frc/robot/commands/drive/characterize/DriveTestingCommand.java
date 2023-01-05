@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
 
@@ -38,8 +39,8 @@ public class DriveTestingCommand extends CommandBase {
         if (useNextStates) {
             SwerveModuleState[] nextStates = new SwerveModuleState[DriveTrainConstants.NUM_MODULES];
             for (int i = 0; i < states.length; i++) {
-                states[i] = new SwerveModuleState(
-                        rampRateMetersPerSecond * (elapsedTime + 0.02), Rotation2d.fromDegrees(0.0));
+                nextStates[i] = new SwerveModuleState(
+                        rampRateMetersPerSecond * (elapsedTime + Constants.DT), Rotation2d.fromDegrees(0.0));
             }
             driveSubsystem.setRawStates(true, false, states, nextStates);
         } else {

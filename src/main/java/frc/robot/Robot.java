@@ -46,6 +46,9 @@ public class Robot extends TreeTimedRobot {
      */
     @Override
     public void robotInit() {
+        // Hacky way to get everything initialized
+        Timer.delay(1.0);
+
         LiveWindow.disableAllTelemetry();
         DriverStation.silenceJoystickConnectionWarning(true);
         // No reason to log them as everything on NT is already logged
@@ -57,6 +60,22 @@ public class Robot extends TreeTimedRobot {
 
         telemetryPowerDistribution = new TelemetryPowerDistribution(0, ModuleType.kCTRE);
         miscRobotTelemetryAndAlerts = new MiscRobotTelemetryAndAlerts();
+
+        Thread otherTelemetryThread = new Thread(() -> {
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    telemetryPowerDistribution.logValues();
+                    miscRobotTelemetryAndAlerts.logValues();
+
+                    //noinspection BusyWait
+                    Thread.sleep(100);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        otherTelemetryThread.setPriority(Thread.MIN_PRIORITY);
+        otherTelemetryThread.start();
 
         robotContainer = new RobotContainer();
     }
@@ -72,11 +91,6 @@ public class Robot extends TreeTimedRobot {
     public void robotPeriodic() {
         watchdog.addNode("commandScheduler");
         CommandScheduler.getInstance().run();
-        watchdog.endCurrentNode();
-
-        watchdog.addNode("otherTelemetry");
-        miscRobotTelemetryAndAlerts.logValues();
-        telemetryPowerDistribution.logValues();
         watchdog.endCurrentNode();
 
         if (MiscConstants.TUNING_MODE) {

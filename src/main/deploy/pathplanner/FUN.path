@@ -37,7 +37,7 @@
       },
       "holonomicAngle": -82.345102859122,
       "isReversal": false,
-      "velOverride": null,
+      "velOverride": 0.1,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {

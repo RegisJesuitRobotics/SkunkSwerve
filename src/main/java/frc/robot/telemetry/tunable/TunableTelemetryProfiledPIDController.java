@@ -9,6 +9,8 @@ public class TunableTelemetryProfiledPIDController extends ProfiledPIDController
     private final DoubleTelemetryEntry currentMeasurementEntry;
     private final DoubleTelemetryEntry goalPositionEntry;
     private final DoubleTelemetryEntry goalVelocityEntry;
+    private final DoubleTelemetryEntry setpointPositionEntry;
+    private final DoubleTelemetryEntry setpointVelocityEntry;
     private final DoubleTelemetryEntry outputEntry;
 
     private final TunablePIDGains pidGains;
@@ -34,6 +36,8 @@ public class TunableTelemetryProfiledPIDController extends ProfiledPIDController
         currentMeasurementEntry = new DoubleTelemetryEntry(logTable + "currentMeasurement", true);
         goalPositionEntry = new DoubleTelemetryEntry(logTable + "goalPosition", true);
         goalVelocityEntry = new DoubleTelemetryEntry(logTable + "goalVelocity", true);
+        setpointPositionEntry = new DoubleTelemetryEntry(logTable + "setpointPosition", true);
+        setpointVelocityEntry = new DoubleTelemetryEntry(logTable + "setpointVelocity", true);
         outputEntry = new DoubleTelemetryEntry(logTable + "output", true);
     }
 
@@ -49,6 +53,8 @@ public class TunableTelemetryProfiledPIDController extends ProfiledPIDController
         goalVelocityEntry.append(getGoal().velocity);
 
         double output = super.calculate(measurement);
+        setpointPositionEntry.append(getSetpoint().position);
+        setpointVelocityEntry.append(getSetpoint().velocity);
         outputEntry.append(output);
 
         return output;

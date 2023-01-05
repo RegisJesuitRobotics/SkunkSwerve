@@ -153,7 +153,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     /**
      * Set the desired speed of the robot. Chassis speeds are always robot centric but can be created
      * from field centric values through {@link ChassisSpeeds#fromFieldRelativeSpeeds(double, double,
-     * double, Rotation2d)}
+     * double, Rotation2d)}. This will correct for skew.
      *
      * @param chassisSpeeds the desired chassis speeds
      * @param nextChassisSpeeds the speeds that will be next, used for calculating acceleration
@@ -192,15 +192,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param nextStates the states that will be used for the acceleration ff
      */
     public void setRawStates(
-            boolean activeSteer, boolean openLoop, SwerveModuleState[] states, SwerveModuleState[] nextStates) {
-        if (states.length != modules.length) {
-            throw new IllegalArgumentException("You must provide states for all modules");
+            boolean activeSteer, boolean openLoop, SwerveModuleState[] desiredStates, SwerveModuleState[] nextStates) {
+        if (desiredStates.length != modules.length) {
+            throw new IllegalArgumentException("You must provide desiredStates for all modules");
         }
 
         driveMode = openLoop ? DriveMode.OPEN_LOOP : DriveMode.CLOSE_LOOP;
         this.activeSteer = activeSteer;
 
-        this.desiredStates = SwerveUtils.copySwerveStateArray(states);
+        this.desiredStates = SwerveUtils.copySwerveStateArray(desiredStates);
         this.nextStates = SwerveUtils.copySwerveStateArray(nextStates);
     }
 
@@ -304,6 +304,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         switch (driveMode) {
             case OPEN_LOOP, CLOSE_LOOP -> {
                 SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_VELOCITY_METERS_PER_SECOND);
+                SwerveDriveKinematics.desaturateWheelSpeeds(nextStates, MAX_VELOCITY_METERS_PER_SECOND);
                 for (int i = 0; i < modules.length; i++) {
                     modules[i].setDesiredState(
                             desiredStates[i], nextStates[i], activeSteer, driveMode == DriveMode.OPEN_LOOP);

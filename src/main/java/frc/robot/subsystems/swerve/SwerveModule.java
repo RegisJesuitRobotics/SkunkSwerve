@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.telemetry.tunable.TunableFFGains;
 import frc.robot.telemetry.tunable.TunablePIDGains;
@@ -209,8 +210,6 @@ public class SwerveModule {
                 config.sharedConfiguration().steerPeakCurrentLimit();
         motorConfiguration.supplyCurrLimit.triggerThresholdTime =
                 config.sharedConfiguration().steerPeakCurrentDurationSeconds();
-
-        motorConfiguration.neutralDeadband = 0.02;
 
         config.sharedConfiguration().steerPositionPIDGains().setSlot(motorConfiguration.slot0);
         motorConfiguration.slot0.allowableClosedloopError =
@@ -493,14 +492,9 @@ public class SwerveModule {
         nextDriveVelocitySetpointEntry.append(nextTargetVelocityMetersPerSecond);
         openLoopEntry.append(openLoop);
 
-        double feedforwardValuePercent;
-        if (targetVelocityMetersPerSecond == nextTargetVelocityMetersPerSecond) {
-            feedforwardValuePercent = driveMotorFF.calculate(targetVelocityMetersPerSecond) / nominalVoltage;
-        } else {
-            feedforwardValuePercent =
-                    driveMotorFF.calculate(targetVelocityMetersPerSecond, nextTargetVelocityMetersPerSecond, 0.02)
-                            / nominalVoltage;
-        }
+        double feedforwardValuePercent =
+                driveMotorFF.calculate(targetVelocityMetersPerSecond, nextTargetVelocityMetersPerSecond, Constants.DT)
+                        / nominalVoltage;
 
         if (openLoop) {
             driveMotor.set(TalonFXControlMode.PercentOutput, feedforwardValuePercent);

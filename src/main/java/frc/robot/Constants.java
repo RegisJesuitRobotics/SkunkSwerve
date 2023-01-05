@@ -14,6 +14,8 @@ import frc.robot.utils.SwerveModuleConfiguration.SharedSwerveModuleConfiguration
 public final class Constants {
     private Constants() {}
 
+    public static final double DT = 0.02;
+
     public static class DriveTrainConstants {
         private DriveTrainConstants() {}
 
@@ -34,14 +36,12 @@ public final class Constants {
 
         public static final double NOMINAL_VOLTAGE = 12.0;
 
-        // FIXME: For FF only run, so need to be put back to PIDF after
         // For talons PID full output is 1023 except for all FF gains
-        public static final TunablePIDGains DRIVE_VELOCITY_PID_GAINS = new TunablePIDGains(
-                // "gains/drive", 0.06, 0.0, 0.0, MiscConstants.TUNING_MODE
-                "gains/drive", 0.0, 0.0, 0.0, MiscConstants.TUNING_MODE);
+        public static final TunablePIDGains DRIVE_VELOCITY_PID_GAINS =
+                new TunablePIDGains("gains/drive", 0.06, 0.0, 0.0, MiscConstants.TUNING_MODE);
 
         public static final TunableFFGains DRIVE_VELOCITY_FF_GAINS =
-                new TunableFFGains("gains/drive", 0.62419, 2.1982, 0.08943, MiscConstants.TUNING_MODE);
+                new TunableFFGains("gains/drive", 0.3346, 2.2549, 0.5731, MiscConstants.TUNING_MODE);
 
         public static final TunablePIDGains STEER_POSITION_PID_GAINS =
                 new TunablePIDGains("gains/steer", 0.3, 0.0, 0.1, MiscConstants.TUNING_MODE);
@@ -109,14 +109,15 @@ public final class Constants {
     }
 
     public static class AutoConstants {
-        // TODO: tune
         public static final TunablePIDGains PATH_TRANSLATION_POSITION_GAINS =
                 new TunablePIDGains("gains/pathXY", 0.5, 0.0, 0.0, MiscConstants.TUNING_MODE);
         public static final TunablePIDGains PATH_ANGULAR_POSITION_PID_GAINS =
                 new TunablePIDGains("gains/pathAngular", 0.5, 0.0, 0.0, MiscConstants.TUNING_MODE);
-        public static final TunableTrapezoidalProfileGains PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS =
+        public static final TunablePIDGains SNAP_ANGULAR_POSITION_PID_GAINS =
+                new TunablePIDGains("gains/snapAngular", 1.0, 0.0, 0.0, MiscConstants.TUNING_MODE);
+        public static final TunableTrapezoidalProfileGains SNAP_ANGULAR_POSITION_TRAPEZOIDAL_GAINS =
                 new TunableTrapezoidalProfileGains(
-                        "gains/pathAngular",
+                        "gains/snapAngular",
                         DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                         DriveTrainConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED,
                         MiscConstants.TUNING_MODE);

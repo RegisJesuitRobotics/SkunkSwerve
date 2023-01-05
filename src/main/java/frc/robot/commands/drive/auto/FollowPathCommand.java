@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.MiscConstants;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
@@ -73,11 +74,14 @@ public class FollowPathCommand extends CommandBase {
         PathPlannerState desiredState = (PathPlannerState) currentPath.sample(currentTime);
         ChassisSpeeds chassisSpeeds = driveController.calculate(currentPose, desiredState);
 
-        PathPlannerState nextDesiredState = (PathPlannerState) currentPath.sample(currentTime + 0.02);
+        Pose2d desiredPose = new Pose2d(desiredState.poseMeters.getTranslation(), desiredState.holonomicRotation);
+
+        PathPlannerState nextDesiredState = (PathPlannerState) currentPath.sample(currentTime + Constants.DT);
         Pose2d assumedNextPose = currentPose.plus(new Transform2d(
-                new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond).times(0.02),
-                new Rotation2d(chassisSpeeds.omegaRadiansPerSecond).times(0.02)));
+                new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond).times(Constants.DT),
+                new Rotation2d(chassisSpeeds.omegaRadiansPerSecond).times(Constants.DT)));
         driveSubsystem.getField2d().getObject("followPathNext").setPose(assumedNextPose);
+        driveSubsystem.getField2d().getObject("followPathDesired").setPose(desiredPose);
 
         ChassisSpeeds nextChassisSpeeds = nextDriveController.calculate(assumedNextPose, nextDesiredState);
 
@@ -100,6 +104,6 @@ public class FollowPathCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(currentPath.getTotalTimeSeconds()) && driveController.atReference();
+        return timer.hasElapsed(currentPath.getTotalTimeSeconds());
     }
 }

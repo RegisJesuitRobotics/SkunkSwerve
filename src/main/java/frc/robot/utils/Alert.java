@@ -5,6 +5,7 @@ package frc.robot.utils;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -40,8 +41,7 @@ public class Alert {
     public Alert(String group, String text, AlertType type) {
         if (!groups.containsKey(group)) {
             groups.put(group, new SendableAlerts());
-            // FIXME
-            // Shuffleboard.getTab("AlertsRaw").add(group, groups.get(group));
+            Shuffleboard.getTab("AlertsRaw").add(group, groups.get(group));
         }
 
         this.text = text;

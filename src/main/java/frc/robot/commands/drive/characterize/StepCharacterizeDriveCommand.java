@@ -15,7 +15,7 @@ public class StepCharacterizeDriveCommand extends CharacterizeDriveCommand {
 
     @Override
     protected double getVoltage(double currentTime) {
-        int stepIndex = (int) (currentTime / stepLength);
+        int stepIndex = ((int) (currentTime / stepLength)) + 1;
         return stepIndex * stepHeight;
     }
 }

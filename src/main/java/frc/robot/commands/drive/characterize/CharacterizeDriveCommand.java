@@ -9,8 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class CharacterizeDriveCommand extends CommandBase {
+    private static final double DELAY = 1.0;
     private final SwerveDriveSubsystem driveSubsystem;
-    private final Timer timer = new Timer();
+    private final Timer actualTimer = new Timer();
+    private final Timer delayTimer = new Timer();
+    private boolean started = false;
 
     private final List<Double> timeList = new ArrayList<>();
     private final List<Double> voltageList = new ArrayList<>();
@@ -45,19 +48,31 @@ public abstract class CharacterizeDriveCommand extends CommandBase {
         positionList.clear();
 
         driveSubsystem.resetModuleEncoderPositions();
+        started = false;
 
-        timer.reset();
-        timer.start();
+        delayTimer.reset();
+        delayTimer.start();
     }
 
     @Override
     public void execute() {
-        double voltage = getVoltage(timer.get());
+        double voltage = 0.0;
+        if (!started) {
+            if (delayTimer.hasElapsed(DELAY)) {
+                started = true;
+                actualTimer.reset();
+                actualTimer.start();
+            } else {
+                return;
+            }
+        } else {
+            getVoltage(actualTimer.get());
 
-        timeList.add(timer.get());
-        voltageList.add(voltage);
-        velocityList.add(driveSubsystem.getAverageDriveVelocityMetersSecond());
-        positionList.add(driveSubsystem.getAverageDrivePositionMeters());
+            timeList.add(actualTimer.get());
+            voltageList.add(voltage);
+            velocityList.add(driveSubsystem.getAverageDriveVelocityMetersSecond());
+            positionList.add(driveSubsystem.getAverageDrivePositionMeters());
+        }
 
         driveSubsystem.setCharacterizationVoltage(voltage);
     }

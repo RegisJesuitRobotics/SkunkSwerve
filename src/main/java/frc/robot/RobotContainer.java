@@ -7,11 +7,8 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -25,11 +22,11 @@ import frc.robot.commands.drive.auto.Autos;
 import frc.robot.commands.drive.auto.FollowPathCommand;
 import frc.robot.commands.drive.teleop.SwerveDriveCommand;
 import frc.robot.subsystems.swerve.SwerveDriveSubsystem;
+import frc.robot.telemetry.tunable.TunableDouble;
 import frc.robot.telemetry.tunable.TunableTelemetryProfiledPIDController;
 import frc.robot.utils.Alert;
 import frc.robot.utils.Alert.AlertType;
 import frc.robot.utils.ListenableSendableChooser;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.DoubleSupplier;
@@ -53,11 +50,13 @@ public class RobotContainer {
     public RobotContainer() {
         configureButtonBindings();
         configureAutos();
+
+        Shuffleboard.getTab("UtilsRaw").add(CommandScheduler.getInstance());
     }
 
     private void configureAutos() {
         if (MiscConstants.TUNING_MODE) {
-            PathPlannerServer.startServer(5810);
+            PathPlannerServer.startServer(5811);
         }
 
         autoCommandChooser.setDefaultOption("Nothing", null);
@@ -75,26 +74,19 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
-        GenericEntry maxTranslationSpeedEntry = Shuffleboard.getTab("DriveTrainRaw")
-                .add("Max Translational Speed (Percent)", 0.9)
-                .withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0, "max", 1.0))
-                .getEntry();
-        GenericEntry maxAngularSpeedEntry = Shuffleboard.getTab("DriveTrainRaw")
-                .add("Max Angular Speed (Percent)", 1.0)
-                .withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0, "max", 1.0))
-                .getEntry();
+        TunableDouble maxTranslationSpeed = new TunableDouble("speed/maxTranslation", 0.9, true);
+        TunableDouble maxMaxAngularSpeed = new TunableDouble("speed/maxAngular", 0.75, true);
 
         DoubleSupplier translationalMaxSpeedSuppler =
-                () -> maxTranslationSpeedEntry.getDouble(0.9) * DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
+                () -> maxTranslationSpeed.get() * DriveTrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
         DoubleSupplier angularMaxSpeedSupplier =
-                () -> maxAngularSpeedEntry.getDouble(1.0) * DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+                () -> maxMaxAngularSpeed.get() * DriveTrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 
         ProfiledPIDController snapController = new TunableTelemetryProfiledPIDController(
                 "drive/snapController",
-                AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
-                AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS);
+                AutoConstants.SNAP_ANGULAR_POSITION_PID_GAINS,
+                AutoConstants.SNAP_ANGULAR_POSITION_TRAPEZOIDAL_GAINS);
+        snapController.enableContinuousInput(-Math.PI, Math.PI);
         AtomicBoolean isSnapControllerEnabled = new AtomicBoolean(false);
 
         driveCommandChooser.setDefaultOption(
@@ -104,14 +96,15 @@ public class RobotContainer {
                         () -> -driverController.getLeftX(),
                         () -> {
                             if (driverController.leftBumper().getAsBoolean()) {
-                                if (isSnapControllerEnabled.getAndSet(true)) {
+                                if (!isSnapControllerEnabled.getAndSet(true)) {
                                     snapController.reset(driveSubsystem
                                             .getPose()
                                             .getRotation()
                                             .getRadians());
+                                    snapController.setGoal(0.0);
                                 }
                                 return snapController.calculate(
-                                        driveSubsystem.getPose().getRotation().getRadians(), 0);
+                                        driveSubsystem.getPose().getRotation().getRadians());
                             } else {
                                 isSnapControllerEnabled.set(false);
                                 return -driverController.getRightX();
@@ -132,32 +125,6 @@ public class RobotContainer {
                         angularMaxSpeedSupplier,
                         driveSubsystem));
 
-        SmartDashboard.putData(CommandScheduler.getInstance());
-        ProfiledPIDController alwaysFacingAngularController = new TunableTelemetryProfiledPIDController(
-                "drive/alwaysFacingController",
-                AutoConstants.PATH_ANGULAR_POSITION_PID_GAINS,
-                AutoConstants.PATH_ANGULAR_POSITION_TRAPEZOIDAL_GAINS);
-        alwaysFacingAngularController.enableContinuousInput(-Math.PI, Math.PI);
-        driveCommandChooser.addOption(
-                "Always Facing (0, 0)",
-                // This isn't optimal so if we were to actually use this in season we would have
-                // some FF with where we predict we will be and use a ProfiledPIDController
-                new SwerveDriveCommand(
-                        () -> -driverController.getLeftX(),
-                        () -> -driverController.getLeftY(),
-                        () -> {
-                            Pose2d robotPose = driveSubsystem.getPose();
-                            Translation2d targetToCurrent = new Translation2d().minus(robotPose.getTranslation());
-
-                            return alwaysFacingAngularController.calculate(
-                                    robotPose.getRotation().getRadians(),
-                                    targetToCurrent.getAngle().getRadians());
-                        },
-                        driverController.rightBumper().negate(),
-                        translationalMaxSpeedSuppler,
-                        () -> DriveTrainConstants.ANGULAR_RATE_LIMIT_RADIANS_SECOND_SQUARED,
-                        driveSubsystem));
-
         ShuffleboardTab driveTab = Shuffleboard.getTab("DriveTrainRaw");
         driveTab.add("Drive Style", driveCommandChooser);
 
@@ -173,7 +140,7 @@ public class RobotContainer {
                         .ignoringDisable(true)
                         .withName("Reset Odometry"));
         driverController
-                .leftBumper()
+                .povUp()
                 .whileTrue(new LockModulesCommand(driveSubsystem).repeatedly().withName("Lock Modules"));
 
         driverController
@@ -189,11 +156,11 @@ public class RobotContainer {
                                             AutoConstants.PATH_CONSTRAINTS,
                                             new PathPoint(
                                                     currentPose.getTranslation(),
-                                                    new Rotation2d(translation.getX(), translation.getY()).unaryMinus(),
+                                                    new Rotation2d(-translation.getX(), -translation.getY()),
                                                     currentPose.getRotation()),
                                             new PathPoint(
                                                     new Translation2d(0, 0),
-                                                    new Rotation2d(translation.getX(), translation.getY()),
+                                                    new Rotation2d(-translation.getX(), -translation.getY()),
                                                     new Rotation2d(0)));
                                 },
                                 driveSubsystem)

@@ -30,7 +30,7 @@ public class Autos {
         addPPAuto("WithRotation");
         addAuto("QuasistaticCharacterization", new QuasistaticCharacterizeDriveCommand(0.4, driveSubsystem));
         addAuto("DynamicCharacterization", new DynamicCharacterizeDriveCommand(8.0, driveSubsystem));
-        addAuto("StepCharacterization", new StepCharacterizeDriveCommand(1.0, 4.0, driveSubsystem));
+        addAuto("StepCharacterization", new StepCharacterizeDriveCommand(3.0, 2.0, driveSubsystem));
         addAuto("SteerTesting", new SteerTestingCommand(driveSubsystem));
         addAuto("DriveTestingCommand", new DriveTestingCommand(1.0, true, driveSubsystem));
         addAuto("GreaseGears", new GreaseGearsCommand(driveSubsystem));
